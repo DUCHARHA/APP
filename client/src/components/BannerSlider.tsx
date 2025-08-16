@@ -123,7 +123,7 @@ export function BannerSlider() {
           )}
           {currentBanner.subtitle && (
             <span className="text-white/80 text-sm">
-              {currentBanner.priority === 0 ? '' : getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
+              {currentBanner.priority !== 0 && getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
             </span>
           )}
         </div>
