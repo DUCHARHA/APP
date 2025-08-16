@@ -86,24 +86,8 @@ export default function Home() {
 
   return (
     <main className="pb-20 bg-background">
-      {/* Floating Search Bar */}
-      <div className={`fixed top-2 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
-        isSearchSticky ? 'translate-y-0 opacity-100' : 'translate-y-[-150px] opacity-0 pointer-events-none'
-      }`}>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Поиск продуктов..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple transition-all"
-          />
-        </div>
-      </div>
-
       {/* Header */}
-      <header className={`sticky top-0 z-40 transition-all duration-300 ${
+      <header className={`transition-all duration-300 ${
         isSearchSticky ? 'transform -translate-y-full opacity-0 pointer-events-none' : 'transform translate-y-0 opacity-100'
       } bg-white dark:bg-card shadow-sm`}>
         <div className="flex items-center justify-between p-4">
@@ -136,44 +120,42 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="gradient-hero text-white p-6 relative overflow-hidden">
+      <section className={`gradient-hero text-white p-6 relative overflow-hidden transition-all duration-300 ${
+        isSearchSticky ? 'transform -translate-y-full opacity-0 pointer-events-none' : 'transform translate-y-0 opacity-100'
+      }`}>
         <div className="relative z-10">
-          <div className={`transition-all duration-300 ${isSearchSticky ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}`}>
-            <div className="flex items-center mb-4">
-              <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
-                <Clock className="mr-1 w-4 h-4" />
-                10-15 мин
-              </div>
-              <span className="text-white/80 text-sm">Экспресс доставка</span>
+          <div className="flex items-center mb-4">
+            <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
+              <Clock className="mr-1 w-4 h-4" />
+              10-15 мин
             </div>
-            <h2 className="text-2xl font-bold mb-2">
-              Доставка продуктов быстрее, чем поход в магазин
-            </h2>
-            <p className="text-white/90 mb-4">
-              Свежие продукты к вашему столу за 10-15 минут
-            </p>
+            <span className="text-white/80 text-sm">Экспресс доставка</span>
           </div>
-          
-          {/* Search Bar */}
-          <div className={`relative transition-all duration-500 ${
-            isSearchSticky 
-              ? 'transform scale-75 opacity-0 pointer-events-none' 
-              : 'transform scale-100 opacity-100'
-          }`} id="main-search">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Поиск продуктов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 bg-white/95 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all"
-            />
-          </div>
+          <h2 className="text-2xl font-bold mb-2">
+            Доставка продуктов быстрее, чем поход в магазин
+          </h2>
+          <p className="text-white/90 mb-4">
+            Свежие продукты к вашему столу за 10-15 минут
+          </p>
         </div>
-        <div className={`absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`}></div>
-        <div className={`absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`} style={{ animationDelay: '2s' }}></div>
-        <div className={`absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`} style={{ animationDelay: '4s' }}></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
       </section>
+
+      {/* Search Bar - always visible, becomes sticky */}
+      <div className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''} transition-all duration-300`}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Искать в ДУЧАРХА"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
+          />
+        </div>
+      </div>
 
       {/* Quick Actions */}
       {!searchQuery && (
