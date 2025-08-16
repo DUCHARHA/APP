@@ -48,7 +48,7 @@ export default function MobileNavigation() {
             >
               <item.icon className="w-6 h-6 mb-1" />
               <span className="text-xs font-medium">{item.label}</span>
-              {item.badge && item.badge > 0 && (
+              {item.badge > 0 && (
                 <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {item.badge > 99 ? "99+" : item.badge}
                 </span>
