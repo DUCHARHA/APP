@@ -39,18 +39,18 @@ export function BannerSlider() {
     // Default banner when no active banners
     return (
       <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg">
-        <div className="relative z-10">
-          <div className="flex items-center mb-4">
+        <div className="relative z-10 flex flex-col justify-center h-full py-4">
+          <div className="flex items-center mb-3">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
               <Clock className="mr-1 w-4 h-4" />
               10-15 мин
             </div>
             <span className="text-white/80 text-sm">Экспресс доставка</span>
           </div>
-          <h2 className="text-2xl font-bold mb-2">
+          <h2 className="text-2xl font-bold mb-3 leading-tight">
             Доставка продуктов быстрее, чем поход в магазин
           </h2>
-          <p className="text-white/90 mb-4">
+          <p className="text-white/90 leading-relaxed">
             Свежие продукты к вашему столу за 10-15 минут
           </p>
         </div>
@@ -113,8 +113,8 @@ export function BannerSlider() {
       )}
 
       {/* Banner content */}
-      <div className="relative z-10 w-full">
-        <div className="flex items-center mb-4">
+      <div className="relative z-10 w-full flex flex-col justify-center h-full py-4">
+        <div className="flex items-center mb-3">
           {(currentBanner.type === 'promo' && currentBanner.priority === 0) && (
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
               <Clock className="mr-1 w-4 h-4" />
@@ -128,23 +128,25 @@ export function BannerSlider() {
           )}
         </div>
         
-        <h2 className="text-2xl font-bold mb-2">
+        <h2 className="text-2xl font-bold mb-3 leading-tight">
           {currentBanner.title}
         </h2>
         
-        <p className="text-white/90 mb-4 max-w-md">
+        <p className="text-white/90 mb-4 max-w-md leading-relaxed">
           {currentBanner.message}
         </p>
 
         {currentBanner.buttonText && currentBanner.buttonLink && (
-          <Link href={currentBanner.buttonLink}>
-            <Button 
-              variant="secondary" 
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-            >
-              {currentBanner.buttonText}
-            </Button>
-          </Link>
+          <div className="mt-auto">
+            <Link href={currentBanner.buttonLink}>
+              <Button 
+                variant="secondary" 
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              >
+                {currentBanner.buttonText}
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
