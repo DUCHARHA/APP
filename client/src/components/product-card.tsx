@@ -128,7 +128,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.id}`}>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer" data-testid={`card-product-${product.id}`}>
+      <div className="bg-white dark:bg-card rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" data-testid={`card-product-${product.id}`}>
         <img
           src={product.imageUrl || ""}
           alt={product.name}
@@ -136,12 +136,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           data-testid="img-product"
         />
         <div className="p-3">
-          <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2" data-testid="text-product-name">
+          <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2" data-testid="text-product-name">
             {product.name}
           </h4>
-          <p className="text-xs text-gray-500 mb-2" data-testid="text-product-weight">{product.weight}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2" data-testid="text-product-weight">{product.weight}</p>
           <div className="flex items-center justify-between">
-            <span className="font-bold text-gray-900" data-testid="text-product-price">
+            <span className="font-bold text-gray-900 dark:text-gray-100" data-testid="text-product-price">
               {parseFloat(product.price).toFixed(0)} ₽
             </span>
             
@@ -169,14 +169,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <button
                   onClick={handleDecreaseQuantity}
                   disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
-                  className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
                   data-testid={`button-decrease-${product.id}`}
                 >
-                  <Minus className="w-3 h-3 text-gray-600" />
+                  <Minus className="w-3 h-3 text-gray-600 dark:text-gray-300" />
                 </button>
                 
                 <span 
-                  className="w-8 text-center font-bold text-sm text-gray-900"
+                  className="w-8 text-center font-bold text-sm text-gray-900 dark:text-gray-100"
                   data-testid={`text-quantity-${product.id}`}
                 >
                   {currentQuantity}

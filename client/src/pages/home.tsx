@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Search, Zap, Truck, Shield } from "lucide-react";
+import { Clock, Search, Zap, Truck, Shield, Check } from "lucide-react";
 import { Link } from "wouter";
 import { type Category, type Product } from "@shared/schema";
 import CategoryButton from "@/components/category-button";
@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedPromo, setCopiedPromo] = useState(false);
-  const [showStickySearch, setShowStickySearch] = useState(false);
+  const [isSearchSticky, setIsSearchSticky] = useState(false);
   const { location, error: locationError } = useGeolocation();
   const { totalItems } = useCart();
   const { appliedPromo } = usePromo();
@@ -73,8 +73,8 @@ export default function Home() {
   // Sticky search scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky search when scrolled past the hero section (approximately 200px)
-      setShowStickySearch(window.scrollY > 200);
+      // Make search sticky when scrolled past the hero section (approximately 300px)
+      setIsSearchSticky(window.scrollY > 300);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -82,27 +82,11 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="pb-20">
-      {/* Sticky Search Bar */}
-      <div className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card shadow-lg z-50 transition-all duration-300 ${
-        showStickySearch ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-      }`}>
-        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Поиск продуктов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
-              data-testid="sticky-search-input"
-            />
-          </div>
-        </div>
-      </div>
+    <main className="pb-20 bg-background">
       {/* Header */}
-      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
+      <header className={`bg-white dark:bg-card shadow-sm sticky top-0 z-40 transition-all duration-300 ${
+        isSearchSticky ? 'pb-3' : ''
+      }`}>
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
@@ -130,6 +114,21 @@ export default function Home() {
             </Link>
           </div>
         </div>
+        {/* Sticky Search in Header */}
+        {isSearchSticky && (
+          <div className="px-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Поиск продуктов..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
+              />
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -150,19 +149,20 @@ export default function Home() {
           </p>
           
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative" id="main-search">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Поиск продуктов..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 bg-white/95 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all"
             />
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
       </section>
 
       {/* Quick Actions */}
@@ -179,24 +179,31 @@ export default function Home() {
       {/* Promo Banner */}
       {!searchQuery && (
         <section className="p-4">
-          <div className="bg-gradient-to-r from-electric-green to-emerald-400 rounded-xl p-4 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-electric-green via-emerald-400 to-teal-400 rounded-xl p-6 text-white relative overflow-hidden card-hover">
             <div className="relative z-10">
-              <h3 className="font-bold text-lg mb-1">Скидка 20% на первый заказ</h3>
-              <p className="text-green-100 text-sm mb-3">
-                Используйте промокод ПЕРВЫЙ при оформлении
-              </p>
+              <div className="flex items-center mb-2">
+                <div className="bg-white/20 p-2 rounded-full mr-3">
+                  <div className="text-lg">🎉</div>
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl mb-1">Скидка 20% на первый заказ</h3>
+                  <p className="text-green-100 text-sm">
+                    Используйте промокод <span className="font-semibold bg-white/20 px-2 py-1 rounded">ПЕРВЫЙ</span> при оформлении
+                  </p>
+                </div>
+              </div>
               <button 
                 onClick={copyPromoCode}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all mt-4 ${
                   copiedPromo 
-                    ? "bg-green-600 text-white" 
-                    : "bg-white text-electric-green hover:bg-gray-50"
+                    ? "bg-green-600 text-white scale-105" 
+                    : "bg-white text-electric-green hover:bg-gray-50 hover:scale-105 active:scale-95"
                 }`}
                 data-testid="button-copy-promo"
               >
                 {copiedPromo ? (
                   <>
-                    <div className="w-4 h-4 text-white">✓</div>
+                    <Check className="w-4 h-4 text-white" />
                     <span>Скопировано!</span>
                   </>
                 ) : (
@@ -207,7 +214,9 @@ export default function Home() {
                 )}
               </button>
             </div>
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full floating-elements"></div>
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-1/3 right-1/4 w-8 h-8 bg-white/10 rounded-full floating-elements" style={{ animationDelay: '3s' }}></div>
           </div>
         </section>
       )}
@@ -215,7 +224,7 @@ export default function Home() {
       {/* Products Section */}
       <section className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
             {searchQuery ? `Результаты поиска (${displayProducts.length})` : "Популярные товары"}
           </h3>
           {!searchQuery && (
@@ -229,7 +238,7 @@ export default function Home() {
         
         {displayProducts.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-gray-400">
               {searchQuery ? "Товары не найдены" : "Загрузка товаров..."}
             </p>
           </div>
@@ -245,22 +254,22 @@ export default function Home() {
       {/* Categories Section */}
       {!searchQuery && categories.length > 4 && (
         <section className="p-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Все категории</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Все категории</h3>
           
           <div className="space-y-3">
             {categories.slice(4).map((category) => (
               <Link key={category.id} href={`/catalog/${category.id}`}>
-                <button className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center hover:shadow-md transition-shadow">
+                <button className="w-full bg-white dark:bg-card rounded-xl p-4 shadow-sm flex items-center card-hover">
                   <img
                     src={category.imageUrl || ""}
                     alt={category.name}
                     className="w-12 h-9 rounded-lg object-cover mr-4"
                   />
                   <div className="flex-1 text-left">
-                    <h4 className="font-medium text-gray-900">{category.name}</h4>
-                    <p className="text-xs text-gray-500">Широкий выбор товаров</p>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">{category.name}</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Широкий выбор товаров</p>
                   </div>
-                  <div className="fas fa-chevron-right text-gray-400" />
+                  <div className="fas fa-chevron-right text-gray-400 dark:text-gray-500" />
                 </button>
               </Link>
             ))}
@@ -271,29 +280,29 @@ export default function Home() {
       {/* Delivery Info */}
       {!searchQuery && (
         <section className="p-4 mb-4">
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-3">Условия доставки</h3>
+          <div className="bg-white dark:bg-card rounded-xl p-4 shadow-sm card-hover">
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3">Условия доставки</h3>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="bg-agent-purple/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Clock className="text-agent-purple w-6 h-6" />
                 </div>
-                <p className="text-xs font-medium text-gray-700">10-15 минут</p>
-                <p className="text-xs text-gray-500">Быстрая доставка</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">10-15 минут</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Быстрая доставка</p>
               </div>
               <div>
                 <div className="bg-electric-green/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Truck className="text-electric-green w-6 h-6" />
                 </div>
-                <p className="text-xs font-medium text-gray-700">Бесплатно от 1000₽</p>
-                <p className="text-xs text-gray-500">Минимальный заказ</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Бесплатно от 1000₽</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Минимальный заказ</p>
               </div>
               <div>
                 <div className="bg-bright-orange/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Shield className="text-bright-orange w-6 h-6" />
                 </div>
-                <p className="text-xs font-medium text-gray-700">Качество</p>
-                <p className="text-xs text-gray-500">Гарантия свежести</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Качество</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Гарантия свежести</p>
               </div>
             </div>
           </div>
