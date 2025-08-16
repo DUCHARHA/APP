@@ -21,6 +21,15 @@ interface NotificationBellProps {
 export function NotificationBell({ userId }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
 
+  const handleOpenChange = async (isOpen: boolean) => {
+    setOpen(isOpen);
+    
+    // Mark all notifications as read when opening
+    if (isOpen && unreadCount > 0) {
+      await handleMarkAllAsRead();
+    }
+  };
+
   // Fetch notification count
   const { data: countData } = useQuery({
     queryKey: ['/api/notifications', userId, 'count'],
@@ -94,7 +103,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <button className="relative p-2">
           <Bell className="text-gray-600 dark:text-gray-300 w-6 h-6" />

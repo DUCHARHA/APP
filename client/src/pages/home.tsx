@@ -76,16 +76,28 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       const searchBar = document.querySelector('#search-section');
-      if (searchBar) {
+      if (searchBar && !isSearchSticky) {
         const searchRect = searchBar.getBoundingClientRect();
         // When search would reach the top of viewport, make it sticky
-        setIsSearchSticky(searchRect.top <= 0);
+        if (searchRect.top <= 0) {
+          setIsSearchSticky(true);
+        }
+      } else if (isSearchSticky) {
+        // Check if we should unstick - when user scrolls back to original position
+        const bannerSection = document.querySelector('.banner-section');
+        if (bannerSection) {
+          const bannerRect = bannerSection.getBoundingClientRect();
+          // If banner is visible again, unstick the search
+          if (bannerRect.bottom > 0) {
+            setIsSearchSticky(false);
+          }
+        }
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isSearchSticky]);
 
   return (
     <main className="pb-20 bg-background">
@@ -116,7 +128,9 @@ export default function Home() {
       </header>
 
       {/* Dynamic Banner Slider */}
-      <BannerSlider />
+      <div className="banner-section">
+        <BannerSlider />
+      </div>
 
       {/* Search Section - stays in place, becomes sticky when reaches top */}
       <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>

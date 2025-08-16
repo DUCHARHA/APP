@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -7,15 +7,13 @@ import type { Banner } from "@shared/schema";
 
 export function BannerSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [dismissedBanners, setDismissedBanners] = useState<Set<string>>(new Set());
 
   const { data: banners = [] } = useQuery<Banner[]>({
     queryKey: ['/api/banners'],
     refetchInterval: 60000, // Refetch every minute to check for new banners
   });
 
-  // Filter out dismissed banners
-  const visibleBanners = banners.filter(banner => !dismissedBanners.has(banner.id));
+  const visibleBanners = banners;
 
   useEffect(() => {
     if (visibleBanners.length <= 1) return;
@@ -27,13 +25,7 @@ export function BannerSlider() {
     return () => clearInterval(interval);
   }, [visibleBanners.length]);
 
-  const handleDismiss = (bannerId: string) => {
-    setDismissedBanners(prev => new Set([...prev, bannerId]));
-    // Adjust current slide if we dismissed the current banner
-    if (currentSlide >= visibleBanners.length - 1) {
-      setCurrentSlide(Math.max(0, visibleBanners.length - 2));
-    }
-  };
+
 
   const handlePrevious = () => {
     setCurrentSlide(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1);
@@ -46,7 +38,7 @@ export function BannerSlider() {
   if (visibleBanners.length === 0) {
     // Default banner when no active banners
     return (
-      <section className="gradient-hero text-white p-6 relative overflow-hidden">
+      <section className="gradient-hero text-white p-6 relative overflow-hidden min-h-[200px] flex items-center">
         <div className="relative z-10">
           <div className="flex items-center mb-4">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
@@ -100,15 +92,6 @@ export function BannerSlider() {
         color: currentBanner.textColor || "#ffffff"
       }}
     >
-      {/* Dismiss button */}
-      <button
-        onClick={() => handleDismiss(currentBanner.id)}
-        className="absolute top-3 right-3 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 transition-colors"
-        aria-label="Закрыть баннер"
-      >
-        <X className="w-4 h-4" />
-      </button>
-
       {/* Navigation arrows (only show if multiple banners) */}
       {visibleBanners.length > 1 && (
         <>
@@ -121,7 +104,7 @@ export function BannerSlider() {
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-12 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 transition-colors"
             aria-label="Следующий баннер"
           >
             <ChevronRight className="w-5 h-5" />

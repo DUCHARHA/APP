@@ -1,6 +1,6 @@
 # Overview
 
-ДУЧАРХА is a mobile-first grocery delivery application that provides express delivery of products within 10-15 minutes. The app features a modern React-based frontend with a Node.js Express backend, designed as a Progressive Web App (PWA) with offline capabilities. The system includes product catalog management, shopping cart functionality, user management, and order processing.
+ДУЧАРХА is a mobile-first grocery delivery application that provides express delivery of products within 10-15 minutes. The app features a modern React-based frontend with a Node.js Express backend, designed as a Progressive Web App (PWA) with offline capabilities. The system includes product catalog management, shopping cart functionality, user management, order processing, real-time notifications, and a dynamic banner/promotional content system.
 
 # User Preferences
 
@@ -40,8 +40,25 @@ The server architecture separates concerns between:
 The application uses a dual approach for data management:
 - **Drizzle ORM** configured for PostgreSQL with schema definitions in TypeScript
 - **In-memory storage** for current implementation with pre-seeded data
-- **Database schema** includes users, categories, products, cart items, and orders
+- **Database schema** includes users, categories, products, cart items, orders, notifications, and banners
 - **Zod validation** schemas derived from Drizzle schema for type safety
+
+## Banner/Promotional System (Added August 2025)
+The application features a comprehensive banner management system:
+- **Dynamic banner slider** replacing static hero section on homepage
+- **Admin panel** for creating, editing, and managing banners without code changes
+- **Multiple banner types**: promotional, announcements, partnerships, and information
+- **Customizable styling**: background colors, text colors, custom buttons and links
+- **Priority-based ordering** and active/inactive status management
+- **Automatic banner rotation** every 5 seconds with manual navigation controls
+- **Consistent dimensions** to prevent layout shifts during banner transitions
+- **Always visible** banners (no dismiss functionality per user requirements)
+
+## Notification System (Updated August 2025)
+- **Real-time notification counter** in header with automatic updates
+- **Smart notification handling**: counter resets when notifications are viewed
+- **Multiple notification types**: info, success, warning, error, order updates
+- **Admin interface** for sending test notifications and managing content
 
 This design allows for easy migration from in-memory storage to PostgreSQL without changing business logic.
 
