@@ -44,7 +44,7 @@ export default function Home() {
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
-      
+
       setCopiedPromo(true);
       setTimeout(() => setCopiedPromo(false), 2000);
       toast({
@@ -216,7 +216,7 @@ export default function Home() {
             </Link>
           )}
         </div>
-        
+
         {displayProducts.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 dark:text-gray-400">
@@ -234,9 +234,9 @@ export default function Home() {
 
       {/* Categories Section */}
       {!searchQuery && categories.length > 4 && (
-        <section className="p-4">
+        <section className="p-4 mt-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Все категории</h3>
-          
+
           <div className="space-y-3">
             {categories.slice(4).map((category) => (
               <Link key={category.id} href={`/catalog/${category.id}`}>
