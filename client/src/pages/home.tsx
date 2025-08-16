@@ -7,19 +7,49 @@ import ProductCard from "@/components/product-card";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCart } from "@/hooks/use-cart";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [promoInput, setPromoInput] = useState("");
-  const [isPromoDialogOpen, setIsPromoDialogOpen] = useState(false);
+  const [copiedPromo, setCopiedPromo] = useState(false);
+  const [showStickySearch, setShowStickySearch] = useState(false);
   const { location, error: locationError } = useGeolocation();
   const { totalItems } = useCart();
-  const { appliedPromo, applyPromoCode } = usePromo();
+  const { appliedPromo } = usePromo();
+  const { toast } = useToast();
+
+  const copyPromoCode = async () => {
+    const promoCode = "ПЕРВЫЙ";
+    try {
+      await navigator.clipboard.writeText(promoCode);
+      setCopiedPromo(true);
+      setTimeout(() => setCopiedPromo(false), 2000);
+      toast({
+        title: "Промокод скопирован!",
+        description: `Код ${promoCode} скопирован в буфер обмена`,
+      });
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = promoCode;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      
+      setCopiedPromo(true);
+      setTimeout(() => setCopiedPromo(false), 2000);
+      toast({
+        title: "Промокод скопирован!",
+        description: `Код ${promoCode} скопирован в буфер обмена`,
+      });
+    }
+  };
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -39,8 +69,37 @@ export default function Home() {
   const quickCategories = categories.slice(0, 4);
   const displayProducts = searchQuery ? searchResults : popularProducts;
 
+  // Sticky search scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky search when scrolled past the hero section (approximately 200px)
+      setShowStickySearch(window.scrollY > 200);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <main className="pb-20">
+      {/* Sticky Search Bar */}
+      <div className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white shadow-lg z-50 transition-all duration-300 ${
+        showStickySearch ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+      }`}>
+        <div className="p-3 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Поиск продуктов..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
+              data-testid="sticky-search-input"
+            />
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
@@ -124,59 +183,27 @@ export default function Home() {
               <p className="text-green-100 text-sm mb-3">
                 Используйте промокод ПЕРВЫЙ при оформлении
               </p>
-              <Dialog open={isPromoDialogOpen} onOpenChange={setIsPromoDialogOpen}>
-                <DialogTrigger asChild>
-                  <button className="bg-white text-electric-green px-4 py-2 rounded-lg font-semibold text-sm">
-                    {appliedPromo ? `Код: ${appliedPromo.code}` : "Применить код"}
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md mx-auto">
-                  <DialogHeader>
-                    <DialogTitle>Применить промокод</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Input
-                        placeholder="Введите промокод"
-                        value={promoInput}
-                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                        className="text-center font-semibold"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-gray-900 text-sm">Доступные промокоды:</h4>
-                      <div className="space-y-1 text-xs text-gray-600">
-                        <p>• ПЕРВЫЙ - Скидка 20% на первый заказ</p>
-                        <p>• ДРУЗЬЯМ - Скидка 15% для друзей</p>
-                        <p>• ЛЕТОМ - Летняя скидка 10%</p>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsPromoDialogOpen(false)}
-                        className="flex-1"
-                      >
-                        Отмена
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          if (applyPromoCode(promoInput)) {
-                            setPromoInput("");
-                            setIsPromoDialogOpen(false);
-                          }
-                        }}
-                        className="flex-1 bg-electric-green hover:bg-electric-green/90"
-                        disabled={!promoInput.trim()}
-                      >
-                        Применить
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <button 
+                onClick={copyPromoCode}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                  copiedPromo 
+                    ? "bg-green-600 text-white" 
+                    : "bg-white text-electric-green hover:bg-gray-50"
+                }`}
+                data-testid="button-copy-promo"
+              >
+                {copiedPromo ? (
+                  <>
+                    <div className="w-4 h-4 text-white">✓</div>
+                    <span>Скопировано!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Скопировать код</span>
+                  </>
+                )}
+              </button>
             </div>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
           </div>

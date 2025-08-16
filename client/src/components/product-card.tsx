@@ -1,4 +1,4 @@
-import { Plus, Check } from "lucide-react";
+import { Plus, Minus, Check } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { type Product } from "@shared/schema";
@@ -13,8 +13,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
+  const { cartItems } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const userId = "demo-user"; // In real app, get from auth
+
+  // Find current quantity of this product in cart
+  const cartItem = cartItems.find(item => item.productId === product.id);
+  const currentQuantity = cartItem?.quantity || 0;
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
@@ -48,10 +53,77 @@ export default function ProductCard({ product }: ProductCardProps) {
     },
   });
 
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ quantity }: { quantity: number }) => {
+      if (!cartItem) throw new Error("Item not in cart");
+      const response = await fetch(`/api/cart/${cartItem.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+      if (!response.ok) throw new Error("Failed to update cart item");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить количество товара",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: async () => {
+      if (!cartItem) throw new Error("Item not in cart");
+      const response = await fetch(`/api/cart/${cartItem.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove cart item");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Товар удален",
+        description: "Товар удален из корзины",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить товар из корзины",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCartMutation.mutate();
+  };
+
+  const handleIncreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentQuantity === 0) {
+      addToCartMutation.mutate();
+    } else {
+      updateQuantityMutation.mutate({ quantity: currentQuantity + 1 });
+    }
+  };
+
+  const handleDecreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentQuantity === 1) {
+      removeItemMutation.mutate();
+    } else {
+      updateQuantityMutation.mutate({ quantity: currentQuantity - 1 });
+    }
   };
 
   return (
@@ -72,22 +144,54 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="font-bold text-gray-900" data-testid="text-product-price">
               {parseFloat(product.price).toFixed(0)} ₽
             </span>
-            <button
-              onClick={handleAddToCart}
-              disabled={addToCartMutation.isPending}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                isAdded
-                  ? "bg-electric-green"
-                  : "bg-agent-purple hover:bg-agent-purple/90"
-              }`}
-              data-testid="button-add-to-cart"
-            >
-              {isAdded ? (
-                <Check className="w-4 h-4 text-white" />
-              ) : (
-                <Plus className="w-4 h-4 text-white" />
-              )}
-            </button>
+            
+            {currentQuantity === 0 ? (
+              // Show simple add button when item not in cart
+              <button
+                onClick={handleAddToCart}
+                disabled={addToCartMutation.isPending}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                  isAdded
+                    ? "bg-electric-green"
+                    : "bg-agent-purple hover:bg-agent-purple/90"
+                }`}
+                data-testid="button-add-to-cart"
+              >
+                {isAdded ? (
+                  <Check className="w-4 h-4 text-white" />
+                ) : (
+                  <Plus className="w-4 h-4 text-white" />
+                )}
+              </button>
+            ) : (
+              // Show quantity controls when item is in cart
+              <div className="flex items-center space-x-1" data-testid={`quantity-controls-${product.id}`}>
+                <button
+                  onClick={handleDecreaseQuantity}
+                  disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
+                  className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  data-testid={`button-decrease-${product.id}`}
+                >
+                  <Minus className="w-3 h-3 text-gray-600" />
+                </button>
+                
+                <span 
+                  className="w-8 text-center font-bold text-sm text-gray-900"
+                  data-testid={`text-quantity-${product.id}`}
+                >
+                  {currentQuantity}
+                </span>
+                
+                <button
+                  onClick={handleIncreaseQuantity}
+                  disabled={addToCartMutation.isPending || updateQuantityMutation.isPending}
+                  className="w-7 h-7 rounded-lg bg-agent-purple hover:bg-agent-purple/90 flex items-center justify-center transition-colors"
+                  data-testid={`button-increase-${product.id}`}
+                >
+                  <Plus className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

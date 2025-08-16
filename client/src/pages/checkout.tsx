@@ -30,8 +30,9 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
+  const [promoInput, setPromoInput] = useState("");
   const { toast } = useToast();
-  const { appliedPromo, removePromoCode, calculateDiscount } = usePromo();
+  const { appliedPromo, removePromoCode, calculateDiscount, applyPromoCode } = usePromo();
   const userId = "demo-user"; // In real app, get from auth
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
@@ -325,6 +326,73 @@ export default function Checkout() {
                 </FormItem>
               )}
             />
+          </section>
+
+          {/* Promo Code */}
+          <section className="p-4">
+            <h3 className="font-bold text-gray-900 mb-3">Промокод</h3>
+            {appliedPromo ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-green-700 font-medium">Промокод {appliedPromo.code} применен</span>
+                  </div>
+                  <button
+                    onClick={removePromoCode}
+                    className="text-gray-400 hover:text-red-500 p-1"
+                    data-testid="button-remove-promo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-sm text-green-600 mt-1">Скидка {appliedPromo.discount}% на весь заказ</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Введите промокод"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    className="flex-1 text-center font-semibold"
+                    data-testid="input-promo-code"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (applyPromoCode(promoInput)) {
+                        setPromoInput("");
+                        toast({
+                          title: "Промокод применен",
+                          description: `Скидка по промокоду ${promoInput} активирована`,
+                        });
+                      } else {
+                        toast({
+                          title: "Неверный промокод",
+                          description: "Проверьте правильность ввода кода",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={!promoInput.trim()}
+                    className="bg-electric-green hover:bg-electric-green/90 text-white"
+                    data-testid="button-apply-promo"
+                  >
+                    Применить
+                  </Button>
+                </div>
+                
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <h4 className="font-medium text-gray-900 text-sm mb-2">Доступные промокоды:</h4>
+                  <div className="space-y-1 text-xs text-gray-600">
+                    <p>• ПЕРВЫЙ - Скидка 20% на первый заказ</p>
+                    <p>• ДРУЗЬЯМ - Скидка 15% для друзей</p>
+                    <p>• ЛЕТОМ - Летняя скидка 10%</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Comment */}
