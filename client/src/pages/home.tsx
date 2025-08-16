@@ -76,8 +76,8 @@ export default function Home() {
       // Make search sticky and hide header immediately when scrolling down
       const scrollY = window.scrollY;
       
-      // Hide header and show sticky search when scrolled down more than 50px
-      setIsSearchSticky(scrollY > 50);
+      // Hide header and show sticky search when scrolled down more than 20px
+      setIsSearchSticky(scrollY > 20);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -104,10 +104,10 @@ export default function Home() {
 
       {/* Header */}
       <header className={`sticky top-0 z-40 transition-all duration-300 ${
-        isSearchSticky ? 'bg-transparent shadow-none' : 'bg-white dark:bg-card shadow-sm'
+        isSearchSticky ? 'bg-transparent shadow-none h-0' : 'bg-white dark:bg-card shadow-sm h-auto'
       }`}>
         <div className={`flex items-center justify-between transition-all duration-300 ${
-          isSearchSticky ? 'opacity-0 h-0 overflow-hidden p-0' : 'opacity-100 h-auto p-4'
+          isSearchSticky ? 'opacity-0 h-0 overflow-hidden p-0 pointer-events-none' : 'opacity-100 h-auto p-4'
         }`}>
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
