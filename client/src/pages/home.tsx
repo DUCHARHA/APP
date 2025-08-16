@@ -127,6 +127,11 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Dynamic Banner Slider */}
+      <div className="banner-section">
+        <BannerSlider />
+      </div>
+
       {/* Search Section - stays in place, becomes sticky when reaches top */}
       <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>
         <div className="relative">
@@ -139,11 +144,6 @@ export default function Home() {
             className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
           />
         </div>
-      </div>
-
-      {/* Dynamic Banner Slider - positioned between search and quick actions */}
-      <div className="banner-section px-4 py-3">
-        <BannerSlider />
       </div>
 
       {/* Quick Actions */}

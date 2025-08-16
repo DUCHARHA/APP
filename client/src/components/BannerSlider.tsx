@@ -38,7 +38,7 @@ export function BannerSlider() {
   if (visibleBanners.length === 0) {
     // Default banner when no active banners
     return (
-      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center rounded-lg">
+      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg">
         <div className="relative z-10 flex flex-col justify-center h-full py-4">
           <div className="flex items-center mb-3">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
@@ -86,7 +86,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center rounded-lg"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
