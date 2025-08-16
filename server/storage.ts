@@ -73,7 +73,16 @@ export class MemStorage implements IStorage {
 
     products.forEach(prod => {
       const id = randomUUID();
-      this.products.set(id, { ...prod, id, inStock: true });
+      this.products.set(id, { 
+        ...prod, 
+        id, 
+        inStock: true, 
+        categoryId: prod.categoryId || null,
+        isPopular: prod.isPopular || null,
+        imageUrl: prod.imageUrl || null,
+        description: prod.description || null,
+        weight: prod.weight || null
+      });
     });
   }
 
@@ -87,7 +96,13 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id, createdAt: new Date().toISOString() };
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      createdAt: new Date().toISOString(),
+      phone: insertUser.phone || null,
+      address: insertUser.address || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -102,12 +117,17 @@ export class MemStorage implements IStorage {
   }
 
   async getCategories(): Promise<Category[]> {
-    return Array.from(this.categories.values()).sort((a, b) => a.sortOrder - b.sortOrder);
+    return Array.from(this.categories.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
   async createCategory(insertCategory: InsertCategory): Promise<Category> {
     const id = randomUUID();
-    const category: Category = { ...insertCategory, id };
+    const category: Category = { 
+      ...insertCategory, 
+      id,
+      imageUrl: insertCategory.imageUrl || null,
+      sortOrder: insertCategory.sortOrder || null
+    };
     this.categories.set(id, category);
     return category;
   }
@@ -130,7 +150,16 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
-    const product: Product = { ...insertProduct, id, inStock: true, isPopular: false };
+    const product: Product = { 
+      ...insertProduct, 
+      id, 
+      inStock: true, 
+      isPopular: false,
+      categoryId: insertProduct.categoryId || null,
+      imageUrl: insertProduct.imageUrl || null,
+      description: insertProduct.description || null,
+      weight: insertProduct.weight || null
+    };
     this.products.set(id, product);
     return product;
   }
@@ -161,13 +190,19 @@ export class MemStorage implements IStorage {
 
     if (existingItem) {
       // Update quantity
-      existingItem.quantity += insertCartItem.quantity;
+      existingItem.quantity += insertCartItem.quantity || 1;
       this.cartItems.set(existingItem.id, existingItem);
       return existingItem;
     }
 
     const id = randomUUID();
-    const cartItem: CartItem = { ...insertCartItem, id };
+    const cartItem: CartItem = { 
+      ...insertCartItem, 
+      id,
+      userId: insertCartItem.userId || null,
+      productId: insertCartItem.productId || null,
+      quantity: insertCartItem.quantity || 1
+    };
     this.cartItems.set(id, cartItem);
     return cartItem;
   }
@@ -198,7 +233,13 @@ export class MemStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
-    const order: Order = { ...insertOrder, id, createdAt: new Date().toISOString() };
+    const order: Order = { 
+      ...insertOrder, 
+      id, 
+      createdAt: new Date().toISOString(),
+      userId: insertOrder.userId || null,
+      status: insertOrder.status || "pending"
+    };
     this.orders.set(id, order);
     return order;
   }

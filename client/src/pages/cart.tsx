@@ -6,12 +6,15 @@ import { useCart } from "@/hooks/use-cart";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { usePromo } from "@/hooks/use-promo";
+import { X } from "lucide-react";
 
 type CartItemWithProduct = CartItem & { product: Product };
 
 export default function Cart() {
   const { toast } = useToast();
   const { totalItems, totalPrice } = useCart();
+  const { appliedPromo, removePromoCode, calculateDiscount, calculateTotal } = usePromo();
   const userId = "demo-user"; // In real app, get from auth
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
@@ -87,15 +90,17 @@ export default function Cart() {
     }
   };
 
-  const calculateTotal = () => {
+  const calculateCartTotal = () => {
     return cartItems.reduce((total, item) => {
       return total + (parseFloat(item.product.price) * item.quantity);
     }, 0);
   };
 
-  const total = calculateTotal();
-  const deliveryFee = total >= 1000 ? 0 : 99;
-  const finalTotal = total + deliveryFee;
+  const subtotal = calculateCartTotal();
+  const promoDiscount = appliedPromo ? calculateDiscount(subtotal) : 0;
+  const totalAfterPromo = subtotal - promoDiscount;
+  const deliveryFee = totalAfterPromo >= 1000 ? 0 : 99;
+  const finalTotal = totalAfterPromo + deliveryFee;
 
   if (isLoading) {
     return (
@@ -218,8 +223,23 @@ export default function Cart() {
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Товары ({cartItems.length})</span>
-                <span className="font-medium">{total.toFixed(0)} ₽</span>
+                <span className="font-medium">{subtotal.toFixed(0)} ₽</span>
               </div>
+              
+              {appliedPromo && (
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-600">Промокод {appliedPromo.code}</span>
+                    <button
+                      onClick={removePromoCode}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} ₽</span>
+                </div>
+              )}
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
@@ -228,10 +248,10 @@ export default function Cart() {
                 </span>
               </div>
               
-              {total < 1000 && (
+              {totalAfterPromo < 1000 && (
                 <div className="bg-orange-50 p-3 rounded-lg">
                   <p className="text-sm text-orange-700">
-                    Добавьте товаров на {(1000 - total).toFixed(0)} ₽ для бесплатной доставки
+                    Добавьте товаров на {(1000 - totalAfterPromo).toFixed(0)} ₽ для бесплатной доставки
                   </p>
                 </div>
               )}
@@ -245,9 +265,11 @@ export default function Cart() {
                 </div>
               </div>
               
-              <Button className="w-full bg-agent-purple hover:bg-agent-purple/90 text-white py-3 text-lg font-semibold">
-                Оформить заказ
-              </Button>
+              <Link href="/checkout">
+                <Button className="w-full bg-agent-purple hover:bg-agent-purple/90 text-white py-3 text-lg font-semibold">
+                  Оформить заказ
+                </Button>
+              </Link>
               
               <div className="text-center">
                 <div className="inline-flex items-center text-sm text-gray-600 bg-electric-green/10 px-3 py-1 rounded-full">

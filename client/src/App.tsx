@@ -6,6 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Catalog from "@/pages/catalog";
 import Cart from "@/pages/cart";
+import Checkout from "@/pages/checkout";
+import Orders from "@/pages/orders";
+import Addresses from "@/pages/addresses";
+import PaymentMethods from "@/pages/payment-methods";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import MobileNavigation from "@/components/mobile-navigation";
@@ -18,7 +22,11 @@ function Router() {
         <Route path="/catalog" component={Catalog} />
         <Route path="/catalog/:categoryId" component={Catalog} />
         <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
         <Route path="/profile" component={Profile} />
+        <Route path="/orders" component={Orders} />
+        <Route path="/addresses" component={Addresses} />
+        <Route path="/payment-methods" component={PaymentMethods} />
         <Route component={NotFound} />
       </Switch>
       <MobileNavigation />

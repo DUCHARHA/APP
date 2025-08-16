@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Profile() {
@@ -16,31 +16,31 @@ export default function Profile() {
       icon: MapPin,
       label: "Адреса доставки",
       description: "Управление адресами",
-      action: () => console.log("Addresses"),
+      href: "/addresses",
     },
     {
       icon: Clock,
       label: "История заказов",
       description: "Ваши покупки",
-      action: () => console.log("Orders"),
+      href: "/orders",
     },
     {
       icon: CreditCard,
       label: "Способы оплаты",
       description: "Карты и кошельки",
-      action: () => console.log("Payment"),
+      href: "/payment-methods",
     },
     {
       icon: Bell,
       label: "Уведомления",
       description: "Настройки push",
-      action: () => console.log("Notifications"),
+      href: "#",
     },
     {
       icon: HelpCircle,
       label: "Помощь",
       description: "FAQ и поддержка",
-      action: () => console.log("Help"),
+      href: "#",
     },
   ];
 
@@ -71,7 +71,7 @@ export default function Profile() {
               <p className="text-sm text-gray-500">{user.phone}</p>
             </div>
             <button className="p-2 text-gray-400">
-              <div className="fas fa-edit" />
+              <User className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -122,20 +122,18 @@ export default function Profile() {
       <section className="px-4 pb-4">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {menuItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.action}
-              className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-            >
-              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                <item.icon className="w-5 h-5 text-gray-600" />
-              </div>
-              <div className="flex-1 text-left">
-                <h4 className="font-medium text-gray-900">{item.label}</h4>
-                <p className="text-sm text-gray-500">{item.description}</p>
-              </div>
-              <div className="fas fa-chevron-right text-gray-400" />
-            </button>
+            <Link key={index} href={item.href}>
+              <button className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-medium text-gray-900">{item.label}</h4>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+              </button>
+            </Link>
           ))}
         </div>
       </section>

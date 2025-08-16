@@ -8,11 +8,18 @@ import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCart } from "@/hooks/use-cart";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { usePromo } from "@/hooks/use-promo";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [promoInput, setPromoInput] = useState("");
+  const [isPromoDialogOpen, setIsPromoDialogOpen] = useState(false);
   const { location, error: locationError } = useGeolocation();
   const { totalItems } = useCart();
+  const { appliedPromo, applyPromoCode } = usePromo();
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -117,9 +124,59 @@ export default function Home() {
               <p className="text-green-100 text-sm mb-3">
                 Используйте промокод ПЕРВЫЙ при оформлении
               </p>
-              <button className="bg-white text-electric-green px-4 py-2 rounded-lg font-semibold text-sm">
-                Применить код
-              </button>
+              <Dialog open={isPromoDialogOpen} onOpenChange={setIsPromoDialogOpen}>
+                <DialogTrigger asChild>
+                  <button className="bg-white text-electric-green px-4 py-2 rounded-lg font-semibold text-sm">
+                    {appliedPromo ? `Код: ${appliedPromo.code}` : "Применить код"}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md mx-auto">
+                  <DialogHeader>
+                    <DialogTitle>Применить промокод</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Input
+                        placeholder="Введите промокод"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                        className="text-center font-semibold"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900 text-sm">Доступные промокоды:</h4>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <p>• ПЕРВЫЙ - Скидка 20% на первый заказ</p>
+                        <p>• ДРУЗЬЯМ - Скидка 15% для друзей</p>
+                        <p>• ЛЕТОМ - Летняя скидка 10%</p>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsPromoDialogOpen(false)}
+                        className="flex-1"
+                      >
+                        Отмена
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (applyPromoCode(promoInput)) {
+                            setPromoInput("");
+                            setIsPromoDialogOpen(false);
+                          }
+                        }}
+                        className="flex-1 bg-electric-green hover:bg-electric-green/90"
+                        disabled={!promoInput.trim()}
+                      >
+                        Применить
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
           </div>
