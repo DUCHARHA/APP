@@ -128,7 +128,7 @@ export default function Home() {
       </header>
 
       {/* Dynamic Banner Slider */}
-      <div className="banner-section md:-mx-4">
+      <div className="banner-section">
         <BannerSlider />
       </div>
 

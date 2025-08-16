@@ -38,19 +38,19 @@ export function BannerSlider() {
   if (visibleBanners.length === 0) {
     // Default banner when no active banners
     return (
-      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] md:h-[300px] flex items-center mx-4 md:mx-0 mb-6 rounded-lg md:rounded-none">
-        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg">
+        <div className="relative z-10">
           <div className="flex items-center mb-4">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
               <Clock className="mr-1 w-4 h-4" />
               10-15 мин
             </div>
-            <span className="text-white/80 text-sm md:text-base">Экспресс доставка</span>
+            <span className="text-white/80 text-sm">Экспресс доставка</span>
           </div>
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4">
+          <h2 className="text-2xl font-bold mb-2">
             Доставка продуктов быстрее, чем поход в магазин
           </h2>
-          <p className="text-white/90 mb-4 md:mb-6 max-w-md md:max-w-2xl text-sm md:text-lg">
+          <p className="text-white/90 mb-4">
             Свежие продукты к вашему столу за 10-15 минут
           </p>
         </div>
@@ -86,7 +86,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden h-[200px] md:h-[300px] flex items-center mx-4 md:mx-0 mb-6 rounded-lg md:rounded-none"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
@@ -113,7 +113,7 @@ export function BannerSlider() {
       )}
 
       {/* Banner content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8">
+      <div className="relative z-10 w-full">
         <div className="flex items-center mb-4">
           {(currentBanner.type === 'promo' && currentBanner.priority === 0) && (
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
@@ -122,17 +122,17 @@ export function BannerSlider() {
             </div>
           )}
           {currentBanner.subtitle && (
-            <span className="text-white/80 text-sm md:text-base">
+            <span className="text-white/80 text-sm">
               {currentBanner.priority !== 0 && getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
             </span>
           )}
         </div>
         
-        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4">
+        <h2 className="text-2xl font-bold mb-2">
           {currentBanner.title}
         </h2>
         
-        <p className="text-white/90 mb-4 md:mb-6 max-w-md md:max-w-2xl text-sm md:text-lg">
+        <p className="text-white/90 mb-4 max-w-md">
           {currentBanner.message}
         </p>
 
@@ -140,7 +140,7 @@ export function BannerSlider() {
           <Link href={currentBanner.buttonLink}>
             <Button 
               variant="secondary" 
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30 md:text-lg md:px-8 md:py-3"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
             >
               {currentBanner.buttonText}
             </Button>
