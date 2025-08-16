@@ -20,7 +20,7 @@ export function BannerSlider() {
 
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 10000); // Change slide every 10 seconds
 
     return () => clearInterval(interval);
   }, [visibleBanners.length]);
@@ -115,15 +115,15 @@ export function BannerSlider() {
       {/* Banner content */}
       <div className="relative z-10 w-full">
         <div className="flex items-center mb-4">
-          {currentBanner.type === 'promo' && (
-            <div className="bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
+          {(currentBanner.type === 'promo' && currentBanner.priority === 0) && (
+            <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
               <Clock className="mr-1 w-4 h-4" />
               10-15 мин
             </div>
           )}
           {currentBanner.subtitle && (
             <span className="text-white/80 text-sm">
-              {getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
+              {currentBanner.priority === 0 ? '' : getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
             </span>
           )}
         </div>
