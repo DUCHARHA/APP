@@ -73,11 +73,12 @@ export default function Home() {
   // Sticky search scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      // Make search sticky and hide header immediately when scrolling down
-      const scrollY = window.scrollY;
-      
-      // Hide header and show sticky search when scrolled down more than 20px
-      setIsSearchSticky(scrollY > 20);
+      const searchBar = document.querySelector('#search-section');
+      if (searchBar) {
+        const searchRect = searchBar.getBoundingClientRect();
+        // When search would reach the top of viewport, make it sticky
+        setIsSearchSticky(searchRect.top <= 0);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -87,9 +88,7 @@ export default function Home() {
   return (
     <main className="pb-20 bg-background">
       {/* Header */}
-      <header className={`transition-all duration-300 ${
-        isSearchSticky ? 'transform -translate-y-full opacity-0 pointer-events-none' : 'transform translate-y-0 opacity-100'
-      } bg-white dark:bg-card shadow-sm`}>
+      <header className="bg-white dark:bg-card shadow-sm">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
@@ -120,9 +119,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className={`gradient-hero text-white p-6 relative overflow-hidden transition-all duration-300 ${
-        isSearchSticky ? 'transform -translate-y-full opacity-0 pointer-events-none' : 'transform translate-y-0 opacity-100'
-      }`}>
+      <section className="gradient-hero text-white p-6 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center mb-4">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
@@ -143,8 +140,8 @@ export default function Home() {
         <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
       </section>
 
-      {/* Search Bar - always visible, becomes sticky */}
-      <div className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''} transition-all duration-300`}>
+      {/* Search Section - stays in place, becomes sticky when reaches top */}
+      <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
