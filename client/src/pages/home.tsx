@@ -90,7 +90,7 @@ export default function Home() {
   return (
     <main className="pb-20 bg-background">
       {/* Floating Search Bar */}
-      <div className={`fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
+      <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
         isSearchSticky ? 'translate-y-0 opacity-100' : 'translate-y-[-100px] opacity-0 pointer-events-none'
       }`}>
         <div className="relative">
@@ -107,7 +107,9 @@ export default function Home() {
 
       {/* Header */}
       <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between p-4">
+        <div className={`flex items-center justify-between p-4 transition-all duration-300 ${
+          isSearchSticky ? 'opacity-0 h-0 overflow-hidden py-0' : 'opacity-100 h-auto py-4'
+        }`}>
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
               <Zap className="text-white text-lg" />
