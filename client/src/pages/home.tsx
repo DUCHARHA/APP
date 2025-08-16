@@ -73,14 +73,11 @@ export default function Home() {
   // Sticky search scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      // Make search sticky when scrolled past the search bar in hero section
-      const searchBar = document.querySelector('#main-search');
+      // Make search sticky and hide header immediately when scrolling down
+      const scrollY = window.scrollY;
       
-      if (searchBar) {
-        const searchRect = searchBar.getBoundingClientRect();
-        // When the search bar would disappear from view (top goes above header), make it sticky
-        setIsSearchSticky(searchRect.top <= 80); // 80px to account for header height + some padding
-      }
+      // Hide header and show sticky search when scrolled down more than 50px
+      setIsSearchSticky(scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
