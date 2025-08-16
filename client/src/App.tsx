@@ -19,7 +19,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 
 function Router() {
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen relative">
+    <div className="max-w-md mx-auto bg-background min-h-screen relative">
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/catalog" component={Catalog} />

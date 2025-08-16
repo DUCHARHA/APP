@@ -5,6 +5,7 @@ import { type Category, type Product } from "@shared/schema";
 import CategoryButton from "@/components/category-button";
 import ProductCard from "@/components/product-card";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCart } from "@/hooks/use-cart";
 import { useState, useEffect } from "react";
@@ -83,47 +84,48 @@ export default function Home() {
   return (
     <main className="pb-20">
       {/* Sticky Search Bar */}
-      <div className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white shadow-lg z-50 transition-all duration-300 ${
+      <div className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card shadow-lg z-50 transition-all duration-300 ${
         showStickySearch ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}>
-        <div className="p-3 border-b">
+        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
             <input
               type="text"
               placeholder="Поиск продуктов..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
               data-testid="sticky-search-input"
             />
           </div>
         </div>
       </div>
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
               <Zap className="text-white text-lg" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">ДУЧАРХА</h1>
-              <p className="text-xs text-gray-500">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">ДУЧАРХА</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {location ? "Определяем зону доставки..." : "ул. Пушкина, 25"}
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
             <button className="relative p-2">
-              <div className="fas fa-bell text-gray-600 text-lg" />
+              <div className="fas fa-bell text-gray-600 dark:text-gray-300 text-lg" />
               <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 3
               </span>
             </button>
             <Link href="/profile">
               <button className="p-2">
-                <div className="fas fa-user-circle text-gray-600 text-xl" />
+                <div className="fas fa-user-circle text-gray-600 dark:text-gray-300 text-xl" />
               </button>
             </Link>
           </div>
