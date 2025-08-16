@@ -30,6 +30,8 @@ export interface IStorage {
   // Orders
   createOrder(order: InsertOrder): Promise<Order>;
   getUserOrders(userId: string): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
+  updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -407,6 +409,20 @@ export class MemStorage implements IStorage {
     return Array.from(this.orders.values())
       .filter(order => order.userId === userId)
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values())
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async updateOrderStatus(orderId: string, status: string): Promise<Order | undefined> {
+    const order = this.orders.get(orderId);
+    if (!order) return undefined;
+    
+    const updatedOrder = { ...order, status };
+    this.orders.set(orderId, updatedOrder);
+    return updatedOrder;
   }
 }
 

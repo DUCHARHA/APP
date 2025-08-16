@@ -158,6 +158,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const orders = await storage.getAllOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch all orders" });
+    }
+  });
+
+  app.patch("/api/admin/orders/:orderId/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const order = await storage.updateOrderStatus(req.params.orderId, status);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update order status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -157,6 +157,20 @@ export default function Profile() {
           <LogOut className="w-5 h-5" />
           <span className="font-medium">Выйти</span>
         </button>
+        
+        {/* Hidden admin link - click 5 times on version */}
+        <div 
+          className="text-center py-2 cursor-pointer"
+          onClick={(e) => {
+            const clicks = parseInt(e.currentTarget.dataset.clicks || "0") + 1;
+            e.currentTarget.dataset.clicks = clicks.toString();
+            if (clicks >= 5) {
+              window.location.href = "/admin/login";
+            }
+          }}
+        >
+          <p className="text-xs text-gray-400">ДУЧАРХА v1.0.0</p>
+        </div>
       </section>
     </main>
   );
