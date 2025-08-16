@@ -106,9 +106,11 @@ export default function Home() {
       </div>
 
       {/* Header */}
-      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
-        <div className={`flex items-center justify-between p-4 transition-all duration-300 ${
-          isSearchSticky ? 'opacity-0 h-0 overflow-hidden py-0' : 'opacity-100 h-auto py-4'
+      <header className={`sticky top-0 z-40 transition-all duration-300 ${
+        isSearchSticky ? 'bg-transparent shadow-none' : 'bg-white dark:bg-card shadow-sm'
+      }`}>
+        <div className={`flex items-center justify-between transition-all duration-300 ${
+          isSearchSticky ? 'opacity-0 h-0 overflow-hidden p-0' : 'opacity-100 h-auto p-4'
         }`}>
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
