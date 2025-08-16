@@ -47,7 +47,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await apiRequest(`/api/notifications/${notificationId}/read`, 'PATCH');
+      await apiRequest('PATCH', `/api/notifications/${notificationId}/read`);
       
       // Invalidate both queries to refresh counts and list
       const queryClient = (await import('@/lib/queryClient')).queryClient;
@@ -60,7 +60,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await apiRequest(`/api/notifications/${userId}/read-all`, 'PATCH');
+      await apiRequest('PATCH', `/api/notifications/${userId}/read-all`);
       
       // Invalidate queries
       const queryClient = (await import('@/lib/queryClient')).queryClient;

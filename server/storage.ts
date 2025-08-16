@@ -300,16 +300,6 @@ export class MemStorage implements IStorage {
     // Seed sample banners
     const sampleBanners = [
       {
-        title: "Доставка продуктов быстрее, чем поход в магазин",
-        subtitle: "Экспресс доставка",
-        message: "Свежие продукты к вашему столу за 10-15 минут",
-        type: "promo",
-        backgroundColor: "#6366f1",
-        textColor: "#ffffff",
-        isActive: true,
-        priority: 1
-      },
-      {
         title: "🔥 Скидка 15% на первый заказ",
         subtitle: "Только сегодня",
         message: "Используйте промокод ПЕРВЫЙ и экономьте на доставке продуктов",
@@ -319,7 +309,7 @@ export class MemStorage implements IStorage {
         buttonText: "Получить скидку",
         buttonLink: "/catalog",
         isActive: true,
-        priority: 2
+        priority: 1
       },
       {
         title: "🤝 Партнерство с R-Cola",
@@ -331,7 +321,7 @@ export class MemStorage implements IStorage {
         buttonText: "Смотреть напитки",
         buttonLink: "/catalog/snacks",
         isActive: true,
-        priority: 3
+        priority: 2
       }
     ];
 
