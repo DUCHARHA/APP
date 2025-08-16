@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -39,6 +39,13 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(notificationId: string): Promise<Notification | undefined>;
   markAllNotificationsAsRead(userId: string): Promise<boolean>;
+
+  // Banners
+  getActiveBanners(): Promise<Banner[]>;
+  getAllBanners(): Promise<Banner[]>;
+  createBanner(banner: InsertBanner): Promise<Banner>;
+  updateBanner(id: string, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
+  deleteBanner(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -48,6 +55,7 @@ export class MemStorage implements IStorage {
   private cartItems: Map<string, CartItem> = new Map();
   private orders: Map<string, Order> = new Map();
   private notifications: Map<string, Notification> = new Map();
+  private banners: Map<string, Banner> = new Map();
 
   constructor() {
     this.seedData();
@@ -286,6 +294,58 @@ export class MemStorage implements IStorage {
         id, 
         createdAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
         relatedOrderId: null
+      });
+    });
+
+    // Seed sample banners
+    const sampleBanners = [
+      {
+        title: "🎉 Добро пожаловать в ДУЧАРХА!",
+        subtitle: "Экспресс-доставка продуктов",
+        message: "Свежие продукты к вашему столу за 10-15 минут",
+        type: "promo",
+        backgroundColor: "#6366f1",
+        textColor: "#ffffff",
+        isActive: true,
+        priority: 1
+      },
+      {
+        title: "🔥 Скидка 15% на первый заказ",
+        subtitle: "Только сегодня",
+        message: "Используйте промокод ПЕРВЫЙ и экономьте на доставке продуктов",
+        type: "promo",
+        backgroundColor: "#f59e0b",
+        textColor: "#ffffff",
+        buttonText: "Получить скидку",
+        buttonLink: "/catalog",
+        isActive: true,
+        priority: 2
+      },
+      {
+        title: "🤝 Партнерство с R-Cola",
+        subtitle: "Эксклюзивные напитки",
+        message: "Теперь доступны напитки R-Cola с бесплатной доставкой при заказе от 500₽",
+        type: "partnership",
+        backgroundColor: "#dc2626",
+        textColor: "#ffffff",
+        buttonText: "Смотреть напитки",
+        buttonLink: "/catalog/snacks",
+        isActive: true,
+        priority: 3
+      }
+    ];
+
+    sampleBanners.forEach(banner => {
+      const id = randomUUID();
+      this.banners.set(id, { 
+        ...banner, 
+        id, 
+        createdAt: new Date().toISOString(),
+        subtitle: banner.subtitle || null,
+        buttonText: banner.buttonText || null,
+        buttonLink: banner.buttonLink || null,
+        startDate: null,
+        endDate: null
       });
     });
   }
@@ -547,6 +607,56 @@ export class MemStorage implements IStorage {
     });
     
     return true;
+  }
+
+  async getActiveBanners(): Promise<Banner[]> {
+    const now = new Date().toISOString();
+    return Array.from(this.banners.values())
+      .filter(banner => {
+        if (!banner.isActive) return false;
+        if (banner.startDate && banner.startDate > now) return false;
+        if (banner.endDate && banner.endDate < now) return false;
+        return true;
+      })
+      .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+  }
+
+  async getAllBanners(): Promise<Banner[]> {
+    return Array.from(this.banners.values())
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async createBanner(insertBanner: InsertBanner): Promise<Banner> {
+    const id = randomUUID();
+    const banner: Banner = {
+      ...insertBanner,
+      id,
+      createdAt: new Date().toISOString(),
+      subtitle: insertBanner.subtitle || null,
+      backgroundColor: insertBanner.backgroundColor || "#6366f1",
+      textColor: insertBanner.textColor || "#ffffff",
+      buttonText: insertBanner.buttonText || null,
+      buttonLink: insertBanner.buttonLink || null,
+      isActive: insertBanner.isActive !== undefined ? insertBanner.isActive : true,
+      priority: insertBanner.priority || 0,
+      startDate: insertBanner.startDate || null,
+      endDate: insertBanner.endDate || null
+    };
+    this.banners.set(id, banner);
+    return banner;
+  }
+
+  async updateBanner(id: string, updateData: Partial<InsertBanner>): Promise<Banner | undefined> {
+    const banner = this.banners.get(id);
+    if (!banner) return undefined;
+    
+    const updatedBanner = { ...banner, ...updateData };
+    this.banners.set(id, updatedBanner);
+    return updatedBanner;
+  }
+
+  async deleteBanner(id: string): Promise<boolean> {
+    return this.banners.delete(id);
   }
 }
 

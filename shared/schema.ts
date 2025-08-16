@@ -72,6 +72,23 @@ export const notifications = pgTable("notifications", {
   createdAt: text("created_at").default(sql`now()`),
 });
 
+export const banners = pgTable("banners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  message: text("message").notNull(),
+  type: text("type").notNull().default("info"), // info, promo, announcement, partnership
+  backgroundColor: text("background_color").default("#6366f1"), // Default gradient start color
+  textColor: text("text_color").default("#ffffff"),
+  buttonText: text("button_text"),
+  buttonLink: text("button_link"),
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // Higher priority shows first
+  startDate: text("start_date"),
+  endDate: text("end_date"),
+  createdAt: text("created_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -99,6 +116,11 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertBannerSchema = createInsertSchema(banners).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
@@ -111,3 +133,5 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Banner = typeof banners.$inferSelect;
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
