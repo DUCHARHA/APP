@@ -30,6 +30,19 @@ export const products = pgTable("products", {
   categoryId: varchar("category_id").references(() => categories.id),
   inStock: boolean("in_stock").default(true),
   isPopular: boolean("is_popular").default(false),
+  // Detailed product information
+  ingredients: text("ingredients"),
+  manufacturer: text("manufacturer"),
+  countryOfOrigin: text("country_of_origin"),
+  storageConditions: text("storage_conditions"),
+  shelfLife: text("shelf_life"),
+  // Nutrition facts (per 100g)
+  calories: integer("calories"),
+  proteins: decimal("proteins", { precision: 5, scale: 2 }),
+  fats: decimal("fats", { precision: 5, scale: 2 }),
+  carbs: decimal("carbs", { precision: 5, scale: 2 }),
+  fiber: decimal("fiber", { precision: 5, scale: 2 }),
+  sugar: decimal("sugar", { precision: 5, scale: 2 }),
 });
 
 export const cartItems = pgTable("cart_items", {
