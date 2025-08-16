@@ -326,7 +326,7 @@ export class MemStorage implements IStorage {
         subtitle: "Эксклюзивные напитки",
         message: "Теперь доступны напитки R-Cola с бесплатной доставкой при заказе от 500₽",
         type: "partnership",
-        backgroundColor: "#dc2626",
+        backgroundColor: "#16a34a",
         textColor: "#ffffff",
         buttonText: "Смотреть напитки",
         buttonLink: "/catalog/snacks",

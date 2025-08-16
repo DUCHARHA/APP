@@ -38,7 +38,7 @@ export function BannerSlider() {
   if (visibleBanners.length === 0) {
     // Default banner when no active banners
     return (
-      <section className="gradient-hero text-white p-6 relative overflow-hidden min-h-[200px] flex items-center">
+      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg">
         <div className="relative z-10">
           <div className="flex items-center mb-4">
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
@@ -86,7 +86,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden min-h-[200px] flex items-center"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
@@ -164,10 +164,18 @@ export function BannerSlider() {
         </div>
       )}
 
-      {/* Floating decorative elements */}
+      {/* Floating decorative elements - show for all banners but more prominent for main banner */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
       <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
+      
+      {/* Extra animation elements for main banner */}
+      {currentBanner.priority === 0 && (
+        <>
+          <div className="absolute top-1/4 left-3/4 w-20 h-20 bg-white/8 rounded-full floating-elements" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-1/4 right-1/2 w-12 h-12 bg-white/6 rounded-full floating-elements" style={{ animationDelay: '3s' }}></div>
+        </>
+      )}
     </section>
   );
 }
