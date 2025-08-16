@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -32,6 +32,13 @@ export interface IStorage {
   getUserOrders(userId: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
   updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
+
+  // Notifications
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(notificationId: string): Promise<Notification | undefined>;
+  markAllNotificationsAsRead(userId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -40,6 +47,7 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product> = new Map();
   private cartItems: Map<string, CartItem> = new Map();
   private orders: Map<string, Order> = new Map();
+  private notifications: Map<string, Notification> = new Map();
 
   constructor() {
     this.seedData();
@@ -245,6 +253,41 @@ export class MemStorage implements IStorage {
         sugar: prod.sugar ?? null
       });
     });
+
+    // Seed some sample notifications for demo-user
+    const sampleNotifications = [
+      {
+        userId: "demo-user",
+        title: "Добро пожаловать в ДУЧАРХА! 🎉",
+        message: "Ваша регистрация завершена. Теперь вы можете заказывать продукты с быстрой доставкой!",
+        type: "success",
+        isRead: false
+      },
+      {
+        userId: "demo-user", 
+        title: "Скидка 15% на первый заказ",
+        message: "Используйте промокод ПЕРВЫЙ при оформлении заказа и получите скидку 15%",
+        type: "info",
+        isRead: false
+      },
+      {
+        userId: "demo-user",
+        title: "Новые продукты в каталоге",
+        message: "Добавили свежие фрукты и овощи. Оформите заказ до 23:00 для доставки сегодня",
+        type: "info", 
+        isRead: true
+      }
+    ];
+
+    sampleNotifications.forEach(notif => {
+      const id = randomUUID();
+      this.notifications.set(id, { 
+        ...notif, 
+        id, 
+        createdAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+        relatedOrderId: null
+      });
+    });
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -319,7 +362,18 @@ export class MemStorage implements IStorage {
       categoryId: insertProduct.categoryId || null,
       imageUrl: insertProduct.imageUrl || null,
       description: insertProduct.description || null,
-      weight: insertProduct.weight || null
+      weight: insertProduct.weight || null,
+      ingredients: insertProduct.ingredients || null,
+      manufacturer: insertProduct.manufacturer || null,
+      countryOfOrigin: insertProduct.countryOfOrigin || null,
+      storageConditions: insertProduct.storageConditions || null,
+      shelfLife: insertProduct.shelfLife || null,
+      calories: insertProduct.calories || null,
+      proteins: insertProduct.proteins || null,
+      fats: insertProduct.fats || null,
+      carbs: insertProduct.carbs || null,
+      fiber: insertProduct.fiber || null,
+      sugar: insertProduct.sugar || null
     };
     this.products.set(id, product);
     return product;
@@ -422,7 +476,77 @@ export class MemStorage implements IStorage {
     
     const updatedOrder = { ...order, status };
     this.orders.set(orderId, updatedOrder);
+
+    // Create notification for order status change
+    if (order.userId) {
+      const statusMessages = {
+        confirmed: 'Ваш заказ подтвержден и готовится к доставке',
+        preparing: 'Заказ собирается на складе',
+        out_for_delivery: 'Заказ в пути! Курьер уже едет к вам',
+        delivered: 'Заказ доставлен. Спасибо за покупку!',
+        cancelled: 'Заказ отменен'
+      };
+      
+      const message = statusMessages[status as keyof typeof statusMessages] || `Статус заказа изменен на: ${status}`;
+      
+      await this.createNotification({
+        userId: order.userId,
+        title: 'Обновление заказа',
+        message,
+        type: 'order',
+        relatedOrderId: orderId,
+        isRead: false
+      });
+    }
+    
     return updatedOrder;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return Array.from(this.notifications.values())
+      .filter(notification => notification.userId === userId)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    return Array.from(this.notifications.values())
+      .filter(notification => notification.userId === userId && !notification.isRead)
+      .length;
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const id = randomUUID();
+    const notification: Notification = {
+      ...insertNotification,
+      id,
+      createdAt: new Date().toISOString(),
+      userId: insertNotification.userId || null,
+      type: insertNotification.type || "info",
+      relatedOrderId: insertNotification.relatedOrderId || null,
+      isRead: insertNotification.isRead || false
+    };
+    this.notifications.set(id, notification);
+    return notification;
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<Notification | undefined> {
+    const notification = this.notifications.get(notificationId);
+    if (!notification) return undefined;
+    
+    const updatedNotification = { ...notification, isRead: true };
+    this.notifications.set(notificationId, updatedNotification);
+    return updatedNotification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<boolean> {
+    const userNotifications = Array.from(this.notifications.entries())
+      .filter(([_, notification]) => notification.userId === userId);
+    
+    userNotifications.forEach(([id, notification]) => {
+      this.notifications.set(id, { ...notification, isRead: true });
+    });
+    
+    return true;
   }
 }
 

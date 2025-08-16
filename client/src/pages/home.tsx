@@ -6,6 +6,7 @@ import CategoryButton from "@/components/category-button";
 import ProductCard from "@/components/product-card";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCart } from "@/hooks/use-cart";
 import { useState, useEffect } from "react";
@@ -103,12 +104,7 @@ export default function Home() {
           </div>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <button className="relative p-2">
-              <div className="fas fa-bell text-gray-600 dark:text-gray-300 text-lg" />
-              <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </button>
+            <NotificationBell userId="demo-user" />
             <Link href="/profile">
               <button className="p-2">
                 <div className="fas fa-user-circle text-gray-600 dark:text-gray-300 text-xl" />

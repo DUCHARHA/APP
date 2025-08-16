@@ -14,6 +14,7 @@ import PaymentMethods from "@/pages/payment-methods";
 import Profile from "@/pages/profile";
 import AdminLogin from "@/pages/admin-login";
 import AdminOrders from "@/pages/admin-orders";
+import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import MobileNavigation from "@/components/mobile-navigation";
 
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/payment-methods" component={PaymentMethods} />
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/admin/orders" component={AdminOrders} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
       <MobileNavigation />
