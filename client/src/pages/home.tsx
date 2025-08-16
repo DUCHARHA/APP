@@ -87,8 +87,8 @@ export default function Home() {
   return (
     <main className="pb-20 bg-background">
       {/* Floating Search Bar */}
-      <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
-        isSearchSticky ? 'translate-y-0 opacity-100' : 'translate-y-[-100px] opacity-0 pointer-events-none'
+      <div className={`fixed top-2 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
+        isSearchSticky ? 'translate-y-0 opacity-100' : 'translate-y-[-150px] opacity-0 pointer-events-none'
       }`}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
@@ -104,11 +104,9 @@ export default function Home() {
 
       {/* Header */}
       <header className={`sticky top-0 z-40 transition-all duration-300 ${
-        isSearchSticky ? 'bg-transparent shadow-none h-0' : 'bg-white dark:bg-card shadow-sm h-auto'
-      }`}>
-        <div className={`flex items-center justify-between transition-all duration-300 ${
-          isSearchSticky ? 'opacity-0 h-0 overflow-hidden p-0 pointer-events-none' : 'opacity-100 h-auto p-4'
-        }`}>
+        isSearchSticky ? 'transform -translate-y-full opacity-0 pointer-events-none' : 'transform translate-y-0 opacity-100'
+      } bg-white dark:bg-card shadow-sm`}>
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
               <Zap className="text-white text-lg" />
