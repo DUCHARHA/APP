@@ -73,8 +73,17 @@ export default function Home() {
   // Sticky search scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      // Make search sticky when scrolled past the hero section (approximately 300px)
-      setIsSearchSticky(window.scrollY > 300);
+      // Make search sticky when scrolled past the search bar in hero section
+      const heroSection = document.querySelector('.gradient-hero');
+      const searchBar = document.querySelector('#main-search');
+      
+      if (heroSection && searchBar) {
+        const heroRect = heroSection.getBoundingClientRect();
+        const searchRect = searchBar.getBoundingClientRect();
+        
+        // When the search bar would disappear from view, make it sticky
+        setIsSearchSticky(searchRect.top <= 70); // 70px to account for header height
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -116,15 +125,15 @@ export default function Home() {
         </div>
         {/* Sticky Search in Header */}
         {isSearchSticky && (
-          <div className="px-4">
+          <div className="px-4 pb-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Поиск продуктов..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple transition-all"
               />
             </div>
           </div>
@@ -134,22 +143,24 @@ export default function Home() {
       {/* Hero Section */}
       <section className="gradient-hero text-white p-6 relative overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center mb-4">
-            <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
-              <Clock className="mr-1 w-4 h-4" />
-              10-15 мин
+          <div className={`transition-all duration-300 ${isSearchSticky ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}`}>
+            <div className="flex items-center mb-4">
+              <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
+                <Clock className="mr-1 w-4 h-4" />
+                10-15 мин
+              </div>
+              <span className="text-white/80 text-sm">Экспресс доставка</span>
             </div>
-            <span className="text-white/80 text-sm">Экспресс доставка</span>
+            <h2 className="text-2xl font-bold mb-2">
+              Доставка продуктов быстрее, чем поход в магазин
+            </h2>
+            <p className="text-white/90 mb-4">
+              Свежие продукты к вашему столу за 10-15 минут
+            </p>
           </div>
-          <h2 className="text-2xl font-bold mb-2">
-            Доставка продуктов быстрее, чем поход в магазин
-          </h2>
-          <p className="text-white/90 mb-4">
-            Свежие продукты к вашему столу за 10-15 минут
-          </p>
           
           {/* Search Bar */}
-          <div className="relative" id="main-search">
+          <div className={`relative transition-all duration-300 ${isSearchSticky ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} id="main-search">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
@@ -160,9 +171,9 @@ export default function Home() {
             />
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
+        <div className={`absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`}></div>
+        <div className={`absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`} style={{ animationDelay: '2s' }}></div>
+        <div className={`absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements transition-opacity duration-300 ${isSearchSticky ? 'opacity-0' : 'opacity-100'}`} style={{ animationDelay: '4s' }}></div>
       </section>
 
       {/* Quick Actions */}
