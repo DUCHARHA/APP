@@ -74,15 +74,12 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       // Make search sticky when scrolled past the search bar in hero section
-      const heroSection = document.querySelector('.gradient-hero');
       const searchBar = document.querySelector('#main-search');
       
-      if (heroSection && searchBar) {
-        const heroRect = heroSection.getBoundingClientRect();
+      if (searchBar) {
         const searchRect = searchBar.getBoundingClientRect();
-        
-        // When the search bar would disappear from view, make it sticky
-        setIsSearchSticky(searchRect.top <= 70); // 70px to account for header height
+        // When the search bar would disappear from view (top goes above header), make it sticky
+        setIsSearchSticky(searchRect.top <= 80); // 80px to account for header height + some padding
       }
     };
 
@@ -92,10 +89,24 @@ export default function Home() {
 
   return (
     <main className="pb-20 bg-background">
-      {/* Header */}
-      <header className={`bg-white dark:bg-card shadow-sm sticky top-0 z-40 transition-all duration-300 ${
-        isSearchSticky ? 'pb-3' : ''
+      {/* Floating Search Bar */}
+      <div className={`fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50 transition-all duration-500 ${
+        isSearchSticky ? 'translate-y-0 opacity-100' : 'translate-y-[-100px] opacity-0 pointer-events-none'
       }`}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Поиск продуктов..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
             <div className="bg-agent-purple p-2 rounded-lg">
@@ -123,21 +134,6 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        {/* Sticky Search in Header */}
-        {isSearchSticky && (
-          <div className="px-4 pb-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Поиск продуктов..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple transition-all"
-              />
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Hero Section */}
@@ -160,7 +156,11 @@ export default function Home() {
           </div>
           
           {/* Search Bar */}
-          <div className={`relative transition-all duration-300 ${isSearchSticky ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} id="main-search">
+          <div className={`relative transition-all duration-500 ${
+            isSearchSticky 
+              ? 'transform scale-75 opacity-0 pointer-events-none' 
+              : 'transform scale-100 opacity-100'
+          }`} id="main-search">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
