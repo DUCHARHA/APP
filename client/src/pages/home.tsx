@@ -275,8 +275,8 @@ export default function Home() {
                 <div className="bg-electric-green/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Truck className="text-electric-green w-6 h-6" />
                 </div>
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Бесплатно от 1000₽</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Минимальный заказ</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Всегда бесплатно</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Без минимального заказа</p>
               </div>
               <div>
                 <div className="bg-bright-orange/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
