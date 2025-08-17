@@ -297,56 +297,60 @@ export class MemStorage implements IStorage {
       });
     });
 
-    // Seed sample banners
+    // Create sample banners
     const sampleBanners = [
       {
+        id: randomUUID(),
         title: "Доставка продуктов быстрее, чем поход в магазин",
         subtitle: "Экспресс доставка",
         message: "Свежие продукты к вашему столу за 10-15 минут",
         type: "promo",
         backgroundColor: "#6366f1",
         textColor: "#ffffff",
+        buttonText: "",
+        buttonLink: "",
         isActive: true,
-        priority: 0
+        priority: 0,
+        startDate: null,
+        endDate: null,
+        createdAt: new Date().toISOString()
       },
       {
-        title: "🔥 Скидка 15% на первый заказ",
-        subtitle: "Только сегодня",
-        message: "Используйте промокод ПЕРВЫЙ и экономьте на доставке продуктов",
+        id: randomUUID(),
+        title: "RC Cola - Освежись сейчас!",
+        subtitle: "Партнерская акция",
+        message: "Получи RC Cola бесплатно при заказе от 500 рублей",
+        type: "partnership",
+        backgroundColor: "#dc2626",
+        textColor: "#ffffff",
+        buttonText: "Получить колу",
+        buttonLink: "/catalog",
+        isActive: true,
+        priority: 1,
+        startDate: null,
+        endDate: null,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: randomUUID(),
+        title: "Скидка 15% на первый заказ",
+        subtitle: "Промокод ПЕРВЫЙ",
+        message: "Используйте промокод при оформлении заказа и получите скидку 15%",
         type: "promo",
         backgroundColor: "#f59e0b",
         textColor: "#ffffff",
-        buttonText: "Получить скидку",
+        buttonText: "Скопировать промокод",
         buttonLink: "/catalog",
         isActive: true,
-        priority: 1
-      },
-      {
-        title: "🤝 Партнерство с R-Cola",
-        subtitle: "Эксклюзивные напитки",
-        message: "Теперь доступны напитки R-Cola с бесплатной доставкой при заказе от 500₽",
-        type: "partnership",
-        backgroundColor: "#16a34a",
-        textColor: "#ffffff",
-        buttonText: "Смотреть напитки",
-        buttonLink: "/catalog/snacks",
-        isActive: true,
-        priority: 2
+        priority: 2,
+        startDate: null,
+        endDate: null,
+        createdAt: new Date().toISOString()
       }
     ];
 
     sampleBanners.forEach(banner => {
-      const id = randomUUID();
-      this.banners.set(id, { 
-        ...banner, 
-        id, 
-        createdAt: new Date().toISOString(),
-        subtitle: banner.subtitle || null,
-        buttonText: banner.buttonText || null,
-        buttonLink: banner.buttonLink || null,
-        startDate: null,
-        endDate: null
-      });
+      this.banners.set(banner.id, banner);
     });
   }
 
@@ -374,7 +378,7 @@ export class MemStorage implements IStorage {
   async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User | undefined> {
     const user = this.users.get(id);
     if (!user) return undefined;
-    
+
     const updatedUser = { ...user, ...updateData };
     this.users.set(id, updatedUser);
     return updatedUser;
@@ -533,7 +537,7 @@ export class MemStorage implements IStorage {
   async updateOrderStatus(orderId: string, status: string): Promise<Order | undefined> {
     const order = this.orders.get(orderId);
     if (!order) return undefined;
-    
+
     const updatedOrder = { ...order, status };
     this.orders.set(orderId, updatedOrder);
 
@@ -546,9 +550,9 @@ export class MemStorage implements IStorage {
         delivered: 'Заказ доставлен. Спасибо за покупку!',
         cancelled: 'Заказ отменен'
       };
-      
+
       const message = statusMessages[status as keyof typeof statusMessages] || `Статус заказа изменен на: ${status}`;
-      
+
       await this.createNotification({
         userId: order.userId,
         title: 'Обновление заказа',
@@ -558,7 +562,7 @@ export class MemStorage implements IStorage {
         isRead: false
       });
     }
-    
+
     return updatedOrder;
   }
 
@@ -592,7 +596,7 @@ export class MemStorage implements IStorage {
   async markNotificationAsRead(notificationId: string): Promise<Notification | undefined> {
     const notification = this.notifications.get(notificationId);
     if (!notification) return undefined;
-    
+
     const updatedNotification = { ...notification, isRead: true };
     this.notifications.set(notificationId, updatedNotification);
     return updatedNotification;
@@ -601,11 +605,11 @@ export class MemStorage implements IStorage {
   async markAllNotificationsAsRead(userId: string): Promise<boolean> {
     const userNotifications = Array.from(this.notifications.entries())
       .filter(([_, notification]) => notification.userId === userId);
-    
+
     userNotifications.forEach(([id, notification]) => {
       this.notifications.set(id, { ...notification, isRead: true });
     });
-    
+
     return true;
   }
 
@@ -649,7 +653,7 @@ export class MemStorage implements IStorage {
   async updateBanner(id: string, updateData: Partial<InsertBanner>): Promise<Banner | undefined> {
     const banner = this.banners.get(id);
     if (!banner) return undefined;
-    
+
     const updatedBanner = { ...banner, ...updateData };
     this.banners.set(id, updatedBanner);
     return updatedBanner;

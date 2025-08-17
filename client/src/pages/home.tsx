@@ -111,7 +111,7 @@ export default function Home() {
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">ДУЧАРХА</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {location ? "Определяем зону доставки..." : "ул. Пушкина, 25"}
+                {location ? "Определяем зону доставки..." : ""}
               </p>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function Home() {
                 ) : (
                   <>
                     <Copy className="w-4 h-4" />
-                    <span>Скопировать код</span>
+                    <span>Скопировать промокод</span>
                   </>
                 )}
               </button>
