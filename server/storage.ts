@@ -922,6 +922,7 @@ export class MemStorage implements IStorage {
       ...insertBanner,
       id,
       createdAt: new Date().toISOString(),
+      type: insertBanner.type || "info",
       subtitle: insertBanner.subtitle || null,
       backgroundColor: insertBanner.backgroundColor || "#6366f1",
       textColor: insertBanner.textColor || "#ffffff",
