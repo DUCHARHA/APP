@@ -573,12 +573,14 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    sampleNotifications.forEach(notif => {
+    sampleNotifications.forEach((notif, index) => {
       const id = randomUUID();
+      // Make notifications recent (within last 30 minutes to 2 hours)
+      const minutesAgo = 30 + (index * 15);
       this.notifications.set(id, { 
         ...notif, 
         id, 
-        createdAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(Date.now() - minutesAgo * 60 * 1000).toISOString(),
         relatedOrderId: null
       });
     });

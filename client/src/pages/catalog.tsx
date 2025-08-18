@@ -34,18 +34,20 @@ export default function Catalog() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
         <div className="flex items-center p-4">
-          <Link href="/">
-            <button className="mr-3 p-2 -ml-2">
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </button>
-          </Link>
+          {currentCategory && (
+            <Link href="/catalog">
+              <button className="mr-3 p-2 -ml-2">
+                <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
+            </Link>
+          )}
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {currentCategory ? currentCategory.name : "Каталог"}
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {displayProducts.length} товаров
             </p>
           </div>

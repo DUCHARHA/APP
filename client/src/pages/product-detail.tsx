@@ -139,7 +139,7 @@ export default function ProductDetail() {
 
         <div className="flex items-center justify-between mb-6">
           <div className="text-3xl font-bold text-gray-900" data-testid="text-product-price">
-            {product.price} ₽
+            {product.price} сом.
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3 bg-gray-100 rounded-lg p-1">
