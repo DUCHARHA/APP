@@ -22,6 +22,7 @@ const checkoutSchema = z.object({
   deliveryAddress: z.string().min(10, "Введите полный адрес доставки"),
   paymentMethod: z.enum(["card", "cash"], { required_error: "Выберите способ оплаты" }),
   comment: z.string().optional(),
+  packerComment: z.string().optional(),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -45,6 +46,7 @@ export default function Checkout() {
       deliveryAddress: "ул. Пушкина, 25, кв. 10",
       paymentMethod: "card",
       comment: "",
+      packerComment: "",
     },
   });
 
@@ -69,6 +71,8 @@ export default function Checkout() {
           userId,
           totalAmount: finalTotal.toString(),
           deliveryAddress: orderData.deliveryAddress,
+          comment: orderData.comment,
+          packerComment: orderData.packerComment,
           status: "pending",
           promoCode: appliedPromo?.code || null,
         }),
@@ -395,17 +399,35 @@ export default function Checkout() {
             )}
           </section>
 
-          {/* Comment */}
-          <section className="p-4">
-            <h3 className="font-bold text-gray-900 mb-3">Комментарий к заказу</h3>
+          {/* Comments */}
+          <section className="p-4 space-y-4">
+            <h3 className="font-bold text-gray-900 mb-3">Комментарии к заказу</h3>
+            
             <FormField
               control={form.control}
               name="comment"
               render={({ field }) => (
                 <FormItem>
+                  <label className="text-sm font-medium text-gray-700">Информация для курьера</label>
                   <FormControl>
                     <Input
-                      placeholder="Дополнительная информация для курьера"
+                      placeholder="Дополнительная информация для курьера (домофон, этаж, квартира)"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="packerComment"
+              render={({ field }) => (
+                <FormItem>
+                  <label className="text-sm font-medium text-gray-700">Информация для сборщика</label>
+                  <FormControl>
+                    <Input
+                      placeholder="Пожелания по сборке заказа (спелость фруктов, замены и т.д.)"
                       {...field}
                     />
                   </FormControl>

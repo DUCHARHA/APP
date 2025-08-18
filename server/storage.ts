@@ -31,6 +31,7 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   getUserOrders(userId: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
+  getOrderById(orderId: string): Promise<Order | undefined>;
   updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
 
   // Notifications
@@ -575,8 +576,8 @@ export class MemStorage implements IStorage {
 
     sampleNotifications.forEach((notif, index) => {
       const id = randomUUID();
-      // Make notifications recent (within last 30 minutes to 2 hours)
-      const minutesAgo = 30 + (index * 15);
+      // Make notifications very recent (1-3 minutes ago)
+      const minutesAgo = 1 + (index * 1);
       this.notifications.set(id, { 
         ...notif, 
         id, 
@@ -639,6 +640,34 @@ export class MemStorage implements IStorage {
 
     sampleBanners.forEach(banner => {
       this.banners.set(banner.id, banner);
+    });
+
+    // Seed sample orders for demo
+    const sampleOrders = [
+      {
+        id: randomUUID(),
+        userId: "demo-user",
+        totalAmount: "1250.00",
+        status: "delivered",
+        deliveryAddress: "ул. Рудаки, 25, кв. 10",
+        comment: "Домофон 15К",
+        packerComment: "Бананы спелые, молоко свежее",
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: randomUUID(),
+        userId: "demo-user", 
+        totalAmount: "890.00",
+        status: "preparing",
+        deliveryAddress: "ул. Сомони, 12, офис 205",
+        comment: "Звонить в офис",
+        packerComment: null,
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+
+    sampleOrders.forEach(order => {
+      this.orders.set(order.id, order);
     });
   }
 
@@ -820,6 +849,10 @@ export class MemStorage implements IStorage {
   async getAllOrders(): Promise<Order[]> {
     return Array.from(this.orders.values())
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async getOrderById(orderId: string): Promise<Order | undefined> {
+    return this.orders.get(orderId);
   }
 
   async updateOrderStatus(orderId: string, status: string): Promise<Order | undefined> {

@@ -1,14 +1,76 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { ArrowLeft, Clock, CheckCircle, Package, Truck } from "lucide-react";
 import { type Order } from "@shared/schema";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Orders() {
   const userId = "demo-user"; // In real app, get from auth
+  const { toast } = useToast();
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders", userId],
   });
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "PATCH",
+      });
+      if (!response.ok) throw new Error("Failed to cancel order");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Заказ отменен",
+        description: "Ваш заказ успешно отменен",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось отменить заказ",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const repeatOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/orders/${orderId}/repeat`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to repeat order");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Товары добавлены в корзину",
+        description: "Товары из заказа добавлены в корзину",
+      });
+      window.location.href = "/cart";
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось повторить заказ",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cancelOrder = (orderId: string) => {
+    if (confirm("Вы уверены, что хотите отменить заказ?")) {
+      cancelOrderMutation.mutate(orderId);
+    }
+  };
+
+  const repeatOrder = (orderId: string) => {
+    repeatOrderMutation.mutate(orderId);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -138,18 +200,32 @@ export default function Orders() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-gray-900">
-                    {parseFloat(order.totalAmount).toFixed(0)} ₽
+                    {parseFloat(order.totalAmount).toFixed(0)} сом.
                   </span>
-                  {order.status === "delivered" && (
-                    <button className="text-agent-purple text-sm font-medium">
-                      Повторить заказ
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={() => window.location.href = `/order/${order.id}`}
+                      className="text-gray-500 text-sm font-medium hover:text-gray-700"
+                    >
+                      Подробнее
                     </button>
-                  )}
-                  {(order.status === "pending" || order.status === "preparing") && (
-                    <button className="text-red-500 text-sm font-medium">
-                      Отменить заказ
-                    </button>
-                  )}
+                    {order.status === "delivered" && (
+                      <button 
+                        onClick={() => repeatOrder(order.id)}
+                        className="text-agent-purple text-sm font-medium hover:text-agent-purple/80"
+                      >
+                        Повторить
+                      </button>
+                    )}
+                    {(order.status === "pending" || order.status === "preparing") && (
+                      <button 
+                        onClick={() => cancelOrder(order.id)}
+                        className="text-red-500 text-sm font-medium hover:text-red-600"
+                      >
+                        Отменить
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {order.status === "delivering" && (

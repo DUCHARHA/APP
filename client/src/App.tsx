@@ -18,14 +18,33 @@ import AdminOrders from "@/pages/admin-orders";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import MobileNavigation from "@/components/mobile-navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+// Store scroll positions for each page
+const scrollPositions = new Map<string, number>();
 
 function Router() {
   const [location] = useLocation();
+  const previousLocation = useRef<string>("");
 
-  // Reset scroll to top for each new page navigation
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Save scroll position of previous page
+    if (previousLocation.current && previousLocation.current !== location) {
+      scrollPositions.set(previousLocation.current, window.scrollY);
+    }
+
+    // Restore scroll position or scroll to top for new pages
+    const savedPosition = scrollPositions.get(location);
+    if (savedPosition !== undefined) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        window.scrollTo(0, savedPosition);
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
+
+    previousLocation.current = location;
   }, [location]);
 
   return (

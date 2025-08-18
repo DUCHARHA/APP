@@ -58,6 +58,8 @@ export const orders = pgTable("orders", {
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"),
   deliveryAddress: text("delivery_address").notNull(),
+  comment: text("comment"),
+  packerComment: text("packer_comment"),
   createdAt: text("created_at").default(sql`now()`),
 });
 
