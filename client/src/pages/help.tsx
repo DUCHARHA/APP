@@ -100,11 +100,11 @@ export default function Help() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Доставка</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">24/7</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">с 7:00 до 23:00</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Поддержка</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">Круглосуточно</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">с 7:00 до 23:00</span>
             </div>
           </div>
         </div>

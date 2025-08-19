@@ -20,7 +20,7 @@ export function BannerSlider() {
 
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
-    }, 10000); // Change slide every 10 seconds
+    }, 8000); // Change slide every 8 seconds
 
     return () => clearInterval(interval);
   }, [visibleBanners.length, currentSlide]); // Reset timer when currentSlide changes
