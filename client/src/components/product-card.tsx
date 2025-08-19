@@ -15,6 +15,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const { cartItems } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const userId = "demo-user"; // In real app, get from auth
 
   // Find current quantity of this product in cart
@@ -44,10 +45,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         description: `${product.name} добавлен в корзину`,
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Add to cart error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось добавить товар в корзину",
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
@@ -67,10 +69,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Update quantity error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось обновить количество товара",
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
@@ -91,10 +94,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         description: "Товар удален из корзины",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Remove item error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось удалить товар из корзины",
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
@@ -129,12 +133,22 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/product/${product.id}`}>
       <div className="bg-white dark:bg-card rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" data-testid={`card-product-${product.id}`}>
-        <img
-          src={product.imageUrl || ""}
-          alt={product.name}
-          className="w-full h-32 object-cover"
-          data-testid="img-product"
-        />
+        {imageError || !product.imageUrl ? (
+          <div className="w-full h-32 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <div className="text-gray-400 dark:text-gray-600 text-center">
+              <div className="text-2xl mb-1">📦</div>
+              <div className="text-xs">Изображение</div>
+            </div>
+          </div>
+        ) : (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-32 object-cover"
+            data-testid="img-product"
+            onError={() => setImageError(true)}
+          />
+        )}
         <div className="p-3">
           <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2" data-testid="text-product-name">
             {product.name}

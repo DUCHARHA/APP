@@ -34,10 +34,11 @@ export default function Cart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Update quantity error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось обновить количество товара",
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
@@ -57,10 +58,11 @@ export default function Cart() {
         description: "Товар удален из корзины",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Remove item error:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось удалить товар из корзины",
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
@@ -178,11 +180,30 @@ export default function Cart() {
             {cartItems.map((item) => (
               <div key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center space-x-3">
-                  <img
-                    src={item.product.imageUrl || ""}
-                    alt={item.product.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
+                  {!item.product.imageUrl ? (
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="text-gray-400 dark:text-gray-600 text-center">
+                        <div className="text-lg">📦</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={item.product.imageUrl}
+                      alt={item.product.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const placeholder = target.nextElementSibling as HTMLDivElement;
+                        if (placeholder) placeholder.style.display = 'flex';
+                      }}
+                    />
+                  )}
+                  <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center" style={{display: 'none'}}>
+                    <div className="text-gray-400 dark:text-gray-600 text-center">
+                      <div className="text-lg">📦</div>
+                    </div>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900 truncate">
                       {item.product.name}

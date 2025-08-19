@@ -48,10 +48,28 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      retry: false,
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors (client errors)
+        if (error && typeof error === 'object' && 'message' in error) {
+          const errorMessage = error.message as string;
+          if (errorMessage.startsWith('4')) return false;
+        }
+        // Retry network errors up to 2 times
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors (client errors)
+        if (error && typeof error === 'object' && 'message' in error) {
+          const errorMessage = error.message as string;
+          if (errorMessage.startsWith('4')) return false;
+        }
+        // Retry network errors up to 1 time for mutations
+        return failureCount < 1;
+      },
+      retryDelay: 1000,
     },
   },
 });

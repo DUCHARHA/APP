@@ -120,7 +120,7 @@ export default function Home() {
             <NotificationBell userId="demo-user" />
             <Link href="/profile">
               <button className="p-2">
-                <div className="fas fa-user-circle text-gray-600 dark:text-gray-300 text-xl" />
+                <i className="fas fa-user-circle text-gray-600 dark:text-gray-300 text-xl" />
               </button>
             </Link>
           </div>
@@ -241,11 +241,26 @@ export default function Home() {
             {categories.slice(4).map((category) => (
               <Link key={category.id} href={`/catalog/${category.id}`}>
                 <button className="w-full bg-white dark:bg-card rounded-xl p-4 shadow-sm flex items-center card-hover">
-                  <img
-                    src={category.imageUrl || ""}
-                    alt={category.name}
-                    className="w-12 h-9 rounded-lg object-cover mr-4"
-                  />
+                  {!category.imageUrl ? (
+                    <div className="w-12 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-4">
+                      <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
+                    </div>
+                  ) : (
+                    <img
+                      src={category.imageUrl}
+                      alt={category.name}
+                      className="w-12 h-9 rounded-lg object-cover mr-4"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const placeholder = target.nextElementSibling as HTMLDivElement;
+                        if (placeholder) placeholder.style.display = 'flex';
+                      }}
+                    />
+                  )}
+                  <div className="w-12 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 items-center justify-center mr-4" style={{display: 'none'}}>
+                    <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
+                  </div>
                   <div className="flex-1 text-left">
                     <h4 className="font-medium text-gray-900 dark:text-gray-100">{category.name}</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Широкий выбор товаров</p>

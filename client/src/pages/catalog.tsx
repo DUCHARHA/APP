@@ -55,15 +55,15 @@ export default function Catalog() {
       </header>
 
       {/* Search */}
-      <section className="p-4 bg-gray-50">
+      <section className="p-4 bg-gray-50 dark:bg-gray-900">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
           <input
             type="text"
             placeholder="Поиск в каталоге..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-agent-purple/50"
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:border-agent-purple/50"
           />
         </div>
       </section>
@@ -71,7 +71,7 @@ export default function Catalog() {
       {/* Categories */}
       {!categoryId && !searchQuery && (
         <section className="p-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Категории</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Категории</h3>
           <div className="grid grid-cols-4 gap-3 mb-6">
             {categories.slice(0, 8).map((category) => (
               <CategoryButton key={category.id} category={category} />
@@ -84,7 +84,7 @@ export default function Catalog() {
       <section className="p-4">
         {searchQuery && (
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Результаты поиска по запросу "{searchQuery}"
             </p>
           </div>
@@ -97,10 +97,10 @@ export default function Catalog() {
                 <Search className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               {searchQuery ? "Товары не найдены" : "Нет товаров"}
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               {searchQuery 
                 ? "Попробуйте изменить поисковый запрос" 
                 : "В этой категории пока нет товаров"
