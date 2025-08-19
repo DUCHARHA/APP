@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, CreditCard, Plus, Trash2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -122,6 +122,9 @@ export default function PaymentMethods() {
             <DialogContent className="max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle>Добавить способ оплаты</DialogTitle>
+                <DialogDescription>
+                  Добавьте новую банковскую карту или электронный кошелек для оплаты заказов
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

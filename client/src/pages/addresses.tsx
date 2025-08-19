@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, MapPin, Plus, Trash2, Home, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -107,6 +107,9 @@ export default function Addresses() {
             <DialogContent className="max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle>Добавить адрес</DialogTitle>
+                <DialogDescription>
+                  Добавьте новый адрес доставки для быстрого оформления заказов
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

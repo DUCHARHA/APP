@@ -1,10 +1,24 @@
 import { Link, useLocation } from "wouter";
 import { Home, Grid, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
+import { useCallback } from "react";
 
 export default function MobileNavigation() {
   const [location] = useLocation();
   const { totalItems } = useCart();
+  
+  // Prevent rapid navigation clicks
+  const handleNavigation = useCallback((e: React.MouseEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    if (target.style.pointerEvents === 'none') {
+      e.preventDefault();
+      return;
+    }
+    target.style.pointerEvents = 'none';
+    setTimeout(() => {
+      target.style.pointerEvents = 'auto';
+    }, 300);
+  }, []);
 
   const navigationItems = [
     {
@@ -40,6 +54,7 @@ export default function MobileNavigation() {
         {navigationItems.map((item) => (
           <Link key={item.path} href={item.path}>
             <button
+              onClick={handleNavigation}
               className={`flex flex-col items-center py-2 px-1 relative transition-colors ${
                 item.active
                   ? "text-agent-purple"

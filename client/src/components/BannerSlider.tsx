@@ -24,7 +24,7 @@ export function BannerSlider() {
     }, 7000); // Change slide every 7 seconds
 
     return () => clearInterval(interval);
-  }, [visibleBanners.length, currentSlide]); // Reset timer when currentSlide changes
+  }, [visibleBanners.length]); // Only reset when banners change, not on slide change
 
 
 

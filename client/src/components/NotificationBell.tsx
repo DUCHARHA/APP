@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -117,8 +118,11 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
+          <DialogTitle>Уведомления</DialogTitle>
+          <DialogDescription className="sr-only">
+            Список всех ваших уведомлений
+          </DialogDescription>
           <div className="flex items-center justify-between">
-            <DialogTitle>Уведомления</DialogTitle>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"

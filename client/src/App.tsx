@@ -30,6 +30,8 @@ function Router() {
   const previousLocation = useRef<string>("");
 
   useEffect(() => {
+    let isStale = false;
+    
     // Save scroll position of previous page
     if (previousLocation.current && previousLocation.current !== location) {
       scrollPositions.set(previousLocation.current, window.scrollY);
@@ -38,15 +40,23 @@ function Router() {
     // Restore scroll position or scroll to top for new pages
     const savedPosition = scrollPositions.get(location);
     if (savedPosition !== undefined) {
-      // Use requestAnimationFrame to ensure DOM is ready
+      // Use requestAnimationFrame to ensure DOM is ready and prevent stale state
       requestAnimationFrame(() => {
-        window.scrollTo(0, savedPosition);
+        if (!isStale) {
+          window.scrollTo(0, savedPosition);
+        }
       });
     } else {
-      window.scrollTo(0, 0);
+      if (!isStale) {
+        window.scrollTo(0, 0);
+      }
     }
 
     previousLocation.current = location;
+    
+    return () => {
+      isStale = true;
+    };
   }, [location]);
 
   return (
