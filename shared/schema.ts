@@ -1,15 +1,17 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, decimal, boolean, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
-  phone: text("phone"),
+  phone: text("phone").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
   address: text("address"),
-  createdAt: text("created_at").default(sql`now()`),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const categories = pgTable("categories", {
@@ -91,6 +93,34 @@ export const banners = pgTable("banners", {
   createdAt: text("created_at").default(sql`now()`),
 });
 
+// Telegram authentication tables
+export const verificationCodes = pgTable("verification_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  phone: text("phone").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_verification_codes_phone").on(table.phone),
+  index("idx_verification_codes_expires_at").on(table.expiresAt),
+]);
+
+export const sessions = pgTable("sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isActive: boolean("is_active").default(true),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_sessions_token").on(table.token),
+  index("idx_sessions_user_id").on(table.userId),
+]);
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -123,6 +153,16 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   createdAt: true,
 });
 
+export const insertVerificationCodeSchema = createInsertSchema(verificationCodes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
@@ -137,3 +177,25 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
+export type VerificationCode = typeof verificationCodes.$inferSelect;
+export type InsertVerificationCode = z.infer<typeof insertVerificationCodeSchema>;
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+
+// Custom validation schemas for auth
+export const phoneAuthSchema = z.object({
+  phone: z.string().min(10, "Номер телефона должен содержать минимум 10 цифр")
+    .regex(/^\+?[1-9]\d{1,14}$/, "Неверный формат номера телефона"),
+});
+
+export const verifyCodeSchema = z.object({
+  phone: z.string().min(10, "Номер телефона обязателен"),
+  code: z.string().length(6, "Код должен содержать 6 цифр")
+    .regex(/^\d{6}$/, "Код должен содержать только цифры"),
+});
+
+export const updateUserSchema = z.object({
+  firstName: z.string().min(1, "Имя обязательно").optional(),
+  lastName: z.string().optional(),
+  address: z.string().optional(),
+});

@@ -1,47 +1,90 @@
 import { Link } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, CreditCard, Bell, HelpCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { AuthDialog } from "@/components/AuthDialog";
+import { UserProfile } from "@/components/UserProfile";
 import { type Order } from "@shared/schema";
 
 export default function Profile() {
-  const userId = "demo-user";
-  const [user, setUser] = useState({
-    name: "Анна Иванова",
-    email: "anna@example.com",
-    phone: "+7 (999) 123-45-67",
-    address: "ул. Пушкина, 25, кв. 10",
-  });
-  
+  const { isAuthenticated, user, isLoading } = useAuth();
 
-  // Загружаем данные пользователя из localStorage
-  useEffect(() => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      setUser(JSON.parse(savedProfile));
-    }
-  }, []);
-
-  // Получаем реальные данные заказов
+  // Получаем реальные данные заказов только для авторизованных пользователей
   const { data: orders = [] } = useQuery<Order[]>({
-    queryKey: ["/api/orders", userId],
+    queryKey: ["/api/orders"],
+    enabled: isAuthenticated,
   });
 
-  
+  if (isLoading) {
+    return (
+      <main className="pb-20">
+        <header className="bg-white shadow-sm sticky top-0 z-40">
+          <div className="flex items-center p-4">
+            <Link href="/">
+              <button className="mr-3 p-2 -ml-2" data-testid="button-back">
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+            </Link>
+            <h1 className="text-xl font-bold text-gray-900">Профиль</h1>
+          </div>
+        </header>
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-agent-purple"></div>
+        </div>
+      </main>
+    );
+  }
+
+  // Если пользователь не авторизован, показываем форму входа
+  if (!isAuthenticated) {
+    return (
+      <main className="pb-20">
+        <header className="bg-white shadow-sm sticky top-0 z-40">
+          <div className="flex items-center p-4">
+            <Link href="/">
+              <button className="mr-3 p-2 -ml-2" data-testid="button-back">
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+            </Link>
+            <h1 className="text-xl font-bold text-gray-900">Профиль</h1>
+          </div>
+        </header>
+
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <ArrowLeft className="w-12 h-12 text-gray-400" />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Добро пожаловать!
+          </h2>
+          <p className="text-gray-500 mb-8 max-w-sm">
+            Войдите в аккаунт, чтобы управлять заказами, адресами и получать персональные скидки
+          </p>
+          
+          <AuthDialog>
+            <Button size="lg" className="w-full max-w-sm" data-testid="button-login-main">
+              Войти в ДУЧАРХА
+            </Button>
+          </AuthDialog>
+        </div>
+      </main>
+    );
+  }
 
   const menuItems = [
+    {
+      icon: Clock,
+      label: "История заказов",
+      description: `${orders.length} заказов`,
+      href: "/orders",
+    },
     {
       icon: MapPin,
       label: "Адреса доставки",
       description: "Управление адресами",
       href: "/addresses",
-    },
-    {
-      icon: Clock,
-      label: "История заказов",
-      description: "Ваши покупки",
-      href: "/orders",
     },
     {
       icon: CreditCard,
@@ -69,7 +112,7 @@ export default function Profile() {
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="flex items-center p-4">
           <Link href="/">
-            <button className="mr-3 p-2 -ml-2">
+            <button className="mr-3 p-2 -ml-2" data-testid="button-back">
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
           </Link>
@@ -77,36 +120,22 @@ export default function Profile() {
         </div>
       </header>
 
-      {/* User Info */}
+      {/* User Info with integrated UserProfile */}
       <section className="p-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-agent-purple/10 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-agent-purple" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900">{user.name}</h3>
-              <p className="text-sm text-gray-500">{user.email}</p>
-              <p className="text-sm text-gray-500">{user.phone}</p>
-            </div>
-            <Link href="/profile/edit">
-              <button className="p-2 text-gray-400 hover:text-agent-purple">
-                <Edit className="w-5 h-5" />
-              </button>
-            </Link>
-          </div>
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <UserProfile />
         </div>
       </section>
-
-
-      
 
       {/* Menu Items */}
       <section className="px-4 pb-4">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {menuItems.map((item, index) => (
             <Link key={index} href={item.href}>
-              <button className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+              <button 
+                className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                data-testid={`menu-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+              >
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                   <item.icon className="w-5 h-5 text-gray-600" />
                 </div>
@@ -128,31 +157,27 @@ export default function Profile() {
           <p className="text-purple-100 text-sm mb-3">
             Бесплатная доставка и скидки до 15%
           </p>
-          <Button className="bg-white text-agent-purple hover:bg-gray-100">
+          <Button className="bg-white text-agent-purple hover:bg-gray-100" data-testid="button-premium">
             Узнать больше
           </Button>
         </div>
       </section>
 
-      {/* Logout */}
+      {/* Version info with hidden admin access */}
       <section className="px-4 pb-8">
-        <button className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center justify-center space-x-2 text-red-500">
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Выйти</span>
-        </button>
-        
-        {/* Hidden admin link - click 5 times on version */}
         <div 
           className="text-center py-2 cursor-pointer"
           onClick={(e) => {
-            const clicks = parseInt(e.currentTarget.dataset.clicks || "0") + 1;
-            e.currentTarget.dataset.clicks = clicks.toString();
+            const target = e.currentTarget as HTMLElement;
+            const clicks = parseInt(target.dataset.clicks || "0") + 1;
+            target.dataset.clicks = clicks.toString();
             if (clicks >= 5) {
               window.location.href = "/admin/login";
             }
           }}
+          data-testid="version-info"
         >
-          <p className="text-xs text-gray-400">ДУЧАРХА v1.0.0</p>
+          <p className="text-xs text-gray-400">ДУЧАРХА v2.0.0</p>
         </div>
       </section>
     </main>
