@@ -83,8 +83,27 @@ export class MemStorage implements IStorage {
       { name: "Товары для дома", slug: "household", imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&h=60", sortOrder: 15 },
     ];
 
+    // Use fixed IDs for categories to maintain consistency
+    const categoryIds = {
+      "vegetables": "cat-vegetables-001",
+      "dairy": "cat-dairy-002",
+      "meat": "cat-meat-003",
+      "snacks": "cat-snacks-004",
+      "ready-meals": "cat-ready-005",
+      "bakery": "cat-bakery-006",
+      "cereals": "cat-cereals-007",
+      "canned": "cat-canned-008",
+      "sweets": "cat-sweets-009",
+      "frozen": "cat-frozen-010",
+      "spices": "cat-spices-011",
+      "oils": "cat-oils-012",
+      "tea-coffee": "cat-tea-013",
+      "baby": "cat-baby-014",
+      "household": "cat-household-015"
+    };
+
     categories.forEach(cat => {
-      const id = randomUUID();
+      const id = categoryIds[cat.slug as keyof typeof categoryIds];
       this.categories.set(id, { ...cat, id });
     });
 
@@ -137,7 +156,7 @@ export class MemStorage implements IStorage {
         price: "120.00", 
         weight: "800г", 
         imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
-        categoryId: Array.from(this.categories.values()).find(c => c.slug === "cereals")?.id,
+        categoryId: "cat-cereals-007",
         isPopular: true,
         ingredients: "Гречневая крупа ядрица высшего сорта",
         manufacturer: "ООО \"Мистраль\"",
@@ -157,7 +176,7 @@ export class MemStorage implements IStorage {
         price: "185.00", 
         weight: "500г", 
         imageUrl: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
-        categoryId: Array.from(this.categories.values()).find(c => c.slug === "cereals")?.id,
+        categoryId: "cat-cereals-007",
         isPopular: true,
         ingredients: "Мука из твердых сортов пшеницы, вода",
         manufacturer: "Barilla",
@@ -177,7 +196,7 @@ export class MemStorage implements IStorage {
         price: "95.00", 
         weight: "900г", 
         imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
-        categoryId: Array.from(this.categories.values()).find(c => c.slug === "cereals")?.id,
+        categoryId: "cat-cereals-007",
         ingredients: "Рис шлифованный круглозерный",
         manufacturer: "Агрохолдинг \"Кубань\"",
         countryOfOrigin: "Россия",
@@ -196,7 +215,7 @@ export class MemStorage implements IStorage {
         price: "320.00", 
         weight: "300г", 
         imageUrl: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
-        categoryId: Array.from(this.categories.values()).find(c => c.slug === "meat")?.id,
+        categoryId: "cat-meat-003",
         isPopular: true,
         ingredients: "Свинина, говядина, молоко, яйца, соль, специи",
         manufacturer: "Останкино",
@@ -510,7 +529,7 @@ export class MemStorage implements IStorage {
         price: "299.00", 
         weight: "1кг", 
         imageUrl: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
-        categoryId: Array.from(this.categories.values()).find(c => c.slug === "meat")?.id,
+        categoryId: "cat-meat-003",
         ingredients: "Филе куриное (грудка) без кости и кожи",
         manufacturer: "Птицефабрика \"Белая птица\"",
         countryOfOrigin: "Россия",
@@ -525,8 +544,13 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    products.forEach(prod => {
-      const id = randomUUID();
+    // Add fixed IDs for products to maintain consistency across server restarts
+    const productFixedIds = [
+      "prod-bread-001", "prod-milk-002", "prod-buckwheat-003", "prod-chicken-004"
+    ];
+
+    products.forEach((prod, index) => {
+      const id = productFixedIds[index] || `prod-${index+1}-${Date.now()}`;
       this.products.set(id, { 
         ...prod, 
         id, 

@@ -144,7 +144,7 @@ export function BannerSlider() {
                 variant="secondary" 
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30"
               >
-                {currentBanner.type === 'promo' ? 'Скопировать промокод' : currentBanner.buttonText}
+                {currentBanner.buttonText}
               </Button>
             </Link>
           </div>
