@@ -45,15 +45,15 @@ export function AuthDialog({ children, open, onOpenChange }: AuthDialogProps) {
   // Format phone number for display
   const formatPhone = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
-    if (cleaned.startsWith('7')) return `+${cleaned}`;
-    if (cleaned.length <= 10) return `+7${cleaned}`;
+    if (cleaned.startsWith('992')) return `+${cleaned}`;
+    if (cleaned.length <= 9) return `+992${cleaned}`;
     return `+${cleaned}`;
   };
 
   // Handle phone input
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 11) {
+    if (value.length <= 12) {
       setPhone(value);
     }
   };
@@ -61,7 +61,7 @@ export function AuthDialog({ children, open, onOpenChange }: AuthDialogProps) {
   // Send verification code
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length >= 10) {
+    if (phone.length >= 9) {
       const formattedPhone = formatPhone(phone);
       sendCode({ phone: formattedPhone }, {
         onSuccess: () => {
@@ -142,7 +142,7 @@ export function AuthDialog({ children, open, onOpenChange }: AuthDialogProps) {
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="9123456789"
+                      placeholder="900123456"
                       value={phone}
                       onChange={handlePhoneChange}
                       className="pl-10 text-lg tracking-wider"
@@ -159,7 +159,7 @@ export function AuthDialog({ children, open, onOpenChange }: AuthDialogProps) {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={phone.length < 10 || isLoadingSendCode}
+                  disabled={phone.length < 9 || isLoadingSendCode}
                   data-testid="button-send-code"
                 >
                   {isLoadingSendCode ? (
