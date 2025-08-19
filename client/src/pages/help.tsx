@@ -141,7 +141,7 @@ export default function Help() {
             >
               <MessageCircle className="w-4 h-4 text-gray-400" />
               <div className="text-left">
-                <div className="font-medium text-gray-900 dark:text-gray-100">@DilovarAkhi</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">DilovarAkhi</div>
                 <div className="text-gray-500 dark:text-gray-400">Telegram</div>
               </div>
             </button>
