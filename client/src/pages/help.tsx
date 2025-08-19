@@ -100,11 +100,11 @@ export default function Help() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Доставка</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">с 7:00 до 23:00</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">c 7:00 до 23:00</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Поддержка</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">с 7:00 до 23:00</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Круглосуточно</span>
             </div>
           </div>
         </div>
@@ -125,8 +125,8 @@ export default function Help() {
             <div className="flex items-center space-x-3">
               <Mail className="w-4 h-4 text-gray-400" />
               <div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">support@ducharha.com</div>
-                <div className="text-gray-500 dark:text-gray-400">Email поддержки</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">Ducharha@gmail.com</div>
+                <div className="text-gray-500 dark:text-gray-400">Почта поддержки</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
