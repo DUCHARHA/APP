@@ -115,27 +115,36 @@ export default function Help() {
         <div className="bg-white dark:bg-card rounded-xl p-4 shadow-sm">
           <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3">Контакты</h3>
           <div className="space-y-3 text-sm">
-            <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => window.open('tel:+992971844884')}
+              className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
               <Phone className="w-4 h-4 text-gray-400" />
-              <div>
+              <div className="text-left">
                 <div className="font-medium text-gray-900 dark:text-gray-100">+992 971 84 48 84</div>
                 <div className="text-gray-500 dark:text-gray-400">Горячая линия</div>
               </div>
-            </div>
-            <div className="flex items-center space-x-3">
+            </button>
+            <button 
+              onClick={() => window.open('mailto:Ducharha@gmail.com')}
+              className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
               <Mail className="w-4 h-4 text-gray-400" />
-              <div>
+              <div className="text-left">
                 <div className="font-medium text-gray-900 dark:text-gray-100">Ducharha@gmail.com</div>
                 <div className="text-gray-500 dark:text-gray-400">Почта поддержки</div>
               </div>
-            </div>
-            <div className="flex items-center space-x-3">
+            </button>
+            <button 
+              onClick={() => window.open('https://t.me/DilovarAkhi')}
+              className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
               <MessageCircle className="w-4 h-4 text-gray-400" />
-              <div>
+              <div className="text-left">
                 <div className="font-medium text-gray-900 dark:text-gray-100">@DilovarAkhi</div>
                 <div className="text-gray-500 dark:text-gray-400">Telegram</div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </section>
