@@ -1,9 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, phoneAuthSchema, verifyCodeSchema, updateUserSchema } from "@shared/schema";
+import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema } from "@shared/schema";
 import crypto from "crypto";
-import { authenticateToken, optionalAuth, generateVerificationCode, generateSessionToken, signToken, sendTelegramCode, cleanupExpiredAuth, type AuthenticatedRequest } from "./auth";
 
 // Cache for ETag generation
 const dataCache = new Map<string, { etag: string; data: any; timestamp: number }>();
@@ -34,196 +33,6 @@ function logError(error: any, context: string, req: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
-  app.post("/api/auth/send-code", async (req, res) => {
-    try {
-      const { phone } = phoneAuthSchema.parse(req.body);
-      
-      // Clean phone number (remove spaces, dashes, etc.)
-      const cleanPhone = phone.replace(/[^+\d]/g, '');
-      
-      // Generate 6-digit verification code
-      const code = generateVerificationCode();
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-      
-      // Store verification code in database
-      await storage.createVerificationCode({
-        phone: cleanPhone,
-        code,
-        expiresAt,
-        isUsed: false,
-        attempts: 0
-      });
-      
-      // Send code via Telegram bot
-      const sent = await sendTelegramCode(cleanPhone, code);
-      
-      if (!sent) {
-        return res.status(500).json({ 
-          message: "Не удалось отправить код. Попробуйте позже.",
-          error: "telegram_send_failed"
-        });
-      }
-      
-      res.json({ 
-        message: "Код отправлен в Telegram",
-        phone: cleanPhone,
-        expiresIn: 300 // 5 minutes in seconds
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ 
-          message: "Неверный формат номера телефона", 
-          errors: error.errors 
-        });
-      }
-      logError(error, 'POST /api/auth/send-code', req);
-      res.status(500).json({ 
-        message: "Внутренняя ошибка сервера",
-        requestId: crypto.randomUUID().slice(0, 8)
-      });
-    }
-  });
-  
-  app.post("/api/auth/verify-code", async (req, res) => {
-    try {
-      const { phone, code } = verifyCodeSchema.parse(req.body);
-      
-      const cleanPhone = phone.replace(/[^+\d]/g, '');
-      
-      // Find valid verification code
-      const verificationCode = await storage.getValidVerificationCode(cleanPhone, code);
-      
-      if (!verificationCode) {
-        return res.status(400).json({ 
-          message: "Неверный или истекший код",
-          error: "invalid_code"
-        });
-      }
-      
-      // Mark code as used
-      await storage.markCodeAsUsed(verificationCode.id);
-      
-      // Find or create user
-      let user = await storage.getUserByPhone(cleanPhone);
-      if (!user) {
-        user = await storage.createUser({
-          phone: cleanPhone
-        });
-      } else {
-        // Update last login time
-        await storage.updateUser(user.id, { 
-          lastLoginAt: new Date() 
-        });
-      }
-      
-      // Create session
-      const sessionToken = generateSessionToken();
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-      
-      await storage.createSession({
-        userId: user.id,
-        token: sessionToken,
-        expiresAt,
-        isActive: true,
-        userAgent: req.get('User-Agent') || null,
-        ipAddress: req.ip || req.connection.remoteAddress || null
-      });
-      
-      // Generate JWT token
-      const jwtToken = signToken({
-        userId: user.id,
-        phone: cleanPhone,
-        sessionToken
-      });
-      
-      res.json({
-        message: "Успешный вход",
-        token: jwtToken,
-        user: {
-          id: user.id,
-          phone: user.phone,
-          firstName: user.firstName,
-          lastName: user.lastName
-        },
-        expiresIn: 30 * 24 * 60 * 60 // 30 days in seconds
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ 
-          message: "Неверные данные", 
-          errors: error.errors 
-        });
-      }
-      logError(error, 'POST /api/auth/verify-code', req);
-      res.status(500).json({ 
-        message: "Внутренняя ошибка сервера",
-        requestId: crypto.randomUUID().slice(0, 8)
-      });
-    }
-  });
-  
-  app.get("/api/auth/user", authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      res.json({
-        id: req.user!.id,
-        phone: req.user!.phone,
-        firstName: req.user!.firstName,
-        lastName: req.user!.lastName
-      });
-    } catch (error) {
-      logError(error, 'GET /api/auth/user', req);
-      res.status(500).json({ 
-        message: "Не удалось получить данные пользователя",
-        requestId: crypto.randomUUID().slice(0, 8)
-      });
-    }
-  });
-  
-  app.post("/api/auth/logout", authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (req.sessionToken) {
-        await storage.invalidateSession(req.sessionToken);
-      }
-      res.json({ message: "Вы вышли из системы" });
-    } catch (error) {
-      logError(error, 'POST /api/auth/logout', req);
-      res.status(500).json({ 
-        message: "Ошибка при выходе из системы",
-        requestId: crypto.randomUUID().slice(0, 8)
-      });
-    }
-  });
-  
-  app.put("/api/auth/profile", authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      const userData = updateUserSchema.parse(req.body);
-      const updatedUser = await storage.updateUser(req.user!.id, userData);
-      
-      res.json({
-        id: updatedUser!.id,
-        phone: updatedUser!.phone,
-        firstName: updatedUser!.firstName,
-        lastName: updatedUser!.lastName
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ 
-          message: "Неверные данные профиля", 
-          errors: error.errors 
-        });
-      }
-      logError(error, 'PUT /api/auth/profile', req);
-      res.status(500).json({ 
-        message: "Не удалось обновить профиль",
-        requestId: crypto.randomUUID().slice(0, 8)
-      });
-    }
-  });
-  
-  // Cleanup expired auth data every hour
-  setInterval(cleanupExpiredAuth, 60 * 60 * 1000);
-
   // Categories (with caching)
   app.get("/api/categories", async (req, res) => {
     try {
@@ -368,44 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cart (optimized with short-term caching) - now requires authentication
-  app.get("/api/cart", authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      const userId = req.user!.id;
-      const cacheKey = `cart_${userId}`;
-      
-      // Short cache for cart (30 seconds)
-      if (isCacheValid(cacheKey, 30000)) {
-        const cached = dataCache.get(cacheKey)!;
-        
-        if (req.get('If-None-Match') === cached.etag) {
-          return res.status(304).end();
-        }
-        
-        res.set('ETag', cached.etag);
-        res.set('Cache-Control', 'private, max-age=30');
-        return res.json(cached.data);
-      }
-      
-      const cartItems = await storage.getCartItems(userId);
-      const etag = generateETag(cartItems);
-      
-      dataCache.set(cacheKey, { etag, data: cartItems, timestamp: Date.now() });
-      
-      if (req.get('If-None-Match') === etag) {
-        return res.status(304).end();
-      }
-      
-      res.set('ETag', etag);
-      res.set('Cache-Control', 'private, max-age=30');
-      res.json(cartItems);
-    } catch (error) {
-      logError(error, 'GET /api/cart', req);
-      res.status(500).json({ error: "Failed to fetch cart items", requestId: crypto.randomUUID().slice(0, 8) });
-    }
-  });
-  
-  // Legacy cart endpoint for backward compatibility
+  // Cart (optimized with short-term caching)
   app.get("/api/cart/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
@@ -442,18 +214,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", authenticateToken, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/cart", async (req, res) => {
     try {
-      const { productId, quantity } = req.body;
-      const cartItemData = insertCartItemSchema.parse({
-        userId: req.user!.id,
-        productId,
-        quantity
-      });
+      const cartItemData = insertCartItemSchema.parse(req.body);
       const cartItem = await storage.addToCart(cartItemData);
       
       // Invalidate cart cache for this user
-      const cacheKey = `cart_${req.user!.id}`;
+      const cacheKey = `cart_${cartItemData.userId}`;
       dataCache.delete(cacheKey);
       
       res.status(201).json(cartItem);
@@ -501,16 +268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Orders - now requires authentication
-  app.post("/api/orders", authenticateToken, async (req: AuthenticatedRequest, res) => {
+  // Orders
+  app.post("/api/orders", async (req, res) => {
     try {
-      const { totalAmount, deliveryAddress, comment } = req.body;
-      const orderData = insertOrderSchema.parse({
-        userId: req.user!.id,
-        totalAmount,
-        deliveryAddress,
-        comment
-      });
+      const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
       res.status(201).json(order);
     } catch (error) {
@@ -518,9 +279,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/orders", authenticateToken, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/orders/:userId", async (req, res) => {
     try {
-      const orders = await storage.getUserOrders(req.user!.id);
+      const orders = await storage.getUserOrders(req.params.userId);
       res.json(orders);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch orders" });

@@ -43,17 +43,6 @@ The application uses a dual approach for data management:
 - **Database schema** includes users, categories, products, cart items, orders, notifications, and banners
 - **Zod validation** schemas derived from Drizzle schema for type safety
 
-## Telegram Authentication System (August 2025)
-The application features a modern Telegram-based authentication system:
-- **Telegram Bot Integration**: @Ducharha_bot sends verification codes via Telegram
-- **Two-step verification**: phone number entry + 6-digit code verification
-- **JWT token authentication** with 30-day expiration and secure session management
-- **PostgreSQL storage** for users, verification codes, and sessions
-- **Phone number format**: +992XXXXXXXXX (Tajikistan country code)
-- **Unified API architecture**: bot and web app use same Express.js API and database
-- **Real-time code delivery**: instant code delivery through Telegram bot
-- **Secure session handling**: automatic cleanup of expired codes and sessions
-
 ## Banner/Promotional System (Added August 2025)
 The application features a comprehensive banner management system:
 - **Dynamic banner slider** replacing static hero section on homepage
@@ -116,7 +105,6 @@ Client-side state is managed through:
 ## External Services
 The application is designed to integrate with:
 - **PostgreSQL database** via Neon Database service
-- **Telegram Bot API** for authentication code delivery via @Ducharha_bot
 - **Geolocation API** for delivery address detection
 - **Push notifications** infrastructure for order updates
 - **Image hosting** services for product and category images (currently using Unsplash URLs)

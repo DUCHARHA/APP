@@ -1,9 +1,10 @@
-import { Plus, Minus, Check, Phone } from "lucide-react";
+import { Plus, Minus, Check } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { type Product } from "@shared/schema";
 import { useCart } from "@/hooks/use-cart";
-import { useAuth } from "@/hooks/use-auth";
-import { AuthDialog } from "@/components/AuthDialog";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -11,138 +12,203 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { isAuthenticated } = useAuth();
-  const { cartItems, addToCart, updateCartItem, isAddingToCart } = useCart();
+  const { toast } = useToast();
+  const { cartItems } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const userId = "demo-user"; // In real app, get from auth
 
   // Find current quantity of this product in cart
   const cartItem = cartItems.find(item => item.productId === product.id);
   const currentQuantity = cartItem?.quantity || 0;
 
-  const handleAddToCart = () => {
-    if (!isAuthenticated) return;
-    
-    addToCart(
-      { productId: product.id, quantity: 1 },
-      {
-        onSuccess: () => {
-          setIsAdded(true);
-          setTimeout(() => setIsAdded(false), 1000);
-        }
-      }
-    );
+  const addToCartMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          productId: product.id,
+          quantity: 1,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to add to cart");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 1000);
+      toast({
+        title: "Товар добавлен",
+        description: `${product.name} добавлен в корзину`,
+      });
+    },
+    onError: (error) => {
+      console.error('Add to cart error:', error);
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ quantity }: { quantity: number }) => {
+      if (!cartItem) throw new Error("Item not in cart");
+      const response = await fetch(`/api/cart/${cartItem.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+      if (!response.ok) throw new Error("Failed to update cart item");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+    onError: (error) => {
+      console.error('Update quantity error:', error);
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: async () => {
+      if (!cartItem) throw new Error("Item not in cart");
+      const response = await fetch(`/api/cart/${cartItem.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove cart item");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Товар удален",
+        description: "Товар удален из корзины",
+      });
+    },
+    onError: (error) => {
+      console.error('Remove item error:', error);
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCartMutation.mutate();
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
-    if (!isAuthenticated || !cartItem) return;
-    
-    updateCartItem({ itemId: cartItem.id, quantity: newQuantity });
+  const handleIncreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentQuantity === 0) {
+      addToCartMutation.mutate();
+    } else {
+      updateQuantityMutation.mutate({ quantity: currentQuantity + 1 });
+    }
   };
 
-  const handleImageError = () => {
-    setImageError(true);
+  const handleDecreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentQuantity === 1) {
+      removeItemMutation.mutate();
+    } else {
+      updateQuantityMutation.mutate({ quantity: currentQuantity - 1 });
+    }
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02]">
-      {/* Product Image */}
-      <div className="relative mb-3">
-        {!product.imageUrl || imageError ? (
-          <div className="w-full h-32 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+    <Link href={`/product/${product.id}`}>
+      <div className="bg-white dark:bg-card rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" data-testid={`card-product-${product.id}`}>
+        {imageError || !product.imageUrl ? (
+          <div className="w-full h-32 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <div className="text-gray-400 dark:text-gray-600 text-center">
-              <div className="text-3xl mb-2">📦</div>
-              <div className="text-xs">Фото товара</div>
+              <div className="text-2xl mb-1">📦</div>
+              <div className="text-xs">Изображение</div>
             </div>
           </div>
         ) : (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-32 object-cover rounded-xl"
-            onError={handleImageError}
-            loading="lazy"
+            className="w-full h-32 object-cover"
+            data-testid="img-product"
+            onError={() => setImageError(true)}
           />
         )}
-      </div>
-
-      {/* Product Info */}
-      <Link href={`/product/${product.id}`}>
-        <div className="cursor-pointer">
-          <h3 className="font-medium text-gray-900 text-sm leading-tight mb-1 line-clamp-2 hover:text-agent-purple transition-colors">
+        <div className="p-3">
+          <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2" data-testid="text-product-name">
             {product.name}
-          </h3>
-          {product.weight && (
-            <p className="text-xs text-gray-500 mb-2">{product.weight}</p>
-          )}
+          </h4>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2" data-testid="text-product-weight">{product.weight}</p>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-bold text-gray-900">
+            <span className="font-bold text-gray-900 dark:text-gray-100" data-testid="text-product-price">
               {parseFloat(product.price).toFixed(0)} с.
             </span>
-          </div>
-        </div>
-      </Link>
-
-      {/* Add to Cart Button */}
-      <div className="mt-3">
-        {!isAuthenticated ? (
-          <AuthDialog>
-            <button 
-              className="w-full bg-gray-100 text-gray-600 py-2 px-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center space-x-2"
-              data-testid={`button-login-add-${product.id}`}
-            >
-              <Phone className="w-4 h-4" />
-              <span>Войти</span>
-            </button>
-          </AuthDialog>
-        ) : currentQuantity === 0 ? (
-          <button
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-            className="w-full bg-agent-purple text-white py-2 px-3 rounded-xl text-sm font-medium hover:bg-agent-purple/90 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
-            data-testid={`button-add-to-cart-${product.id}`}
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>Добавлено</span>
-              </>
+            
+            {currentQuantity === 0 ? (
+              // Show simple add button when item not in cart
+              <button
+                onClick={handleAddToCart}
+                disabled={addToCartMutation.isPending}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                  isAdded
+                    ? "bg-electric-green"
+                    : "bg-agent-purple hover:bg-agent-purple/90"
+                }`}
+                data-testid="button-add-to-cart"
+              >
+                {isAdded ? (
+                  <Check className="w-4 h-4 text-white" />
+                ) : (
+                  <Plus className="w-4 h-4 text-white" />
+                )}
+              </button>
             ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                <span>В корзину</span>
-              </>
+              // Show quantity controls when item is in cart
+              <div className="flex items-center space-x-1" data-testid={`quantity-controls-${product.id}`}>
+                <button
+                  onClick={handleDecreaseQuantity}
+                  disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
+                  className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+                  data-testid={`button-decrease-${product.id}`}
+                >
+                  <Minus className="w-3 h-3 text-gray-600 dark:text-gray-300" />
+                </button>
+                
+                <span 
+                  className="w-8 text-center font-bold text-sm text-gray-900 dark:text-gray-100"
+                  data-testid={`text-quantity-${product.id}`}
+                >
+                  {currentQuantity}
+                </span>
+                
+                <button
+                  onClick={handleIncreaseQuantity}
+                  disabled={addToCartMutation.isPending || updateQuantityMutation.isPending}
+                  className="w-7 h-7 rounded-lg bg-agent-purple hover:bg-agent-purple/90 flex items-center justify-center transition-colors"
+                  data-testid={`button-increase-${product.id}`}
+                >
+                  <Plus className="w-3 h-3 text-white" />
+                </button>
+              </div>
             )}
-          </button>
-        ) : (
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-2">
-            <button
-              onClick={() => handleQuantityChange(currentQuantity - 1)}
-              className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center"
-              data-testid={`button-decrease-cart-${product.id}`}
-            >
-              <Minus className="w-4 h-4 text-gray-600" />
-            </button>
-            <span className="font-medium text-gray-900" data-testid={`quantity-cart-${product.id}`}>
-              {currentQuantity}
-            </span>
-            <button
-              onClick={() => handleQuantityChange(currentQuantity + 1)}
-              className="w-8 h-8 rounded-lg bg-agent-purple flex items-center justify-center"
-              data-testid={`button-increase-cart-${product.id}`}
-            >
-              <Plus className="w-4 h-4 text-white" />
-            </button>
           </div>
-        )}
-      </div>
-
-      {/* Badge/Tag if needed */}
-      {product.isPopular && (
-        <div className="absolute top-2 left-2 bg-agent-purple text-white text-xs px-2 py-1 rounded-lg">
-          Хит
         </div>
-      )}
-    </div>
+      </div>
+    </Link>
   );
 }

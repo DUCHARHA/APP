@@ -1,74 +1,104 @@
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag, Phone } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
+import { type CartItem, type Product } from "@shared/schema";
 import { useCart } from "@/hooks/use-cart";
-import { useAuth } from "@/hooks/use-auth";
-import { AuthDialog } from "@/components/AuthDialog";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
 import { X } from "lucide-react";
 
+type CartItemWithProduct = CartItem & { product: Product };
+
 export default function Cart() {
-  const { isAuthenticated, user } = useAuth();
-  const {
-    cartItems,
-    totalItems,
-    totalPrice,
-    isLoading,
-    updateCartItem,
-    removeFromCart,
-    clearCart,
-    isUpdatingCart,
-    isRemovingFromCart,
-    isClearingCart,
-  } = useCart();
-  
+  const { toast } = useToast();
+  const { totalItems, totalPrice } = useCart();
   const { appliedPromo, removePromoCode, calculateDiscount, calculateTotal } = usePromo();
+  const userId = "demo-user"; // In real app, get from auth
 
-  // If user is not authenticated, show login prompt
-  if (!isAuthenticated) {
-    return (
-      <main className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
-            <Link href="/catalog">
-              <button className="mr-3 p-2 -ml-2" data-testid="button-back">
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
-              </button>
-            </Link>
-            <h1 className="text-xl font-bold text-gray-900">Корзина</h1>
-          </div>
-        </header>
+  const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
+    queryKey: ["/api/cart", userId],
+  });
 
-        <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-            <Phone className="w-12 h-12 text-gray-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Войдите для просмотра корзины
-          </h3>
-          <p className="text-gray-500 mb-6 max-w-sm">
-            Чтобы добавлять товары в корзину и оформлять заказы, необходимо войти в систему
-          </p>
-          <AuthDialog>
-            <Button className="bg-agent-purple hover:bg-agent-purple/90" data-testid="button-login-cart">
-              <Phone className="mr-2 h-4 w-4" />
-              Войти
-            </Button>
-          </AuthDialog>
-        </div>
-      </main>
-    );
-  }
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ id, quantity }: { id: string; quantity: number }) => {
+      const response = await fetch(`/api/cart/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+      if (!response.ok) throw new Error("Failed to update cart item");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+    onError: (error) => {
+      console.error('Update quantity error:', error);
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/cart/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove cart item");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Товар удален",
+        description: "Товар удален из корзины",
+      });
+    },
+    onError: (error) => {
+      console.error('Remove item error:', error);
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearCartMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/cart/user/${userId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to clear cart");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Корзина очищена",
+        description: "Все товары удалены из корзины",
+      });
+    },
+  });
 
   const handleQuantityChange = (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeItemMutation.mutate(id);
     } else {
-      updateCartItem({ itemId: id, quantity });
+      updateQuantityMutation.mutate({ id, quantity });
     }
   };
 
-  const subtotal = totalPrice;
+  const calculateCartTotal = () => {
+    return cartItems.reduce((total, item) => {
+      return total + (parseFloat(item.product.price) * item.quantity);
+    }, 0);
+  };
+
+  const subtotal = calculateCartTotal();
   const promoDiscount = appliedPromo ? calculateDiscount(subtotal) : 0;
   const totalAfterPromo = subtotal - promoDiscount;
   const deliveryFee = 0; // Всегда бесплатная доставка
@@ -79,8 +109,8 @@ export default function Cart() {
       <div className="pb-20">
         <header className="bg-white shadow-sm sticky top-0 z-40">
           <div className="flex items-center p-4">
-            <Link href="/catalog">
-              <button className="mr-3 p-2 -ml-2" data-testid="button-back">
+            <Link href="/">
+              <button className="mr-3 p-2 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
             </Link>
@@ -105,7 +135,7 @@ export default function Cart() {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center">
             <Link href="/catalog">
-              <button className="mr-3 p-2 -ml-2" data-testid="button-back">
+              <button className="mr-3 p-2 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
             </Link>
@@ -116,10 +146,9 @@ export default function Cart() {
           </div>
           {cartItems.length > 0 && (
             <button
-              onClick={() => clearCart()}
+              onClick={() => clearCartMutation.mutate()}
               className="text-gray-500 p-2"
-              disabled={isClearingCart}
-              data-testid="button-clear-cart"
+              disabled={clearCartMutation.isPending}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -139,7 +168,7 @@ export default function Cart() {
             Добавьте товары в корзину, чтобы оформить заказ
           </p>
           <Link href="/catalog">
-            <Button className="bg-agent-purple hover:bg-agent-purple/90" data-testid="button-go-shopping">
+            <Button className="bg-agent-purple hover:bg-agent-purple/90">
               Перейти в каталог
             </Button>
           </Link>
@@ -149,7 +178,7 @@ export default function Cart() {
           {/* Cart Items */}
           <section className="p-4 space-y-3">
             {cartItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl p-4 shadow-sm" data-testid={`cart-item-${item.id}`}>
+              <div key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center space-x-3">
                   {!item.product.imageUrl ? (
                     <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -188,19 +217,17 @@ export default function Cart() {
                     <button
                       onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                       className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
-                      disabled={isUpdatingCart}
-                      data-testid={`button-decrease-${item.id}`}
+                      disabled={updateQuantityMutation.isPending}
                     >
                       <Minus className="w-4 h-4 text-gray-600" />
                     </button>
-                    <span className="w-8 text-center font-medium" data-testid={`quantity-${item.id}`}>
+                    <span className="w-8 text-center font-medium">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                       className="w-8 h-8 rounded-lg bg-agent-purple flex items-center justify-center"
-                      disabled={isUpdatingCart}
-                      data-testid={`button-increase-${item.id}`}
+                      disabled={updateQuantityMutation.isPending}
                     >
                       <Plus className="w-4 h-4 text-white" />
                     </button>
@@ -209,34 +236,6 @@ export default function Cart() {
               </div>
             ))}
           </section>
-
-          {/* Promo Code Section */}
-          {appliedPromo && (
-            <section className="px-4 pb-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 text-sm">%</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-green-800">{appliedPromo.name}</p>
-                      <p className="text-sm text-green-600">
-                        Скидка {appliedPromo.discountPercent}%
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={removePromoCode}
-                    className="text-green-600 hover:text-green-800"
-                    data-testid="button-remove-promo"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
 
           {/* Order Summary */}
           <section className="p-4">
@@ -248,36 +247,58 @@ export default function Cart() {
                 <span className="font-medium">{subtotal.toFixed(0)} с.</span>
               </div>
               
-              {appliedPromo && promoDiscount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>Скидка ({appliedPromo.discountPercent}%)</span>
-                  <span>-{promoDiscount.toFixed(0)} с.</span>
+              {appliedPromo && (
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-600">Промокод {appliedPromo.code}</span>
+                    <button
+                      onClick={removePromoCode}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} с.</span>
                 </div>
               )}
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
-                <span className="font-medium text-green-600">Бесплатно</span>
+                <span className="font-medium">
+                  Бесплатно
+                </span>
               </div>
+              
+              {totalAfterPromo < 1000 && (
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-sm text-orange-700">
+                    Добавьте товаров на {(1000 - totalAfterPromo).toFixed(0)} с. для бесплатной доставки
+                  </p>
+                </div>
+              )}
               
               <div className="border-t pt-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">К оплате:</span>
-                  <span className="text-2xl font-bold text-agent-purple" data-testid="total-price">
+                  <span className="text-lg font-bold text-gray-900">К оплате</span>
+                  <span className="text-xl font-bold text-gray-900">
                     {finalTotal.toFixed(0)} с.
                   </span>
                 </div>
               </div>
+              
+              <Link href="/checkout">
+                <Button className="w-full bg-agent-purple hover:bg-agent-purple/90 text-white py-3 text-lg font-semibold">
+                  Оформить заказ
+                </Button>
+              </Link>
+              
+              <div className="text-center">
+                <div className="inline-flex items-center text-sm text-gray-600 bg-electric-green/10 px-3 py-1 rounded-full">
+                  <div className="w-2 h-2 bg-electric-green rounded-full mr-2 animate-pulse"></div>
+                  Доставка за 10-15 минут
+                </div>
+              </div>
             </div>
-          </section>
-
-          {/* Checkout Button */}
-          <section className="p-4">
-            <Link href="/checkout">
-              <Button className="w-full bg-agent-purple hover:bg-agent-purple/90 py-4 text-lg" data-testid="button-checkout">
-                Оформить заказ • {finalTotal.toFixed(0)} с.
-              </Button>
-            </Link>
           </section>
         </>
       )}
