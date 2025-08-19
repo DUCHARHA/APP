@@ -261,7 +261,7 @@ export default function Checkout() {
                   <div className="text-right">
                     <p className="text-sm text-gray-600">{item.quantity} шт</p>
                     <p className="font-semibold text-gray-900">
-                      {(parseFloat(item.product.price) * item.quantity).toFixed(0)} ₽
+                      {(parseFloat(item.product.price) * item.quantity).toFixed(0)} с.
                     </p>
                   </div>
                 </div>
@@ -443,7 +443,7 @@ export default function Checkout() {
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Товары ({cartItems.length})</span>
-                <span className="font-medium">{subtotal.toFixed(0)} сом.</span>
+                <span className="font-medium">{subtotal.toFixed(0)} с.</span>
               </div>
               
               {appliedPromo && (
@@ -457,14 +457,14 @@ export default function Checkout() {
                       <X className="w-3 h-3" />
                     </button>
                   </div>
-                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} сом.</span>
+                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} с.</span>
                 </div>
               )}
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
-                  {deliveryFee === 0 ? "Бесплатно" : `${deliveryFee} сом.`}
+                  {deliveryFee === 0 ? "Бесплатно" : `${deliveryFee} с.`}
                 </span>
               </div>
               
@@ -472,7 +472,7 @@ export default function Checkout() {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Итого</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {finalTotal.toFixed(0)} сом.
+                    {finalTotal.toFixed(0)} с.
                   </span>
                 </div>
               </div>

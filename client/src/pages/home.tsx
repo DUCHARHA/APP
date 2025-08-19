@@ -118,11 +118,6 @@ export default function Home() {
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             <NotificationBell userId="demo-user" />
-            <Link href="/profile">
-              <button className="p-2">
-                <i className="fas fa-user-circle text-gray-600 dark:text-gray-300 text-xl" />
-              </button>
-            </Link>
           </div>
         </div>
       </header>

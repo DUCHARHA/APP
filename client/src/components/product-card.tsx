@@ -156,7 +156,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2" data-testid="text-product-weight">{product.weight}</p>
           <div className="flex items-center justify-between">
             <span className="font-bold text-gray-900 dark:text-gray-100" data-testid="text-product-price">
-              {parseFloat(product.price).toFixed(0)} сом.
+              {parseFloat(product.price).toFixed(0)} с.
             </span>
             
             {currentQuantity === 0 ? (

@@ -139,7 +139,7 @@ export default function ProductDetail() {
 
         <div className="flex items-center justify-between mb-6">
           <div className="text-3xl font-bold text-gray-900" data-testid="text-product-price">
-            {product.price} сом.
+            {product.price} с.
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3 bg-gray-100 rounded-lg p-1">
@@ -266,7 +266,7 @@ export default function ProductDetail() {
             <ShoppingCart className="w-5 h-5 mr-2" />
             {addToCartMutation.isPending
               ? "Добавляем..."
-              : `Добавить в корзину • ${(parseFloat(product.price) * quantity).toFixed(2)} ₽`
+              : `Добавить в корзину • ${(parseFloat(product.price) * quantity).toFixed(0)} с.`
             }
           </Button>
         </div>

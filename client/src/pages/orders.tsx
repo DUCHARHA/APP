@@ -72,6 +72,36 @@ export default function Orders() {
     repeatOrderMutation.mutate(orderId);
   };
 
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete order");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Заказ удален",
+        description: "Заказ успешно удален из истории",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить заказ",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteOrder = (orderId: string) => {
+    if (confirm("Вы уверены, что хотите удалить заказ из истории?")) {
+      deleteOrderMutation.mutate(orderId);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-orange-100 text-orange-700";
@@ -200,7 +230,7 @@ export default function Orders() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-gray-900">
-                    {parseFloat(order.totalAmount).toFixed(0)} сом.
+                    {parseFloat(order.totalAmount).toFixed(0)} с.
                   </span>
                   <div className="flex items-center space-x-2">
                     <button 
@@ -210,11 +240,29 @@ export default function Orders() {
                       Подробнее
                     </button>
                     {order.status === "delivered" && (
+                      <>
+                        <button 
+                          onClick={() => repeatOrder(order.id)}
+                          className="text-agent-purple text-sm font-medium hover:text-agent-purple/80"
+                        >
+                          Повторить
+                        </button>
+                        <button 
+                          onClick={() => deleteOrder(order.id)}
+                          className="text-red-500 text-lg font-medium hover:text-red-600"
+                          title="Удалить заказ"
+                        >
+                          ×
+                        </button>
+                      </>
+                    )}
+                    {order.status === "cancelled" && (
                       <button 
-                        onClick={() => repeatOrder(order.id)}
-                        className="text-agent-purple text-sm font-medium hover:text-agent-purple/80"
+                        onClick={() => deleteOrder(order.id)}
+                        className="text-red-500 text-lg font-medium hover:text-red-600"
+                        title="Удалить заказ"
                       >
-                        Повторить
+                        ×
                       </button>
                     )}
                     {(order.status === "pending" || order.status === "preparing") && (

@@ -134,7 +134,7 @@ export default function Cart() {
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center">
-            <Link href="/">
+            <Link href="/catalog">
               <button className="mr-3 p-2 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
@@ -210,7 +210,7 @@ export default function Cart() {
                     </h4>
                     <p className="text-sm text-gray-500">{item.product.weight}</p>
                     <p className="font-bold text-gray-900">
-                      {parseFloat(item.product.price).toFixed(0)} сом.
+                      {parseFloat(item.product.price).toFixed(0)} с.
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -244,7 +244,7 @@ export default function Cart() {
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Товары ({cartItems.length})</span>
-                <span className="font-medium">{subtotal.toFixed(0)} сом.</span>
+                <span className="font-medium">{subtotal.toFixed(0)} с.</span>
               </div>
               
               {appliedPromo && (
@@ -258,21 +258,21 @@ export default function Cart() {
                       <X className="w-3 h-3" />
                     </button>
                   </div>
-                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} сом.</span>
+                  <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} с.</span>
                 </div>
               )}
               
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
-                  {deliveryFee === 0 ? "Бесплатно" : `${deliveryFee} сом.`}
+                  {deliveryFee === 0 ? "Бесплатно" : `${deliveryFee} с.`}
                 </span>
               </div>
               
               {totalAfterPromo < 1000 && (
                 <div className="bg-orange-50 p-3 rounded-lg">
                   <p className="text-sm text-orange-700">
-                    Добавьте товаров на {(1000 - totalAfterPromo).toFixed(0)} сом. для бесплатной доставки
+                    Добавьте товаров на {(1000 - totalAfterPromo).toFixed(0)} с. для бесплатной доставки
                   </p>
                 </div>
               )}
@@ -281,7 +281,7 @@ export default function Cart() {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">К оплате</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {finalTotal.toFixed(0)} сом.
+                    {finalTotal.toFixed(0)} с.
                   </span>
                 </div>
               </div>

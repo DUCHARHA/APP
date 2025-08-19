@@ -13,6 +13,8 @@ import Orders from "@/pages/orders";
 import Addresses from "@/pages/addresses";
 import PaymentMethods from "@/pages/payment-methods";
 import Profile from "@/pages/profile";
+import ProfileEdit from "@/pages/profile-edit";
+import Help from "@/pages/help";
 import AdminLogin from "@/pages/admin-login";
 import AdminOrders from "@/pages/admin-orders";
 import Admin from "@/pages/admin";
@@ -57,6 +59,8 @@ function Router() {
         <Route path="/cart" component={Cart} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/profile" component={Profile} />
+        <Route path="/profile/edit" component={ProfileEdit} />
+        <Route path="/help" component={Help} />
         <Route path="/orders" component={Orders} />
         <Route path="/addresses" component={Addresses} />
         <Route path="/payment-methods" component={PaymentMethods} />

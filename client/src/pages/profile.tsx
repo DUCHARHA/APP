@@ -1,15 +1,46 @@
 import { Link } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 
 export default function Profile() {
-  // In real app, get user data from auth context
-  const user = {
+  const userId = "demo-user";
+  const [user, setUser] = useState({
     name: "Анна Иванова",
     email: "anna@example.com",
     phone: "+7 (999) 123-45-67",
     address: "ул. Пушкина, 25, кв. 10",
+  });
+  const [joinDate] = useState(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)); // 90 дней назад
+
+  // Загружаем данные пользователя из localStorage
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      setUser(JSON.parse(savedProfile));
+    }
+  }, []);
+
+  // Получаем реальные данные заказов
+  const { data: orders = [] } = useQuery({
+    queryKey: ["/api/orders", userId],
+  });
+
+  const calculateStats = () => {
+    const totalOrders = orders.length;
+    const deliveredOrders = orders.filter(order => order.status === "delivered");
+    const avgDeliveryTime = deliveredOrders.length > 0 ? 13 : 0; // В среднем 13 минут
+    const daysWithUs = Math.floor((Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      totalOrders,
+      avgDeliveryTime,
+      daysWithUs
+    };
   };
+
+  const stats = calculateStats();
 
   const menuItems = [
     {
@@ -34,13 +65,13 @@ export default function Profile() {
       icon: Bell,
       label: "Уведомления",
       description: "Настройки push",
-      href: "#",
+      href: "/notifications",
     },
     {
       icon: HelpCircle,
       label: "Помощь",
       description: "FAQ и поддержка",
-      href: "#",
+      href: "/help",
     },
   ];
 
@@ -70,9 +101,11 @@ export default function Profile() {
               <p className="text-sm text-gray-500">{user.email}</p>
               <p className="text-sm text-gray-500">{user.phone}</p>
             </div>
-            <button className="p-2 text-gray-400">
-              <User className="w-5 h-5" />
-            </button>
+            <Link href="/profile/edit">
+              <button className="p-2 text-gray-400 hover:text-agent-purple">
+                <Edit className="w-5 h-5" />
+              </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -103,16 +136,18 @@ export default function Profile() {
           <h3 className="font-bold text-gray-900 mb-3">Статистика</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-agent-purple">24</div>
-              <div className="text-xs text-gray-500">Заказов</div>
+              <div className="text-2xl font-bold text-agent-purple">{stats.totalOrders}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Заказов</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-electric-green">12</div>
-              <div className="text-xs text-gray-500">Минут в среднем</div>
+              <div className="text-2xl font-bold text-electric-green">
+                {stats.avgDeliveryTime > 0 ? stats.avgDeliveryTime : '--'}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Минут в среднем</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-bright-orange">3</div>
-              <div className="text-xs text-gray-500">Мес. с нами</div>
+              <div className="text-2xl font-bold text-bright-orange">{stats.daysWithUs}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Дней с нами</div>
             </div>
           </div>
         </div>

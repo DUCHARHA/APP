@@ -33,6 +33,7 @@ export interface IStorage {
   getAllOrders(): Promise<Order[]>;
   getOrderById(orderId: string): Promise<Order | undefined>;
   updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
+  deleteOrder(orderId: string): Promise<boolean>;
 
   // Notifications
   getUserNotifications(userId: string): Promise<Notification[]>;
@@ -834,7 +835,9 @@ export class MemStorage implements IStorage {
       id, 
       createdAt: new Date().toISOString(),
       userId: insertOrder.userId || null,
-      status: insertOrder.status || "pending"
+      status: insertOrder.status || "pending",
+      comment: insertOrder.comment || null,
+      packerComment: insertOrder.packerComment || null
     };
     this.orders.set(id, order);
     return order;
@@ -885,6 +888,14 @@ export class MemStorage implements IStorage {
     }
 
     return updatedOrder;
+  }
+
+  async deleteOrder(orderId: string): Promise<boolean> {
+    const orderExists = this.orders.has(orderId);
+    if (orderExists) {
+      this.orders.delete(orderId);
+    }
+    return orderExists;
   }
 
   async getUserNotifications(userId: string): Promise<Notification[]> {

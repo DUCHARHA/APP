@@ -207,6 +207,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/orders/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteOrder(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete order" });
+    }
+  });
+
   // Notifications
   app.get("/api/notifications/:userId", async (req, res) => {
     try {
