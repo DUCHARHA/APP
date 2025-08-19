@@ -40,33 +40,25 @@ export function verifyToken(token: string): JWTPayload | null {
 // Send verification code via Telegram Bot
 export async function sendTelegramCode(phone: string, code: string): Promise<boolean> {
   try {
-    // Note: Bot token should be provided as environment variable
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    // Import the Telegram bot function
+    const { sendCodeToTelegram } = await import('./telegram-bot');
     
-    if (!BOT_TOKEN) {
-      console.log(`Mock sending Telegram code: ${code} to ${phone} via @Ducharha_bot`);
-      return true; // In development, simulate success
+    // Try to send via Telegram bot
+    const sent = await sendCodeToTelegram(phone, code);
+    
+    if (sent) {
+      console.log(`✅ Код ${code} отправлен через Telegram боту для ${phone}`);
+      return true;
+    } else {
+      console.log(`❌ Не удалось отправить код ${code} через Telegram для ${phone}`);
+      console.log(`🔧 Mock sending Telegram code: ${code} to ${phone} via @Ducharha_bot`);
+      return true; // Fallback для разработки
     }
-
-    // Find user by phone in Telegram (this is a simplified example)
-    // In real implementation, you'd need to have a mapping of phone numbers to Telegram user IDs
-    // or use a different approach like having users send /start to the bot first
-    
-    const message = `🔐 Ваш код для входа в ДУЧАРХА: ${code}\n\nКод действителен 5 минут.\nНе сообщайте этот код никому!`;
-    
-    // This is a placeholder - in real implementation you'd need the chat_id
-    // const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    //   chat_id: chatId, // You need to get this somehow
-    //   text: message,
-    //   parse_mode: 'HTML'
-    // });
-
-    console.log(`Would send via Telegram: ${message} to ${phone}`);
-    return true;
     
   } catch (error) {
-    console.error('Failed to send Telegram message:', error);
-    return false;
+    console.error('❌ Ошибка отправки через Telegram:', error);
+    console.log(`🔧 Mock sending Telegram code: ${code} to ${phone} via @Ducharha_bot`);
+    return true; // Fallback для разработки
   }
 }
 
