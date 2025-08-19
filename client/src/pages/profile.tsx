@@ -3,6 +3,7 @@ import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, C
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { type Order } from "@shared/schema";
 
 export default function Profile() {
   const userId = "demo-user";
@@ -23,7 +24,7 @@ export default function Profile() {
   }, []);
 
   // Получаем реальные данные заказов
-  const { data: orders = [] } = useQuery({
+  const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ["/api/orders", userId],
   });
 
@@ -110,25 +111,6 @@ export default function Profile() {
         </div>
       </section>
 
-      {/* Delivery Address */}
-      <section className="px-4 pb-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-electric-green/10 rounded-lg flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-electric-green" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">Адрес доставки</h4>
-                <p className="text-sm text-gray-500">{user.address}</p>
-              </div>
-            </div>
-            <button className="text-agent-purple text-sm font-medium">
-              Изменить
-            </button>
-          </div>
-        </div>
-      </section>
 
       {/* Stats */}
       <section className="px-4 pb-4">

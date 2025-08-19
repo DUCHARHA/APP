@@ -46,6 +46,9 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
+    
+    // Force immediate application
+    root.style.setProperty('color-scheme', theme);
   }, [theme]);
 
   const value = {

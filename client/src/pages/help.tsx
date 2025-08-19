@@ -10,7 +10,7 @@ export default function Help() {
     },
     {
       question: "Какая минимальная сумма заказа?",
-      answer: "Минимальной суммы заказа нет. Доставка бесплатная при заказе от 1000 с., при меньшей сумме стоимость доставки составляет 99 с.",
+      answer: "Минимальной суммы заказа нет. Доставка всегда бесплатная для всех заказов.",
     },
     {
       question: "Можно ли отменить заказ?",
@@ -54,14 +54,14 @@ export default function Help() {
           <div className="flex space-x-2">
             <Button 
               className="bg-white text-agent-purple hover:bg-gray-100 flex-1"
-              onClick={() => window.open('tel:+79991234567')}
+              onClick={() => window.open('tel:+992971844884')}
             >
               <Phone className="w-4 h-4 mr-2" />
               Позвонить
             </Button>
             <Button 
               className="bg-white/20 hover:bg-white/30 text-white flex-1"
-              onClick={() => window.open('https://t.me/ducharha_support')}
+              onClick={() => window.open('https://t.me/DilovarAkhi')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Чат
@@ -118,7 +118,7 @@ export default function Help() {
             <div className="flex items-center space-x-3">
               <Phone className="w-4 h-4 text-gray-400" />
               <div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">+7 (999) 123-45-67</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">+992 971 84 48 84</div>
                 <div className="text-gray-500 dark:text-gray-400">Горячая линия</div>
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function Help() {
             <div className="flex items-center space-x-3">
               <MessageCircle className="w-4 h-4 text-gray-400" />
               <div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">@ducharha_support</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">@DilovarAkhi</div>
                 <div className="text-gray-500 dark:text-gray-400">Telegram</div>
               </div>
             </div>

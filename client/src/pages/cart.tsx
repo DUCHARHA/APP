@@ -101,7 +101,7 @@ export default function Cart() {
   const subtotal = calculateCartTotal();
   const promoDiscount = appliedPromo ? calculateDiscount(subtotal) : 0;
   const totalAfterPromo = subtotal - promoDiscount;
-  const deliveryFee = totalAfterPromo >= 1000 ? 0 : 99;
+  const deliveryFee = 0; // Всегда бесплатная доставка
   const finalTotal = totalAfterPromo + deliveryFee;
 
   if (isLoading) {
@@ -265,7 +265,7 @@ export default function Cart() {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
-                  {deliveryFee === 0 ? "Бесплатно" : `${deliveryFee} с.`}
+                  Бесплатно
                 </span>
               </div>
               

@@ -147,14 +147,14 @@ export default function Orders() {
   if (isLoading) {
     return (
       <div className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
+        <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
           <div className="flex items-center p-4">
             <Link href="/profile">
               <button className="mr-3 p-2 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-900">История заказов</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">История заказов</h1>
           </div>
         </header>
         <div className="p-4">
@@ -171,7 +171,7 @@ export default function Orders() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
         <div className="flex items-center p-4">
           <Link href="/profile">
             <button className="mr-3 p-2 -ml-2">
@@ -179,8 +179,8 @@ export default function Orders() {
             </button>
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">История заказов</h1>
-            <p className="text-sm text-gray-500">{orders.length} заказов</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">История заказов</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{orders.length} заказов</p>
           </div>
         </div>
       </header>
@@ -207,13 +207,13 @@ export default function Orders() {
           {orders.map((order) => {
             const StatusIcon = getStatusIcon(order.status);
             return (
-              <div key={order.id} className="bg-white rounded-xl p-4 shadow-sm">
+              <div key={order.id} className="bg-white dark:bg-card rounded-xl p-4 shadow-sm">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       Заказ №{order.id.slice(-6)}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {order.createdAt ? formatDate(order.createdAt) : "Недавно"}
                     </p>
                   </div>
@@ -224,17 +224,22 @@ export default function Orders() {
                 </div>
                 
                 <div className="mb-3">
-                  <p className="text-sm text-gray-600 mb-1">Адрес доставки:</p>
-                  <p className="text-sm text-gray-900">{order.deliveryAddress}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Адрес доставки:</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{order.deliveryAddress}</p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                     {parseFloat(order.totalAmount).toFixed(0)} с.
                   </span>
                   <div className="flex items-center space-x-2">
                     <button 
-                      onClick={() => window.location.href = `/order/${order.id}`}
+                      onClick={() => {
+                        toast({
+                          title: "Детали заказа",
+                          description: `Заказ №${order.id.slice(-6)} на сумму ${parseFloat(order.totalAmount).toFixed(0)} с.\nАдрес: ${order.deliveryAddress}\nСтатус: ${getStatusText(order.status)}`,
+                        });
+                      }}
                       className="text-gray-500 text-sm font-medium hover:text-gray-700"
                     >
                       Подробнее

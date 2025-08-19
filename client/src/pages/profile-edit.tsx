@@ -62,9 +62,11 @@ export default function ProfileEdit() {
             </label>
             <Input
               value={formData.phone}
-              onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value}))}
-              placeholder="Введите номер телефона"
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Номер телефона нельзя изменять"
             />
+            <p className="text-xs text-gray-500 mt-1">Для изменения номера обратитесь в поддержку</p>
           </div>
 
           <div>
@@ -74,10 +76,12 @@ export default function ProfileEdit() {
             </label>
             <Input
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
-              placeholder="Введите email"
+              disabled
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Email нельзя изменять"
               type="email"
             />
+            <p className="text-xs text-gray-500 mt-1">Для изменения email обратитесь в поддержку</p>
           </div>
         </div>
 
