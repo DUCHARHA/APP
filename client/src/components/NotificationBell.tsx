@@ -34,7 +34,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const { data: countData } = useQuery({
     queryKey: ['/api/notifications', userId, 'count'],
     enabled: !!userId,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 120000, // Refetch every 2 minutes
   });
 
   // Fetch notifications when dialog opens

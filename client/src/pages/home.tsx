@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,21 +57,29 @@ export default function Home() {
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+    staleTime: 600000, // Cache categories for 10 minutes
+    refetchInterval: false, // Categories rarely change
   });
 
   const { data: popularProducts = [] } = useQuery<Product[]>({
     queryKey: ["/api/products", "popular"],
     queryFn: () => fetch("/api/products?popular=true").then(res => res.json()),
+    staleTime: 300000, // Cache popular products for 5 minutes
+    refetchInterval: false, // Disable automatic refetching
   });
 
+  // Debounce search query to avoid excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  
   const { data: searchResults = [] } = useQuery<Product[]>({
-    queryKey: ["/api/products", "search", searchQuery],
-    queryFn: () => fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`).then(res => res.json()),
-    enabled: searchQuery.length > 0,
+    queryKey: ["/api/products", "search", debouncedSearchQuery],
+    queryFn: () => fetch(`/api/products?search=${encodeURIComponent(debouncedSearchQuery)}`).then(res => res.json()),
+    enabled: debouncedSearchQuery.length > 0,
+    staleTime: 60000, // Cache search results for 1 minute
   });
 
   const quickCategories = categories.slice(0, 4);
-  const displayProducts = searchQuery ? searchResults : popularProducts;
+  const displayProducts = debouncedSearchQuery ? searchResults : popularProducts;
 
   // Sticky search scroll detection
   useEffect(() => {
@@ -142,7 +151,7 @@ export default function Home() {
       </div>
 
       {/* Quick Actions */}
-      {!searchQuery && (
+      {!debouncedSearchQuery && (
         <section className="p-4 -mt-6 relative z-20">
           <div className="grid grid-cols-4 gap-3">
             {quickCategories.map((category) => (
@@ -153,7 +162,7 @@ export default function Home() {
       )}
 
       {/* Promo Banner */}
-      {!searchQuery && (
+      {!debouncedSearchQuery && (
         <section className="p-4">
           <div className="bg-gradient-to-r from-electric-green via-emerald-400 to-teal-400 rounded-xl p-6 text-white relative overflow-hidden card-hover">
             <div className="relative z-10">
@@ -201,9 +210,9 @@ export default function Home() {
       <section className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            {searchQuery ? `Результаты поиска (${displayProducts.length})` : "Популярные товары"}
+            {debouncedSearchQuery ? `Результаты поиска (${displayProducts.length})` : "Популярные товары"}
           </h3>
-          {!searchQuery && (
+          {!debouncedSearchQuery && (
             <Link href="/catalog">
               <button className="text-agent-purple font-medium text-sm">
                 Все товары
@@ -215,7 +224,7 @@ export default function Home() {
         {displayProducts.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 dark:text-gray-400">
-              {searchQuery ? "Товары не найдены" : "Загрузка товаров..."}
+              {debouncedSearchQuery ? "Товары не найдены" : "Загрузка товаров..."}
             </p>
           </div>
         ) : (
@@ -228,7 +237,7 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      {!searchQuery && categories.length > 4 && (
+      {!debouncedSearchQuery && categories.length > 4 && (
         <section className="p-4 mt-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Все категории</h3>
 
@@ -269,7 +278,7 @@ export default function Home() {
       )}
 
       {/* Delivery Info */}
-      {!searchQuery && (
+      {!debouncedSearchQuery && (
         <section className="p-4 mb-4">
           <div className="bg-white dark:bg-card rounded-xl p-4 shadow-sm card-hover">
             <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3">Условия доставки</h3>

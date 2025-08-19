@@ -8,7 +8,8 @@ export function useCart() {
 
   const { data: cartItems = [] } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],
-    staleTime: 0, // Always refetch for real-time cart updates
+    staleTime: 30000, // Cache cart data for 30 seconds
+    refetchInterval: false, // Disable automatic refetching
   });
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
