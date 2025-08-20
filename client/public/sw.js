@@ -1,6 +1,8 @@
-const CACHE_NAME = 'ducharha-pwa-v3';
-const STATIC_CACHE = 'static-v3';
-const DYNAMIC_CACHE = 'dynamic-v3';
+// Версия кэша - заменяется при сборке
+const CACHE_VERSION = '__BUILD_VERSION__';
+const CACHE_NAME = `ducharha-pwa-${CACHE_VERSION}`;
+const STATIC_CACHE = `static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 
 // App Shell - core files that make the app work
 const appShellUrls = [
@@ -67,7 +69,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle app shell and static assets with cache-first strategy
+  // Handle app shell files with network-first strategy to ensure fresh updates
+  if (appShellUrls.includes(url.pathname) || request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful responses
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cached version when offline
+          return caches.match(request).then((cachedResponse) => {
+            return cachedResponse || caches.match('/');
+          });
+        })
+    );
+    return;
+  }
+
+  // Handle static assets with cache-first strategy
   event.respondWith(
     caches.match(request)
       .then((response) => {
@@ -94,10 +120,6 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            // For navigation requests, return cached index.html as fallback
-            if (request.mode === 'navigate') {
-              return caches.match('/');
-            }
             return new Response('Offline', { 
               status: 503, 
               statusText: 'Service Unavailable',
@@ -114,19 +136,23 @@ self.addEventListener('activate', (event) => {
   const currentCaches = [CACHE_NAME, STATIC_CACHE, DYNAMIC_CACHE];
   
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (!currentCaches.includes(cacheName)) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Удаляем все старые кэши
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (!currentCaches.includes(cacheName)) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Немедленно берем контроль над всеми клиентами
+      self.clients.claim()
+    ])
   );
-  self.clients.claim();
-  console.log('Service Worker activated!');
+  console.log('Service Worker activated and claimed all clients!');
 });
 
 // Push notification event
