@@ -106,7 +106,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <button className="relative p-2">
+        <button className="relative p-2 text-[#ffffff]">
           <Bell className="text-gray-600 dark:text-gray-300 w-6 h-6" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 bg-bright-orange hover:bg-bright-orange text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center p-0">
@@ -115,7 +115,6 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           )}
         </button>
       </DialogTrigger>
-      
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Уведомления</DialogTitle>
