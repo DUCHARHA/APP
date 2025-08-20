@@ -4,6 +4,9 @@ const CACHE_NAME = `ducharha-pwa-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 
+// Проверяем, находимся ли мы в режиме разработки
+const isDevelopment = CACHE_VERSION === '__BUILD_VERSION__';
+
 // App Shell - core files that make the app work
 const appShellUrls = [
   '/',
@@ -26,6 +29,14 @@ const staticAssets = [
 // Install event - cache app shell and static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing...');
+  
+  // В режиме разработки не кэшируем файлы при установке
+  if (isDevelopment) {
+    console.log('Development mode - skipping pre-caching');
+    self.skipWaiting();
+    return;
+  }
+  
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => {
@@ -69,13 +80,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle app shell files with network-first strategy to ensure fresh updates
+  // Handle app shell files - different strategy for dev vs prod
   if (appShellUrls.includes(url.pathname) || request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Cache successful responses
-          if (response && response.status === 200 && response.type === 'basic') {
+          // В режиме разработки не кэшируем основные файлы
+          if (!isDevelopment && response && response.status === 200 && response.type === 'basic') {
             const responseClone = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(request, responseClone);
@@ -84,9 +95,16 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Fallback to cached version when offline
-          return caches.match(request).then((cachedResponse) => {
-            return cachedResponse || caches.match('/');
+          // Fallback to cached version when offline (только в production)
+          if (!isDevelopment) {
+            return caches.match(request).then((cachedResponse) => {
+              return cachedResponse || caches.match('/');
+            });
+          }
+          // В development режиме просто возвращаем ошибку
+          return new Response('Offline in development mode', { 
+            status: 503, 
+            statusText: 'Service Unavailable' 
           });
         })
     );
