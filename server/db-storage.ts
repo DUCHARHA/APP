@@ -101,6 +101,18 @@ export class DatabaseStorage implements IStorage {
   private async seedBanners() {
     const bannersData = [
       {
+        title: "Скидка 20% на первый заказ",
+        subtitle: "Промокод",
+        message: "Используйте промокод при оформлении заказа и получите скидку 20%",
+        type: "promo",
+        backgroundColor: "#3b82f6",
+        textColor: "#ffffff",
+        buttonText: "Скопировать промокод",
+        buttonLink: "/catalog",
+        isActive: true,
+        priority: 0
+      },
+      {
         title: "Доставка продуктов быстрее, чем поход в магазин",
         subtitle: "Экспресс доставка",
         message: "Свежие продукты к вашему столу за 10-15 минут",
@@ -110,7 +122,7 @@ export class DatabaseStorage implements IStorage {
         buttonText: "",
         buttonLink: "",
         isActive: true,
-        priority: 0
+        priority: 1
       },
       {
         title: "RC Cola - Освежись сейчас!",
@@ -120,18 +132,6 @@ export class DatabaseStorage implements IStorage {
         backgroundColor: "#f97316",
         textColor: "#ffffff",
         buttonText: "Получить колу",
-        buttonLink: "/catalog",
-        isActive: true,
-        priority: 1
-      },
-      {
-        title: "Скидка 20% на первый заказ",
-        subtitle: "Промокод",
-        message: "Используйте промокод при оформлении заказа и получите скидку 20%",
-        type: "promo",
-        backgroundColor: "#3b82f6",
-        textColor: "#ffffff",
-        buttonText: "Скопировать промокод",
         buttonLink: "/catalog",
         isActive: true,
         priority: 2

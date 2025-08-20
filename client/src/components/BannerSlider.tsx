@@ -123,6 +123,7 @@ export function BannerSlider() {
           )}
           {currentBanner.subtitle && (
             <span className="text-white/80 text-sm">
+              {currentBanner.type === 'promo' && currentBanner.priority === 0 ? '🎉' : ''} 
               {currentBanner.priority !== 0 && getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
             </span>
           )}
