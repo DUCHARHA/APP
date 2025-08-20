@@ -143,7 +143,7 @@ export default function Checkout() {
     return (
       <div className="pb-20">
         <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
+          <div className="flex items-center p-4 bg-[#5B21B6]">
             <Link href="/">
               <button className="mr-3 p-2 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
