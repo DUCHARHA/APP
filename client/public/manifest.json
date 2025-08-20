@@ -10,14 +10,19 @@
   "scope": "/",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%238B5CF6'/%3E%3Cpath d='M96 32l32 32-32 32-32-32zm0 64l32 32-32 32-32-32z' fill='white'/%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
+      "src": "/icons/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%238B5CF6'/%3E%3Cpath d='M256 64l64 64-64 64-64-64zm0 128l64 64-64 64-64-64z' fill='white'/%3E%3C/svg%3E",
+      "src": "/icons/192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ],
   "categories": ["food", "shopping", "lifestyle"],

@@ -106,8 +106,12 @@ export default function Home() {
       <header className="bg-white dark:bg-card shadow-sm">
         <div className="flex items-center justify-between p-4 bg-[#7c3aed] pt-[10px] pb-[10px]">
           <div className="flex items-center space-x-3">
-            <div className="bg-agent-purple p-2 rounded-lg">
-              <Zap className="text-white text-lg" />
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img 
+                src="/icons/logo.png" 
+                alt="ДУЧАРХА" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold dark:text-gray-100 text-[#ffffff]">ДУЧАРХА</h1>
