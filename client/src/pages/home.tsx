@@ -114,8 +114,8 @@ export default function Home() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold dark:text-gray-100 text-[#ffffff]">ДУЧАРХА</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <h1 className="text-xl font-bold text-white dark:text-gray-100">ДУЧАРХА</h1>
+              <p className="text-xs text-gray-300 dark:text-gray-400">
                 {location ? "Определяем зону доставки..." : ""}
               </p>
             </div>
