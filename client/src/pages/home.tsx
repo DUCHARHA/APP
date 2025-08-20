@@ -62,7 +62,7 @@ export default function Home() {
 
   // Debounce search query to avoid excessive API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  
+
   const { data: searchResults = [] } = useQuery<Product[]>({
     queryKey: ["/api/products", "search", debouncedSearchQuery],
     queryFn: () => fetch(`/api/products?search=${encodeURIComponent(debouncedSearchQuery)}`).then(res => res.json()),
@@ -103,7 +103,7 @@ export default function Home() {
   return (
     <main className="pb-20 bg-background">
       {/* Header */}
-      <header className="bg-white dark:bg-card shadow-sm">
+      <header className="bg-background dark:bg-card shadow-sm">
         <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#8018b3]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden">
@@ -115,7 +115,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white dark:text-gray-100">ДУЧАРХА</h1>
-              <p className="text-xs text-gray-300 dark:text-gray-400">
+              <p className="text-xs text-purple-200 dark:text-gray-400">
                 {location ? "Определяем зону доставки..." : ""}
               </p>
             </div>
