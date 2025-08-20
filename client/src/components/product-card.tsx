@@ -40,10 +40,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 1000);
-      toast({
-        title: "Товар добавлен",
-        description: `${product.name} добавлен в корзину`,
-      });
     },
     onError: (error) => {
       console.error('Add to cart error:', error);
@@ -89,10 +85,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Товар удален",
-        description: "Товар удален из корзины",
-      });
     },
     onError: (error) => {
       console.error('Remove item error:', error);

@@ -33,10 +33,7 @@ export default function Home() {
       await navigator.clipboard.writeText(promoCode);
       setCopiedPromo(true);
       setTimeout(() => setCopiedPromo(false), 2000);
-      toast({
-        title: "Промокод скопирован!",
-        description: `Код ${promoCode} скопирован в буфер обмена`,
-      });
+
     } catch (err) {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
@@ -48,10 +45,7 @@ export default function Home() {
 
       setCopiedPromo(true);
       setTimeout(() => setCopiedPromo(false), 2000);
-      toast({
-        title: "Промокод скопирован!",
-        description: `Код ${promoCode} скопирован в буфер обмена`,
-      });
+
     }
   };
 

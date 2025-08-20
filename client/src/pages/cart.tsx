@@ -53,10 +53,6 @@ export default function Cart() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Товар удален",
-        description: "Товар удален из корзины",
-      });
     },
     onError: (error) => {
       console.error('Remove item error:', error);
@@ -77,10 +73,6 @@ export default function Cart() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Корзина очищена",
-        description: "Все товары удалены из корзины",
-      });
     },
   });
 
