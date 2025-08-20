@@ -143,7 +143,7 @@ export default function Home() {
       </div>
       {/* Quick Actions */}
       {!debouncedSearchQuery && (
-        <section className="p-4 relative z-20 pt-[0px] pb-[0px] mt-[12px] mb-[12px]">
+        <section className="p-4 relative z-20 mt-[14px] mb-[14px] pl-[18px] pr-[18px] pt-[0px] pb-[0px]">
           <div className="grid grid-cols-4 gap-3">
             {quickCategories.map((category) => (
               <CategoryButton key={category.id} category={category} />
