@@ -158,7 +158,7 @@ export default function Checkout() {
             Добавьте товары в корзину для оформления заказа
           </p>
           <Link href="/catalog">
-            <Button className="bg-agent-purple hover:bg-agent-purple/90">
+            <Button className="hover:bg-agent-purple/90 bg-[#5B21B6]">
               Перейти в каталог
             </Button>
           </Link>
