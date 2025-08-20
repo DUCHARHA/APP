@@ -52,7 +52,10 @@ export default function MobileNavigation() {
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50">
       <div className="grid grid-cols-4 py-2 pt-[0px] pb-[0px]">
         {navigationItems.map((item) => (
-          <Link key={item.path} href={item.path}>
+          <Link
+            key={item.path}
+            href={item.path}
+            className="text-center ml-[0px] mr-[0px] pl-[25px] pr-[25px]">
             <button
               onClick={handleNavigation}
               className="flex flex-col items-center py-2 px-1 relative transition-colors pl-[0px] pr-[0px] ml-[33px] mr-[33px] text-center text-[#8B5CF6]"
