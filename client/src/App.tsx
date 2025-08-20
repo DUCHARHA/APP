@@ -20,6 +20,7 @@ import AdminOrders from "@/pages/admin-orders";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import MobileNavigation from "@/components/mobile-navigation";
+import { PWAStatus } from "@/components/pwa-status";
 import { useEffect, useRef } from "react";
 
 // Store scroll positions for each page
@@ -61,6 +62,7 @@ function Router() {
 
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen relative">
+      <PWAStatus />
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/catalog" component={Catalog} />

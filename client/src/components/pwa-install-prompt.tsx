@@ -16,7 +16,7 @@ export default function PWAInstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     // Check if app is already installed
-    if (isStandalone()) {
+    if (window.matchMedia("(display-mode: standalone)").matches) {
       setShowPrompt(false);
     }
 
@@ -28,15 +28,15 @@ export default function PWAInstallPrompt() {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
-    trackA2HSEvent('prompt_shown');
+    console.log('PWA Install prompt shown');
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === "accepted") {
-      trackA2HSEvent('prompt_accepted');
+      console.log('PWA Install accepted');
       setShowPrompt(false);
     } else {
-      trackA2HSEvent('prompt_dismissed');
+      console.log('PWA Install dismissed');
     }
     
     setDeferredPrompt(null);
