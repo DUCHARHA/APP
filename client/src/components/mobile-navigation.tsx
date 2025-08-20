@@ -55,7 +55,7 @@ export default function MobileNavigation() {
           <Link key={item.path} href={item.path}>
             <button
               onClick={handleNavigation}
-              className="flex flex-col items-center py-2 px-1 relative transition-colors pl-[0px] pr-[0px] ml-[33px] mr-[33px] text-center text-[#8B5CF6]"
+              className="flex flex-col items-center py-2 px-1 relative transition-colors text-agent-purple pl-[5px] pr-[5px] ml-[25px] mr-[25px] mt-[-3px] mb-[-3px] pt-[0px] pb-[0px]"
             >
               <item.icon className="w-6 h-6 mb-1" />
               <span className="text-xs font-medium">{item.label}</span>
