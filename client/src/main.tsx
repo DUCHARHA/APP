@@ -23,17 +23,14 @@ if ('serviceWorker' in navigator) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Показываем уведомление пользователю о новой версии
-                if (confirm('Доступна новая версия приложения. Обновить сейчас?')) {
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                  window.location.reload();
-                }
+                // Автоматически активируем новую версию без запроса согласия
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
               }
             });
           }
         });
         
-        // Слушаем сообщения от Service Worker о том, что новая версия готова
+        // Слушаем сообщения от Service Worker и автоматически перезагружаем
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload();
         });
