@@ -50,7 +50,7 @@ export default function MobileNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50">
-      <div className="grid grid-cols-4 py-2">
+      <div className="grid grid-cols-4 py-2 pt-[0px] pb-[0px]">
         {navigationItems.map((item) => (
           <Link key={item.path} href={item.path}>
             <button
