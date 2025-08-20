@@ -32,6 +32,7 @@
   --agent-purple: hsl(271 89% 40%);
   --electric-green: hsl(158.1 64.4% 51.6%);
   --bright-orange: hsl(24.6 95% 53.1%);
+  --header-bg: #8018b3;
   --font-inter: 'Inter', system-ui, sans-serif;
 }
 
@@ -144,5 +145,9 @@
 
   .bg-bright-orange {
     background-color: var(--bright-orange);
+  }
+
+  .bg-header-bg {
+    background-color: var(--header-bg);
   }
 }
