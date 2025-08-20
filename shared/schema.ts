@@ -91,6 +91,18 @@ export const banners = pgTable("banners", {
   createdAt: text("created_at").default(sql`now()`),
 });
 
+export const userPreferences = pgTable("user_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  theme: text("theme").notNull().default("light"), // light, dark, system
+  primaryColor: text("primary_color").default("#6366f1"), // CSS color value
+  accentColor: text("accent_color").default("#10b981"), // CSS color value
+  backgroundColor: text("background_color"), // Custom background color
+  customCss: text("custom_css"), // Custom CSS overrides
+  updatedAt: text("updated_at").default(sql`now()`),
+  createdAt: text("created_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -123,6 +135,12 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   createdAt: true,
 });
 
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
@@ -137,3 +155,5 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;

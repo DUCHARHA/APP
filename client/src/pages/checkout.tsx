@@ -201,11 +201,9 @@ export default function Checkout() {
           </div>
 
           <div className="space-y-3 w-full max-w-sm">
-            <Link href="/profile">
-              <Button variant="outline" className="w-full">
-                Отследить заказ
-              </Button>
-            </Link>
+            <Button variant="outline" className="w-full">
+              Отследить заказ
+            </Button>
             <Link href="/">
               <Button className="w-full bg-agent-purple hover:bg-agent-purple/90">
                 На главную

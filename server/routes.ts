@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema } from "@shared/schema";
+import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema } from "@shared/schema";
 import crypto from "crypto";
 
 // Cache for ETag generation
@@ -504,6 +504,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete banner" });
+    }
+  });
+
+  // User Preferences
+  app.get("/api/users/:userId/preferences", async (req, res) => {
+    try {
+      const preferences = await storage.getUserPreferences(req.params.userId);
+      if (!preferences) {
+        // Return default preferences if none exist
+        const defaultPreferences = {
+          theme: "light",
+          primaryColor: "#6366f1",
+          accentColor: "#10b981",
+          backgroundColor: null,
+          customCss: null
+        };
+        return res.json(defaultPreferences);
+      }
+      res.json(preferences);
+    } catch (error) {
+      logError(error, 'GET /api/users/:userId/preferences', req);
+      res.status(500).json({ error: "Failed to fetch user preferences" });
+    }
+  });
+
+  app.post("/api/users/:userId/preferences", async (req, res) => {
+    try {
+      const preferencesData = insertUserPreferencesSchema.parse({
+        ...req.body,
+        userId: req.params.userId
+      });
+      
+      // Check if preferences already exist
+      const existing = await storage.getUserPreferences(req.params.userId);
+      if (existing) {
+        // Update existing preferences
+        const updated = await storage.updateUserPreferences(req.params.userId, preferencesData);
+        return res.json(updated);
+      }
+      
+      // Create new preferences
+      const preferences = await storage.createUserPreferences(preferencesData);
+      res.status(201).json(preferences);
+    } catch (error) {
+      logError(error, 'POST /api/users/:userId/preferences', req);
+      res.status(400).json({ error: "Invalid preferences data" });
+    }
+  });
+
+  app.put("/api/users/:userId/preferences", async (req, res) => {
+    try {
+      const preferencesData = insertUserPreferencesSchema.partial().parse(req.body);
+      const preferences = await storage.updateUserPreferences(req.params.userId, preferencesData);
+      if (!preferences) {
+        return res.status(404).json({ error: "User preferences not found" });
+      }
+      
+      // Clear cache for this user's preferences
+      const cacheKey = `user_preferences_${req.params.userId}`;
+      dataCache.delete(cacheKey);
+      
+      res.json(preferences);
+    } catch (error) {
+      logError(error, 'PUT /api/users/:userId/preferences', req);
+      res.status(400).json({ error: "Invalid preferences data" });
     }
   });
 

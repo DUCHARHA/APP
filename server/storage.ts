@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -7,6 +7,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
+
+  // User Preferences
+  getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
+  createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
+  updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
 
   // Categories
   getCategories(): Promise<Category[]>;
@@ -58,6 +63,7 @@ export class MemStorage implements IStorage {
   private orders: Map<string, Order> = new Map();
   private notifications: Map<string, Notification> = new Map();
   private banners: Map<string, Banner> = new Map();
+  private userPreferences: Map<string, UserPreferences> = new Map();
 
   constructor() {
     this.seedData();
@@ -1018,6 +1024,42 @@ export class MemStorage implements IStorage {
 
   async deleteBanner(id: string): Promise<boolean> {
     return this.banners.delete(id);
+  }
+
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    return Array.from(this.userPreferences.values()).find(pref => pref.userId === userId);
+  }
+
+  async createUserPreferences(insertPreferences: InsertUserPreferences): Promise<UserPreferences> {
+    const id = randomUUID();
+    const preferences: UserPreferences = {
+      ...insertPreferences,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: insertPreferences.userId,
+      theme: insertPreferences.theme || "light",
+      primaryColor: insertPreferences.primaryColor || "#6366f1",
+      accentColor: insertPreferences.accentColor || "#10b981",
+      backgroundColor: insertPreferences.backgroundColor || null,
+      customCss: insertPreferences.customCss || null
+    };
+    this.userPreferences.set(id, preferences);
+    return preferences;
+  }
+
+  async updateUserPreferences(userId: string, updateData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
+    const existing = Array.from(this.userPreferences.entries()).find(([_, pref]) => pref.userId === userId);
+    if (!existing) return undefined;
+
+    const [id, preferences] = existing;
+    const updated = {
+      ...preferences,
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+    this.userPreferences.set(id, updated);
+    return updated;
   }
 }
 
