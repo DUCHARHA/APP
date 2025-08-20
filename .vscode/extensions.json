@@ -1,0 +1,11 @@
+
+{
+  "recommendations": [],
+  "unwantedRecommendations": [
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-css-languageservice",
+    "formulahendry.auto-rename-tag",
+    "formulahendry.auto-close-tag",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
