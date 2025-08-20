@@ -104,7 +104,7 @@ export default function Home() {
     <main className="pb-20 bg-background">
       {/* Header */}
       <header className="bg-white dark:bg-card shadow-sm">
-        <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#7c18b5]">
+        <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#8018b3]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden">
               <img 
