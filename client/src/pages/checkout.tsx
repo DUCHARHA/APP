@@ -227,7 +227,7 @@ export default function Checkout() {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
           </Link>
-          <h1 className="text-xl font-bold text-gray-900">Оформление заказа</h1>
+          <h1 className="text-xl font-bold text-[#ffffff]">Оформление заказа</h1>
         </div>
       </header>
       <Form {...form}>
