@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { type Category, type Product } from "@shared/schema";
 import CategoryButton from "@/components/category-button";
 import ProductCard from "@/components/product-card";
-import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import PWAInstallBanner from "@/components/pwa-install-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { BannerSlider } from "@/components/BannerSlider";
@@ -135,6 +135,9 @@ export default function Home() {
       <div className="banner-section">
         <BannerSlider />
       </div>
+
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
 
       {/* Search Section - stays in place, becomes sticky when reaches top */}
       <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>
@@ -309,7 +312,6 @@ export default function Home() {
         </section>
       )}
 
-      <PWAInstallPrompt />
     </main>
   );
 }
