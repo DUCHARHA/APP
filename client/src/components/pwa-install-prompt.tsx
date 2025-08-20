@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Smartphone } from "lucide-react";
+import { isStandalone, trackA2HSEvent } from "@/utils/pwa-utils";
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -15,7 +16,7 @@ export default function PWAInstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     // Check if app is already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    if (isStandalone()) {
       setShowPrompt(false);
     }
 
@@ -27,11 +28,15 @@ export default function PWAInstallPrompt() {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
+    trackA2HSEvent('prompt_shown');
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === "accepted") {
+      trackA2HSEvent('prompt_accepted');
       setShowPrompt(false);
+    } else {
+      trackA2HSEvent('prompt_dismissed');
     }
     
     setDeferredPrompt(null);
