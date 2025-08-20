@@ -35,7 +35,7 @@ export default function Catalog() {
     <main className="pb-20">
       {/* Header */}
       <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
-        <div className="flex items-center p-4">
+        <div className="flex items-center p-4 bg-[#5B21B6]">
           {currentCategory && (
             <Link href="/catalog">
               <button className="mr-3 p-2 -ml-2">
@@ -53,7 +53,6 @@ export default function Catalog() {
           </div>
         </div>
       </header>
-
       {/* Search */}
       <section className="p-4 bg-gray-50 dark:bg-gray-900">
         <div className="relative">
@@ -67,7 +66,6 @@ export default function Catalog() {
           />
         </div>
       </section>
-
       {/* Categories */}
       {!categoryId && !searchQuery && (
         <section className="p-4">
@@ -79,7 +77,6 @@ export default function Catalog() {
           </div>
         </section>
       )}
-
       {/* Products */}
       <section className="p-4">
         {searchQuery && (
