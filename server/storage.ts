@@ -648,7 +648,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         title: "Скидка 20% на первый заказ",
-        subtitle: "Промокод ПЕРВЫЙ",
+        subtitle: "Промокод\n",
         message: "Используйте промокод при оформлении заказа и получите скидку 20%",
         type: "promo",
         backgroundColor: "#f59e0b",
