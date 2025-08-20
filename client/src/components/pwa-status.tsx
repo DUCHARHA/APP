@@ -37,22 +37,5 @@ export function PWAStatus() {
     return null;
   }
 
-  return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white text-xs p-2 flex items-center justify-center gap-2">
-      {!isOnline && (
-        <>
-          <WifiOff className="w-4 h-4" />
-          <span>Offline режим</span>
-        </>
-      )}
-      {isOnline && (
-        <>
-          <Wifi className="w-4 h-4" />
-          <span>Online</span>
-        </>
-      )}
-      {isServiceWorkerActive && <Shield className="w-3 h-3 text-green-400" />}
-      {isStandalone && <span className="text-green-400">PWA</span>}
-    </div>
-  );
+  return null;
 }
