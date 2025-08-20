@@ -151,7 +151,7 @@ export function BannerSlider() {
       </div>
       {/* Pagination dots */}
       {visibleBanners.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 mt-[-15px] mb-[-15px]">
           {visibleBanners.map((_, index) => (
             <button
               key={index}
