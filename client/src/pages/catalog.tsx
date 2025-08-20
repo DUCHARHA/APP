@@ -44,7 +44,7 @@ export default function Catalog() {
             </Link>
           )}
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-xl font-bold dark:text-gray-100 text-[#ffffff]">
               {currentCategory ? currentCategory.name : "Каталог"}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
