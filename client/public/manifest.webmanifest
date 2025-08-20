@@ -1,6 +1,6 @@
 {
   "name": "ДУЧАРХА - Доставка продуктов",
-  "short_name": "ДУЧАРХА",
+  "short_name": "ДУЧАРХА", 
   "description": "Экспресс-доставка продуктов за 10-15 минут",
   "start_url": "/?source=a2hs",
   "display": "standalone",
@@ -10,28 +10,31 @@
   "theme_color": "#5B21B6",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
+  "id": "/",
   "icons": [
     {
       "src": "/icons/192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "/icons/512.png",
       "sizes": "512x512", 
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "/icons/192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": ["food", "shopping", "lifestyle"],

@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { indexedDBService } from "./lib/indexeddb";
+import "./utils/pwa-debug";
 
 // Initialize IndexedDB
 indexedDBService.init().catch(console.error);

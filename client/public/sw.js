@@ -1,6 +1,6 @@
-const CACHE_NAME = 'ducharha-pwa-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const CACHE_NAME = 'ducharha-pwa-v2';
+const STATIC_CACHE = 'static-v2';
+const DYNAMIC_CACHE = 'dynamic-v2';
 
 // App Shell - core files that make the app work
 const appShellUrls = [
@@ -23,12 +23,15 @@ const staticAssets = [
 
 // Install event - cache app shell and static assets
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => {
+        console.log('Caching app shell...');
         return cache.addAll(appShellUrls);
       }),
       caches.open(STATIC_CACHE).then((cache) => {
+        console.log('Caching static assets...');
         return cache.addAll(staticAssets);
       })
     ])
@@ -40,6 +43,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip non-http requests
+  if (!request.url.startsWith('http')) {
+    return;
+  }
 
   // Handle API requests with network-first strategy
   if (url.pathname.startsWith('/api/')) {
@@ -90,7 +98,11 @@ self.addEventListener('fetch', (event) => {
             if (request.mode === 'navigate') {
               return caches.match('/');
             }
-            return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+            return new Response('Offline', { 
+              status: 503, 
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
       })
   );
@@ -98,6 +110,7 @@ self.addEventListener('fetch', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
   const currentCaches = [CACHE_NAME, STATIC_CACHE, DYNAMIC_CACHE];
   
   event.waitUntil(
@@ -113,6 +126,7 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+  console.log('Service Worker activated!');
 });
 
 // Push notification event
@@ -156,5 +170,12 @@ self.addEventListener('notificationclick', (event) => {
     event.waitUntil(
       clients.openWindow('/')
     );
+  }
+});
+
+// Message event for communication with main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
