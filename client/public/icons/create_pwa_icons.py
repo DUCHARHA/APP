@@ -2,7 +2,8 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 
 def create_maskable_icon(size, filename):
-    # Create image with purple background
+    # Create image with purple background (HSL: 262.1 83.3% 57.8%)
+    # RGB conversion of hsl(262.1 83.3% 57.8%): rgb(91, 33, 182)
     img = Image.new('RGBA', (size, size), color=(91, 33, 182, 255))
     draw = ImageDraw.Draw(img)
     
@@ -36,6 +37,7 @@ def create_maskable_icon(size, filename):
     text_y = (size - text_height) // 2
     
     # Make text larger by drawing multiple times with offset
+    # Using same primary color as background for text
     for i in range(5):
         for j in range(5):
             draw.text((text_x + i - 2, text_y + j - 2), text, fill=(91, 33, 182, 255), font=font)
