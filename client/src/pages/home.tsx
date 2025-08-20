@@ -15,7 +15,6 @@ import { Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
-import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 
 export default function Home() {
@@ -25,7 +24,6 @@ export default function Home() {
   const { location, error: locationError } = useGeolocation();
   const { totalItems } = useCart();
   const { appliedPromo } = usePromo();
-  const { toast } = useToast();
 
   const copyPromoCode = async () => {
     const promoCode = "ПЕРВЫЙ";

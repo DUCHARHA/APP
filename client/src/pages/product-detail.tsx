@@ -30,10 +30,6 @@ export default function ProductDetail() {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Товар добавлен в корзину",
-        description: `${product?.name} (${quantity} шт.)`,
-      });
     },
     onError: () => {
       toast({
