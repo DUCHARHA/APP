@@ -104,7 +104,7 @@ export default function Home() {
     <main className="pb-20 bg-background">
       {/* Header */}
       <header className="bg-background dark:bg-card shadow-sm">
-        <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#5b21b6]">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-purple-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden">
               <img 
@@ -147,7 +147,7 @@ export default function Home() {
       </div>
       {/* Quick Actions */}
       {!debouncedSearchQuery && (
-        <section className="p-4 relative z-20 mt-[14px] mb-[14px] pl-[18px] pr-[18px] pt-[0px] pb-[0px]">
+        <section className="px-4.5 relative z-20 my-3.5">
           <div className="grid grid-cols-4 gap-3">
             {quickCategories.map((category) => (
               <CategoryButton key={category.id} category={category} />
