@@ -17,12 +17,6 @@ if ('serviceWorker' in navigator) {
         // Немедленно проверяем обновления
         registration.update();
         
-        // Проверяем обновления каждые 30 секунд для быстрого деплоя
-        setInterval(() => {
-          console.log('🔄 Проверяем обновления Service Worker...');
-          registration.update();
-        }, 30000);
-        
         // Обработчик новых версий Service Worker
         registration.addEventListener('updatefound', () => {
           console.log('🆕 Найдена новая версия Service Worker');
