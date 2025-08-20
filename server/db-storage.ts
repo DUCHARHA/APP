@@ -101,6 +101,18 @@ export class DatabaseStorage implements IStorage {
   private async seedBanners() {
     const bannersData = [
       {
+        title: "Доставка продуктов быстрее, чем поход в магазин",
+        subtitle: "Экспресс доставка",
+        message: "Свежие продукты к вашему столу за 10-15 минут",
+        type: "promo",
+        backgroundColor: "#00539A",
+        textColor: "#ffffff",
+        buttonText: "",
+        buttonLink: "",
+        isActive: true,
+        priority: 0
+      },
+      {
         title: "Скидка 20% на первый заказ",
         subtitle: "Промокод",
         message: "Используйте промокод при оформлении заказа и получите скидку 20%",
@@ -109,18 +121,6 @@ export class DatabaseStorage implements IStorage {
         textColor: "#ffffff",
         buttonText: "Скопировать промокод",
         buttonLink: "/catalog",
-        isActive: true,
-        priority: 0
-      },
-      {
-        title: "Доставка продуктов быстрее, чем поход в магазин",
-        subtitle: "Экспресс доставка",
-        message: "Свежие продукты к вашему столу за 10-15 минут",
-        type: "promo",
-        backgroundColor: "#22c55e",
-        textColor: "#ffffff",
-        buttonText: "",
-        buttonLink: "",
         isActive: true,
         priority: 1
       },

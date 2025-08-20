@@ -115,7 +115,7 @@ export function BannerSlider() {
       {/* Banner content */}
       <div className="relative z-10 w-full flex flex-col justify-center h-full py-4">
         <div className="flex items-center mb-3">
-          {(currentBanner.type === 'promo' && currentBanner.priority === 0) && (
+          {(currentBanner.subtitle === 'Экспресс доставка' && currentBanner.priority === 0) && (
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
               <Clock className="mr-1 w-4 h-4" />
               10-15 мин
@@ -123,8 +123,8 @@ export function BannerSlider() {
           )}
           {currentBanner.subtitle && (
             <span className="text-white/80 text-sm">
-              {currentBanner.type === 'promo' && currentBanner.priority === 0 ? '🎉' : ''} 
-              {currentBanner.priority !== 0 && getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
+              {currentBanner.subtitle === 'Экспресс доставка' && currentBanner.priority === 0 ? '🎉' : ''} 
+              {!(currentBanner.subtitle === 'Экспресс доставка' && currentBanner.priority === 0) && getBannerIcon(currentBanner.type)} {currentBanner.subtitle}
             </span>
           )}
         </div>
