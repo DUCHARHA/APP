@@ -87,7 +87,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 rounded-lg mt-[11px] mb-[11px] ml-[22px] mr-[22px] pl-[23px] pr-[23px] text-center"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
@@ -112,7 +112,6 @@ export function BannerSlider() {
           </button>
         </>
       )}
-
       {/* Banner content */}
       <div className="relative z-10 w-full flex flex-col justify-center h-full py-4">
         <div className="flex items-center mb-3">
@@ -150,7 +149,6 @@ export function BannerSlider() {
           </div>
         )}
       </div>
-
       {/* Pagination dots */}
       {visibleBanners.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
@@ -166,12 +164,10 @@ export function BannerSlider() {
           ))}
         </div>
       )}
-
       {/* Floating decorative elements - show for all banners but more prominent for main banner */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
       <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
-      
       {/* Extra animation elements for main banner */}
       {currentBanner.priority === 0 && (
         <>
