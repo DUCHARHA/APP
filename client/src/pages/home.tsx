@@ -122,15 +122,12 @@ export default function Home() {
           </div>
         </div>
       </header>
-
       {/* Dynamic Banner Slider */}
       <div className="banner-section">
         <BannerSlider />
       </div>
-
       {/* PWA Install Banner */}
       <PWAInstallBanner />
-
       {/* Search Section - stays in place, becomes sticky when reaches top */}
       <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>
         <div className="relative">
@@ -144,10 +141,9 @@ export default function Home() {
           />
         </div>
       </div>
-
       {/* Quick Actions */}
       {!debouncedSearchQuery && (
-        <section className="p-4 -mt-6 relative z-20">
+        <section className="p-4 relative z-20 pt-[0px] pb-[0px] mt-[12px] mb-[12px]">
           <div className="grid grid-cols-4 gap-3">
             {quickCategories.map((category) => (
               <CategoryButton key={category.id} category={category} />
@@ -155,7 +151,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
       {/* Promo Banner */}
       {!debouncedSearchQuery && (
         <section className="p-4">
@@ -200,7 +195,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
       {/* Products Section */}
       <section className="p-4">
         <div className="flex items-center justify-between mb-4">
@@ -230,7 +224,6 @@ export default function Home() {
           </div>
         )}
       </section>
-
       {/* Categories Section */}
       {!debouncedSearchQuery && categories.length > 4 && (
         <section className="p-4 mt-3">
@@ -271,7 +264,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
       {/* Delivery Info */}
       {!debouncedSearchQuery && (
         <section className="p-4 mb-4">
@@ -303,7 +295,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
     </main>
   );
 }
