@@ -47,9 +47,6 @@ export default function Catalog() {
             <h1 className="text-xl font-bold dark:text-gray-100 text-[#ffffff]">
               {currentCategory ? currentCategory.name : "Каталог"}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {displayProducts.length} товаров
-            </p>
           </div>
         </div>
       </header>
