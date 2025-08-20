@@ -13,6 +13,30 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('SW registered: ', registration);
+        
+        // Проверяем обновления сразу при загрузке страницы
+        registration.update();
+        
+        // Обработчик новых версий Service Worker
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Показываем уведомление пользователю о новой версии
+                if (confirm('Доступна новая версия приложения. Обновить сейчас?')) {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  window.location.reload();
+                }
+              }
+            });
+          }
+        });
+        
+        // Слушаем сообщения от Service Worker о том, что новая версия готова
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
       })
       .catch((registrationError) => {
         console.log('SW registration failed: ', registrationError);
