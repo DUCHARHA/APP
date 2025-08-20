@@ -1,0 +1,22 @@
+
+{
+  "editor.quickSuggestions": {
+    "strings": false
+  },
+  "emmet.showExpandedAbbreviation": "never",
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false,
+  "tailwindCSS.emmetCompletions": false,
+  "tailwindCSS.suggestions": false,
+  "tailwindCSS.hovers": false,
+  "tailwindCSS.codeActions": false,
+  "editor.codeActionsOnSave": {},
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
+  "javascript.suggest.autoImports": false,
+  "css.completion.completePropertyWithSemicolon": false,
+  "emmet.triggerExpansion": false
+}
