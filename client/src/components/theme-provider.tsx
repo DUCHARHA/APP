@@ -50,13 +50,20 @@ export function ThemeProvider({
   userId = "demo-user", // Default user for demo
   ...props
 }: ThemeProviderProps) {
-  // Получаем сохраненную тему из localStorage или используем "light" по умолчанию
-  const savedTheme = typeof window !== 'undefined' ? localStorage.getItem(storageKey) as Theme : null;
-  const [theme, setTheme] = useState<Theme>(savedTheme || "light");
+  // Простая инициализация без функции
+  const [theme, setTheme] = useState<Theme>("light");
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const errorTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load theme from localStorage immediately
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    if (savedTheme && savedTheme !== "system") {
+      setTheme(savedTheme);
+    }
+  }, []);
 
   // Load preferences from backend on mount
   useEffect(() => {
