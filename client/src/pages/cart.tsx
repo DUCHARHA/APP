@@ -100,13 +100,13 @@ export default function Cart() {
     return (
       <div className="pb-20">
         <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
+          <div className="flex items-center p-4 bg-[#5B21B6]">
             <Link href="/">
               <button className="mr-3 p-2 -ml-2">
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
+                <ArrowLeft className="w-6 h-6 text-white" />
               </button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-900">Корзина</h1>
+            <h1 className="text-xl font-bold text-white">Корзина</h1>
           </div>
         </header>
         <div className="p-4">
@@ -124,22 +124,22 @@ export default function Cart() {
     <main className="pb-20">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-4 bg-[#5B21B6]">
           <div className="flex items-center">
             <Link href="/catalog">
               <button className="mr-3 p-2 -ml-2">
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
+                <ArrowLeft className="w-6 h-6 text-white" />
               </button>
             </Link>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Корзина</h1>
-              <p className="text-sm text-gray-500">{cartItems.length} товаров</p>
+              <h1 className="text-xl font-bold text-white">Корзина</h1>
+              <p className="text-sm text-gray-200">{cartItems.length} товаров</p>
             </div>
           </div>
           {cartItems.length > 0 && (
             <button
               onClick={() => clearCartMutation.mutate()}
-              className="text-gray-500 p-2"
+              className="text-white p-2"
               disabled={clearCartMutation.isPending}
             >
               <Trash2 className="w-5 h-5" />

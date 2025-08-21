@@ -39,7 +39,7 @@ export default function Catalog() {
           {currentCategory && (
             <Link href="/catalog">
               <button className="mr-3 p-2 -ml-2">
-                <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                <ArrowLeft className="w-6 h-6 text-white" />
               </button>
             </Link>
           )}
