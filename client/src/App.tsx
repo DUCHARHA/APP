@@ -9,8 +9,10 @@ import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 // import { ErrorBoundary } from "@/components/error-boundary";
 
-// Lazy load all pages for code splitting
-const Home = lazy(() => import("@/pages/home"));
+// Import Home directly to fix white screen issue
+import Home from "@/pages/home";
+
+// Lazy load other pages for code splitting
 const Catalog = lazy(() => import("@/pages/catalog"));
 const ProductDetail = lazy(() => import("@/pages/product-detail"));
 const Cart = lazy(() => import("@/pages/cart"));
@@ -76,9 +78,9 @@ function Router() {
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen relative">
       <PWAStatus />
-      <Suspense fallback={<PageLoader />}>
-        <Switch>
-          <Route path="/" component={Home} />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Suspense fallback={<PageLoader />}>
           <Route path="/catalog" component={Catalog} />
           <Route path="/catalog/:categoryId" component={Catalog} />
           <Route path="/product/:productId" component={ProductDetail} />
@@ -95,8 +97,8 @@ function Router() {
           <Route path="/admin/banners" component={AdminBanners} />
           <Route path="/admin" component={Admin} />
           <Route component={NotFound} />
-        </Switch>
-      </Suspense>
+        </Suspense>
+      </Switch>
       <MobileNavigation />
     </div>
   );
