@@ -32,20 +32,30 @@ const PRESET_COLORS = {
 };
 
 export function ColorCustomizer() {
-  const { preferences, updatePreferences, isLoading } = useTheme();
+  const { preferences, updatePreferences, isLoading, error } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleColorChange = async (type: 'primaryColor' | 'accentColor', color: string) => {
-    await updatePreferences({ [type]: color });
+    try {
+      await updatePreferences({ [type]: color });
+    } catch (error) {
+      // Error is already handled in ThemeProvider and displayed via error state
+      console.error('Failed to update color:', error);
+    }
   };
 
   const resetToDefault = async () => {
-    await updatePreferences({
-      primaryColor: "#6366f1",
-      accentColor: "#10b981",
-      backgroundColor: null,
-      customCss: null,
-    });
+    try {
+      await updatePreferences({
+        primaryColor: "#6366f1",
+        accentColor: "#10b981",
+        backgroundColor: null,
+        customCss: null,
+      });
+    } catch (error) {
+      // Error is already handled in ThemeProvider and displayed via error state
+      console.error('Failed to reset colors:', error);
+    }
   };
 
   return (
@@ -65,6 +75,13 @@ export function ColorCustomizer() {
         </DialogHeader>
         
         <div className="space-y-6">
+          {/* Error message */}
+          {error && (
+            <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md dark:bg-red-950 dark:text-red-300 dark:border-red-800">
+              {error}
+            </div>
+          )}
+          
           {/* Primary Color */}
           <div>
             <h4 className="text-sm font-medium mb-3">Основной цвет</h4>

@@ -23,6 +23,7 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
   isLoading: boolean;
+  error: string | null;
 };
 
 const initialState: ThemeProviderState = {
@@ -37,6 +38,7 @@ const initialState: ThemeProviderState = {
   setTheme: () => null,
   updatePreferences: async () => {},
   isLoading: false,
+  error: null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -51,6 +53,7 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load preferences from backend on mount
   useEffect(() => {
@@ -104,9 +107,20 @@ export function ThemeProvider({
 
   // Apply theme and colors to DOM
   useEffect(() => {
+    // Safety check - ensure we're in browser environment
+    if (typeof window === 'undefined' || !window.document) {
+      return;
+    }
+
     const root = window.document.documentElement;
 
     try {
+      // Safety check for root element
+      if (!root || !root.classList || !root.style) {
+        throw new Error("DOM root element недоступен");
+      }
+
+      // Remove existing theme classes safely
       root.classList.remove("light", "dark");
 
       if (theme === "system") {
@@ -120,18 +134,22 @@ export function ThemeProvider({
         root.classList.add(theme);
       }
 
-      // Apply custom colors
-      if (preferences.primaryColor) {
+      // Apply custom colors with validation
+      if (preferences.primaryColor && /^#[0-9A-Fa-f]{6}$/.test(preferences.primaryColor)) {
         root.style.setProperty("--primary", preferences.primaryColor);
       }
-      if (preferences.accentColor) {
+      if (preferences.accentColor && /^#[0-9A-Fa-f]{6}$/.test(preferences.accentColor)) {
         root.style.setProperty("--electric-green", preferences.accentColor);
       }
-      if (preferences.backgroundColor) {
+      if (preferences.backgroundColor && preferences.backgroundColor.match(/^#[0-9A-Fa-f]{6}$/)) {
         root.style.setProperty("--background", preferences.backgroundColor);
       }
 
-      // Apply custom CSS
+      // Apply custom CSS safely
+      if (!document.head) {
+        throw new Error("Document head недоступен");
+      }
+
       let customStyleElement = document.getElementById("user-custom-styles");
       if (preferences.customCss) {
         if (!customStyleElement) {
@@ -140,17 +158,22 @@ export function ThemeProvider({
           document.head.appendChild(customStyleElement);
         }
         customStyleElement.textContent = preferences.customCss;
-      } else if (customStyleElement) {
-        customStyleElement.remove();
+      } else if (customStyleElement && customStyleElement.parentNode) {
+        customStyleElement.parentNode.removeChild(customStyleElement);
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка при обновлении темы";
       console.warn("Failed to update theme class:", error);
+      setError(`Ошибка применения темы: ${errorMessage}`);
+      setTimeout(() => setError(null), 5000); // Clear error after 5 seconds
     }
   }, [theme, preferences]);
 
   const updatePreferences = async (newPreferences: Partial<UserPreferences>) => {
-    const updated = { ...preferences, ...newPreferences };
-    setPreferences(updated);
+    try {
+      setError(null); // Clear any previous errors
+      const updated = { ...preferences, ...newPreferences };
+      setPreferences(updated);
 
     // Update theme if it changed
     if (newPreferences.theme) {
@@ -181,12 +204,19 @@ export function ThemeProvider({
         // Don't revert local changes - offline support
       }
     }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка";
+      setError(`Ошибка сохранения настроек: ${errorMessage}`);
+      setTimeout(() => setError(null), 5000);
+      throw error; // Re-throw so UI components can handle it
+    }
   };
 
   const value = {
     theme,
     preferences,
     isLoading,
+    error,
     setTheme: (newTheme: Theme) => {
       updatePreferences({ theme: newTheme });
     },
