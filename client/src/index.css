@@ -6,15 +6,15 @@
 :root {
   /* Base theme colors - can be overridden by user preferences */
   --background: hsl(220 15% 97%);
-  --foreground: #5B21B6;
+  --foreground: hsl(210 25% 7.8431%);
   --card: hsl(0 0% 100%);
-  --card-foreground: #5B21B6;
+  --card-foreground: hsl(210 25% 7.8431%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: #5B21B6;
+  --popover-foreground: hsl(210 25% 7.8431%);
   --primary: hsl(262.1 83.3% 57.8%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(210 40% 96%);
-  --secondary-foreground: #5B21B6;
+  --secondary-foreground: hsl(210 25% 7.8431%);
   --muted: hsl(210 40% 96%);
   --muted-foreground: hsl(215.4 16.3% 46.9%);
   --accent: hsl(210 40% 96%);
@@ -45,15 +45,15 @@
 
 .dark {
   --background: hsl(210 25% 7.8431%);
-  --foreground: #A855F7;
+  --foreground: hsl(0 0% 95%);
   --card: hsl(210 25% 7.8431%);
-  --card-foreground: #A855F7;
+  --card-foreground: hsl(0 0% 95%);
   --popover: hsl(210 25% 7.8431%);
-  --popover-foreground: #A855F7;
+  --popover-foreground: hsl(0 0% 95%);
   --primary: hsl(262.1 83.3% 57.8%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: #A855F7;
+  --secondary-foreground: hsl(0 0% 95%);
   --muted: hsl(217.2 32.6% 17.5%);
   --muted-foreground: hsl(215 20.2% 65.1%);
   --accent: hsl(217.2 32.6% 17.5%);
@@ -153,15 +153,4 @@
   .bg-bright-orange {
     background-color: var(--bright-orange);
   }
-}
-
-
-
-/* Стили для заголовков */
-h1, h2, h3, h4, h5, h6 {
-  color: #5B21B6 !important;
-}
-
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  color: #A855F7 !important;
 }
