@@ -430,32 +430,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Banners (with long-term caching)
   app.get("/api/banners", async (req, res) => {
     try {
-      const cacheKey = 'banners_active';
-      
-      // Long cache for banners (10 minutes)
-      if (isCacheValid(cacheKey, 600000)) {
-        const cached = dataCache.get(cacheKey)!;
-        
-        if (req.get('If-None-Match') === cached.etag) {
-          return res.status(304).end();
-        }
-        
-        res.set('ETag', cached.etag);
-        res.set('Cache-Control', 'public, max-age=600');
-        return res.json(cached.data);
-      }
-      
       const banners = await storage.getActiveBanners();
-      const etag = generateETag(banners);
       
-      dataCache.set(cacheKey, { etag, data: banners, timestamp: Date.now() });
+      // No caching - always get fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       
-      if (req.get('If-None-Match') === etag) {
-        return res.status(304).end();
-      }
-      
-      res.set('ETag', etag);
-      res.set('Cache-Control', 'public, max-age=600');
       res.json(banners);
     } catch (error) {
       logError(error, 'GET /api/banners', req);
