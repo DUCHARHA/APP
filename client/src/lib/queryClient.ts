@@ -63,7 +63,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 5000, // 5 секунд вместо Infinity для быстрого обновления корзины
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
         if (error && typeof error === 'object' && 'message' in error) {

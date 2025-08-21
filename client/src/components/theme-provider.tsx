@@ -50,7 +50,10 @@ export function ThemeProvider({
   userId = "demo-user", // Default user for demo
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  // Всегда используем light тему как default, чтобы избежать случайного переключения
+  const [theme, setTheme] = useState<Theme>(
+    () => localStorage.getItem(storageKey) as Theme || "light"
+  );
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +77,11 @@ export function ThemeProvider({
         const response = await fetch(`/api/users/${userId}/preferences`);
         if (response.ok) {
           const userPrefs = await response.json();
-          setTheme(userPrefs.theme || defaultTheme);
+          // Используем только явно сохраненную тему, не system
+          const newTheme = userPrefs.theme === "system" ? "light" : (userPrefs.theme || "light");
+          setTheme(newTheme);
           setPreferences({
-            theme: userPrefs.theme || defaultTheme,
+            theme: newTheme,
             primaryColor: userPrefs.primaryColor || "#6366f1",
             accentColor: userPrefs.accentColor || "#10b981",
             backgroundColor: userPrefs.backgroundColor || null,

@@ -84,6 +84,10 @@ export default function Cart() {
     }
   };
 
+  const handleRemoveItem = (id: string) => {
+    removeItemMutation.mutate(id);
+  };
+
   const calculateCartTotal = () => {
     return cartItems.reduce((total, item) => {
       return total + (parseFloat(item.product.price) * item.quantity);
@@ -205,23 +209,33 @@ export default function Cart() {
                       {parseFloat(item.product.price).toFixed(0)} с.
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                      className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
-                      disabled={updateQuantityMutation.isPending}
+                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                      disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
+                      data-testid={`button-decrease-${item.id}`}
                     >
                       <Minus className="w-4 h-4 text-gray-600" />
                     </button>
-                    <span className="w-8 text-center font-medium">
+                    <span className="w-10 text-center font-medium text-gray-900">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-lg bg-agent-purple flex items-center justify-center"
-                      disabled={updateQuantityMutation.isPending}
+                      className="w-8 h-8 rounded-lg bg-agent-purple hover:bg-agent-purple/90 flex items-center justify-center transition-colors"
+                      disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
+                      data-testid={`button-increase-${item.id}`}
                     >
                       <Plus className="w-4 h-4 text-white" />
+                    </button>
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors ml-2"
+                      disabled={removeItemMutation.isPending}
+                      data-testid={`button-remove-${item.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
                     </button>
                   </div>
                 </div>
