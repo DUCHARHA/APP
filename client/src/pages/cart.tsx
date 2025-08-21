@@ -99,7 +99,7 @@ export default function Cart() {
   if (isLoading) {
     return (
       <div className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
+        <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
           <div className="flex items-center p-4 bg-[#5B21B6]">
             <Link href="/">
               <button className="mr-3 p-2 -ml-2">
@@ -123,7 +123,7 @@ export default function Cart() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
         <div className="flex items-center justify-between p-4 bg-[#5B21B6]">
           <div className="flex items-center">
             <Link href="/catalog">
@@ -233,12 +233,12 @@ export default function Cart() {
           <section className="p-4">
             <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
               <h3 className="font-bold text-gray-900 mb-3">Итого</h3>
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Товары ({cartItems.length})</span>
                 <span className="font-medium">{subtotal.toFixed(0)} с.</span>
               </div>
-              
+
               {appliedPromo && (
                 <div className="flex justify-between text-sm">
                   <div className="flex items-center space-x-2">
@@ -253,14 +253,14 @@ export default function Cart() {
                   <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} с.</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
                   Бесплатно
                 </span>
               </div>
-              
+
               {totalAfterPromo < 1000 && (
                 <div className="bg-orange-50 p-3 rounded-lg">
                   <p className="text-sm text-orange-700">
@@ -268,7 +268,7 @@ export default function Cart() {
                   </p>
                 </div>
               )}
-              
+
               <div className="border-t pt-3">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">К оплате</span>
@@ -277,13 +277,13 @@ export default function Cart() {
                   </span>
                 </div>
               </div>
-              
+
               <Link href="/checkout">
                 <Button className="w-full bg-agent-purple hover:bg-agent-purple/90 text-white py-3 text-lg font-semibold">
                   Оформить заказ
                 </Button>
               </Link>
-              
+
               <div className="text-center">
                 <div className="inline-flex items-center text-sm text-gray-600 bg-electric-green/10 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-electric-green rounded-full mr-2 animate-pulse"></div>
