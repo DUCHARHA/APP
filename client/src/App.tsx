@@ -1,14 +1,15 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 
+// Lazy load all pages for code splitting
 const Home = lazy(() => import("@/pages/home"));
 const Catalog = lazy(() => import("@/pages/catalog"));
 const ProductDetail = lazy(() => import("@/pages/product-detail"));
@@ -26,6 +27,10 @@ const Admin = lazy(() => import("@/pages/admin"));
 const AdminBanners = lazy(() => import("@/pages/AdminBanners"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
+// Store scroll positions for each page
+const scrollPositions = new Map<string, number>();
+
+// Loading component for lazy loaded routes
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -35,6 +40,39 @@ function PageLoader() {
 }
 
 function Router() {
+  const [location] = useLocation();
+  const previousLocation = useRef<string>("");
+
+  useEffect(() => {
+    let isStale = false;
+    
+    // Save scroll position of previous page
+    if (previousLocation.current && previousLocation.current !== location) {
+      scrollPositions.set(previousLocation.current, window.scrollY);
+    }
+
+    // Restore scroll position or scroll to top for new pages
+    const savedPosition = scrollPositions.get(location);
+    if (savedPosition !== undefined) {
+      // Use requestAnimationFrame to ensure DOM is ready and prevent stale state
+      requestAnimationFrame(() => {
+        if (!isStale) {
+          window.scrollTo(0, savedPosition);
+        }
+      });
+    } else {
+      if (!isStale) {
+        window.scrollTo(0, 0);
+      }
+    }
+
+    previousLocation.current = location;
+    
+    return () => {
+      isStale = true;
+    };
+  }, [location]);
+
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen relative">
       <PWAStatus />
