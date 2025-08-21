@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import * as React from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -14,7 +14,7 @@ type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: Theme;
   storageKey?: string;
-  userId?: string; // Add userId to sync with backend
+  userId?: string;
 };
 
 type ThemeProviderState = {
@@ -41,235 +41,121 @@ const initialState: ThemeProviderState = {
   error: null,
 };
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
   defaultTheme = "light",
   storageKey = "vite-ui-theme",
-  userId = "demo-user", // Default user for demo
-  ...props
+  userId = "demo-user",
 }: ThemeProviderProps) {
-  // Простая инициализация без функции
-  const [theme, setTheme] = useState<Theme>("light");
-  const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const errorTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [theme, setThemeState] = React.useState<Theme>("light");
+  const [preferences, setPreferences] = React.useState<UserPreferences>(initialState.preferences);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Load theme from localStorage immediately
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(storageKey) as Theme;
-    if (savedTheme && savedTheme !== "system") {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  // Load preferences from backend on mount
-  useEffect(() => {
-    const loadPreferences = async () => {
-      if (!userId) {
-        // Fallback to localStorage if no userId
-        const savedTheme = localStorage.getItem(storageKey) as Theme;
-        if (savedTheme) {
-          setTheme(savedTheme);
-          setPreferences(prev => ({ ...prev, theme: savedTheme }));
-        }
-        return;
+  // Load theme from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved && saved !== "system") {
+        setThemeState(saved as Theme);
       }
-
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/users/${userId}/preferences`);
-        if (response.ok) {
-          const userPrefs = await response.json();
-          // Используем только явно сохраненную тему, не system
-          const newTheme = userPrefs.theme === "system" ? "light" : (userPrefs.theme || "light");
-          setTheme(newTheme);
-          setPreferences({
-            theme: newTheme,
-            primaryColor: userPrefs.primaryColor || "#6366f1",
-            accentColor: userPrefs.accentColor || "#10b981",
-            backgroundColor: userPrefs.backgroundColor || null,
-            customCss: userPrefs.customCss || null,
-          });
-        } else {
-          // Use localStorage as fallback
-          const savedTheme = localStorage.getItem(storageKey) as Theme;
-          if (savedTheme) {
-            setTheme(savedTheme);
-            setPreferences(prev => ({ ...prev, theme: savedTheme }));
-          }
-        }
-      } catch (error) {
-        console.warn("Failed to load user preferences:", error);
-        // Use localStorage as fallback
-        const savedTheme = localStorage.getItem(storageKey) as Theme;
-        if (savedTheme) {
-          setTheme(savedTheme);
-          setPreferences(prev => ({ ...prev, theme: savedTheme }));
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPreferences();
-  }, [userId, defaultTheme, storageKey]);
-
-  // Apply theme and colors to DOM
-  useEffect(() => {
-    // Safety check - ensure we're in browser environment
-    if (typeof window === 'undefined' || !window.document) {
-      return;
+    } catch (e) {
+      console.warn("Failed to load theme from localStorage");
     }
+  }, [storageKey]);
 
+  // Apply theme to document
+  React.useEffect(() => {
     const root = window.document.documentElement;
-
-    try {
-      // Safety check for root element
-      if (!root || !root.classList || !root.style) {
-        throw new Error("DOM root element недоступен");
-      }
-
-      // Remove existing theme classes safely
-      root.classList.remove("light", "dark");
-
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-
-        root.classList.add(systemTheme);
-      } else {
-        root.classList.add(theme);
-      }
-
-      // Apply custom colors with validation
-      if (preferences.primaryColor && /^#[0-9A-Fa-f]{6}$/.test(preferences.primaryColor)) {
-        root.style.setProperty("--primary", preferences.primaryColor);
-      }
-      if (preferences.accentColor && /^#[0-9A-Fa-f]{6}$/.test(preferences.accentColor)) {
-        root.style.setProperty("--electric-green", preferences.accentColor);
-      }
-      if (preferences.backgroundColor && preferences.backgroundColor.match(/^#[0-9A-Fa-f]{6}$/)) {
-        root.style.setProperty("--background", preferences.backgroundColor);
-      }
-
-      // Apply custom CSS safely
-      if (!document.head) {
-        throw new Error("Document head недоступен");
-      }
-
-      let customStyleElement = document.getElementById("user-custom-styles");
-      if (preferences.customCss) {
-        if (!customStyleElement) {
-          customStyleElement = document.createElement("style");
-          customStyleElement.id = "user-custom-styles";
-          document.head.appendChild(customStyleElement);
-        }
-        customStyleElement.textContent = preferences.customCss;
-      } else if (customStyleElement && customStyleElement.parentNode) {
-        customStyleElement.parentNode.removeChild(customStyleElement);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка при обновлении темы";
-      console.warn("Failed to update theme class:", error);
-      setError(`Ошибка применения темы: ${errorMessage}`);
-      // Clear previous timer if exists
-      if (errorTimerRef.current) {
-        clearTimeout(errorTimerRef.current);
-      }
-      errorTimerRef.current = setTimeout(() => {
-        setError(null);
-        errorTimerRef.current = null;
-      }, 5000);
+    root.classList.remove("light", "dark");
+    
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
     }
-  }, [theme, preferences]);
+  }, [theme]);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (errorTimerRef.current) {
-        clearTimeout(errorTimerRef.current);
-      }
-    };
-  }, []);
-
-  const updatePreferences = async (newPreferences: Partial<UserPreferences>) => {
-    try {
-      setError(null); // Clear any previous errors
-      const updated = { ...preferences, ...newPreferences };
-      setPreferences(updated);
-
-    // Update theme if it changed
-    if (newPreferences.theme) {
-      setTheme(newPreferences.theme);
+  // Apply custom colors
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    
+    if (preferences.primaryColor) {
+      root.style.setProperty("--primary", preferences.primaryColor);
     }
+    
+    if (preferences.accentColor) {
+      root.style.setProperty("--accent", preferences.accentColor);
+    }
+    
+    if (preferences.backgroundColor) {
+      root.style.setProperty("--background", preferences.backgroundColor);
+    }
+  }, [preferences]);
 
-    // Save to localStorage immediately for offline support
-    localStorage.setItem(storageKey, updated.theme);
+  const setTheme = React.useCallback((newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem(storageKey, newTheme);
+  }, [storageKey]);
 
-    // Save to backend if userId is available
-    if (userId) {
-      try {
+  const updatePreferences = React.useCallback(async (newPrefs: Partial<UserPreferences>) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const updatedPrefs = { ...preferences, ...newPrefs };
+      setPreferences(updatedPrefs);
+      
+      if (newPrefs.theme !== undefined) {
+        setTheme(newPrefs.theme);
+      }
+      
+      // Save to backend
+      if (userId && userId !== "demo-user") {
         const response = await fetch(`/api/users/${userId}/preferences`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updated),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedPrefs),
         });
-
+        
         if (!response.ok) {
-          console.warn("Failed to save preferences to backend");
-          // Don't revert local changes - user sees immediate feedback
-          // Backend sync will be retried on next app load
+          throw new Error("Failed to save preferences");
         }
-      } catch (error) {
-        console.warn("Failed to sync preferences:", error);
-        // Don't revert local changes - offline support
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update preferences");
+      console.error("Failed to update preferences:", err);
+    } finally {
+      setIsLoading(false);
     }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка";
-      setError(`Ошибка сохранения настроек: ${errorMessage}`);
-      // Clear previous timer if exists
-      if (errorTimerRef.current) {
-        clearTimeout(errorTimerRef.current);
-      }
-      errorTimerRef.current = setTimeout(() => {
-        setError(null);
-        errorTimerRef.current = null;
-      }, 5000);
-      throw error; // Re-throw so UI components can handle it
-    }
-  };
+  }, [preferences, userId, setTheme]);
 
-  const value = {
-    theme,
-    preferences,
-    isLoading,
-    error,
-    setTheme: (newTheme: Theme) => {
-      updatePreferences({ theme: newTheme });
-    },
-    updatePreferences,
-  };
+  const value = React.useMemo(
+    () => ({
+      theme,
+      preferences,
+      setTheme,
+      updatePreferences,
+      isLoading,
+      error,
+    }),
+    [theme, preferences, setTheme, updatePreferences, isLoading, error]
+  );
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider value={value}>
       {children}
     </ThemeProviderContext.Provider>
   );
 }
 
 export const useTheme = () => {
-  const context = useContext(ThemeProviderContext);
-
-  if (context === undefined)
+  const context = React.useContext(ThemeProviderContext);
+  if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
-
+  }
   return context;
 };
