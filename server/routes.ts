@@ -463,6 +463,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/banners/all", async (req, res) => {
+    try {
+      const banners = await storage.getAllBanners();
+      res.json(banners);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch all banners" });
+    }
+  });
+
   app.get("/api/admin/banners", async (req, res) => {
     try {
       const banners = await storage.getAllBanners();

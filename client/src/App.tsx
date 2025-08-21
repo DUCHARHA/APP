@@ -18,6 +18,7 @@ import Help from "@/pages/help";
 import AdminLogin from "@/pages/admin-login";
 import AdminOrders from "@/pages/admin-orders";
 import Admin from "@/pages/admin";
+import AdminBanners from "@/pages/AdminBanners";
 import NotFound from "@/pages/not-found";
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
@@ -78,6 +79,7 @@ function Router() {
         <Route path="/payment-methods" component={PaymentMethods} />
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/admin/orders" component={AdminOrders} />
+        <Route path="/admin/banners" component={AdminBanners} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
