@@ -19,7 +19,11 @@ export default function AdminBanners() {
   const { toast } = useToast();
 
   const { data: banners = [], isLoading } = useQuery({
-    queryKey: ['/api/banners/all']
+    queryKey: ['/api/banners/all'],
+    staleTime: 0, // Always refetch fresh data
+    gcTime: 0, // No cache retention
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: true, // Always refetch on component mount
   });
 
   const createBannerMutation = useMutation({
