@@ -153,4 +153,17 @@
   .bg-bright-orange {
     background-color: var(--bright-orange);
   }
+
+  /* Стили для фиолетового фона заголовков */
+  .bg-\[#5B21B6\] {
+    background-color: #5B21B6 !important;
+  }
+
+  .text-\[#ffffff\] {
+    color: #ffffff !important;
+  }
+
+  .dark .bg-\[#5B21B6\] {
+    background-color: #5B21B6 !important;
+  }
 }
