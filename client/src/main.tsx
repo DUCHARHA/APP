@@ -1,79 +1,29 @@
-import { createRoot } from "react-dom/client";
-import App from "./App";
+import React from "react";
+import ReactDOM from "react-dom/client";
 import "./index.css";
-import { indexedDBService } from "./lib/indexeddb";
-import "./utils/pwa-debug";
 
-// Initialize IndexedDB
-indexedDBService.init().catch((error) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.error('IndexedDB init error:', error);
-  }
-});
-
-// Register Service Worker with aggressive update strategy
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('✅ Service Worker зарегистрирован:', registration);
-        }
-        
-        // Немедленно проверяем обновления
-        registration.update();
-        
-        // Обработчик новых версий Service Worker
-        registration.addEventListener('updatefound', () => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('🆕 Найдена новая версия Service Worker');
-          }
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (process.env.NODE_ENV === 'development') {
-                console.log('📊 Статус нового SW:', newWorker.state);
-              }
-              if (newWorker.state === 'installed') {
-                if (navigator.serviceWorker.controller) {
-                  // Автоматически активируем новую версию
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('⚡ Активируем новую версию Service Worker');
-                  }
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                } else {
-                  // Первая установка
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('🎉 Service Worker установлен впервые');
-                  }
-                }
-              }
-            });
-          }
-        });
-        
-        // Перезагружаем страницу при смене контроллера
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('🔄 Контроллер изменился, перезагружаем страницу');
-          }
-          window.location.reload();
-        });
-        
-        // Проверяем обновления при каждом обновлении страницы
-        window.addEventListener('beforeunload', () => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('🔄 Страница обновляется, проверяем обновления SW');
-          }
-          registration.update();
-        });
-      })
-      .catch((registrationError) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('❌ Ошибка регистрации Service Worker:', registrationError);
-        }
-      });
-  });
+// Простейший компонент для тестирования
+function TestApp() {
+  return (
+    <div className="p-4 min-h-screen bg-white">
+      <h1 className="text-2xl font-bold text-black mb-4">ДУЧАРХА работает!</h1>
+      <p className="text-gray-600 mb-4">Приложение React загружено успешно.</p>
+      <button 
+        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+        onClick={() => alert("Кнопка работает!")}
+      >
+        Тестовая кнопка
+      </button>
+      <div className="mt-8">
+        <a href="/catalog" className="text-blue-600 underline">Попробовать перейти в каталог</a>
+      </div>
+    </div>
+  );
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Монтируем приложение
+const container = document.getElementById("root");
+if (container) {
+  const root = ReactDOM.createRoot(container);
+  root.render(<TestApp />);
+}
