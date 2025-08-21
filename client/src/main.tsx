@@ -1,31 +1,59 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { indexedDBService } from "./lib/indexeddb";
+import "./utils/pwa-debug";
 
-console.log('🚀 Starting app initialization...');
+// Initialize IndexedDB
+indexedDBService.init().catch(console.error);
 
-// Service Worker temporarily disabled for debugging
-console.log('Service Worker отключен для диагностики');
-
-// Initialize IndexedDB in background (don't block app startup)
-import("./lib/indexeddb").then(({ indexedDBService }) => {
-  indexedDBService.init().catch(console.error);
-}).catch(console.error);
-
-// Add debug logging
-console.log('🎯 About to render React app...');
-
-const rootElement = document.getElementById("root");
-if (!rootElement) {
-  console.error('❌ Root element not found!');
-} else {
-  console.log('✅ Root element found, creating React root...');
-  try {
-    const root = createRoot(rootElement);
-    console.log('✅ React root created, rendering App...');
-    root.render(<App />);
-    console.log('✅ App rendered successfully!');
-  } catch (error) {
-    console.error('❌ Error creating/rendering React app:', error);
-  }
+// Register Service Worker with aggressive update strategy
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('✅ Service Worker зарегистрирован:', registration);
+        
+        // Немедленно проверяем обновления
+        registration.update();
+        
+        // Обработчик новых версий Service Worker
+        registration.addEventListener('updatefound', () => {
+          console.log('🆕 Найдена новая версия Service Worker');
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              console.log('📊 Статус нового SW:', newWorker.state);
+              if (newWorker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  // Автоматически активируем новую версию
+                  console.log('⚡ Активируем новую версию Service Worker');
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                } else {
+                  // Первая установка
+                  console.log('🎉 Service Worker установлен впервые');
+                }
+              }
+            });
+          }
+        });
+        
+        // Перезагружаем страницу при смене контроллера
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('🔄 Контроллер изменился, перезагружаем страницу');
+          window.location.reload();
+        });
+        
+        // Проверяем обновления при каждом обновлении страницы
+        window.addEventListener('beforeunload', () => {
+          console.log('🔄 Страница обновляется, проверяем обновления SW');
+          registration.update();
+        });
+      })
+      .catch((registrationError) => {
+        console.error('❌ Ошибка регистрации Service Worker:', registrationError);
+      });
+  });
 }
+
+createRoot(document.getElementById("root")!).render(<App />);
