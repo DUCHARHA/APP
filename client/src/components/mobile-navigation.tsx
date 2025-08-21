@@ -1,11 +1,21 @@
 import { Link, useLocation } from "wouter";
 import { Home, Grid, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 export default function MobileNavigation() {
   const [location] = useLocation();
   const { totalItems } = useCart();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
   
   // Prevent rapid navigation clicks
   const handleNavigation = useCallback((e: React.MouseEvent) => {
@@ -15,8 +25,15 @@ export default function MobileNavigation() {
       return;
     }
     target.style.pointerEvents = 'none';
-    setTimeout(() => {
+    
+    // Clear previous timeout if exists
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
       target.style.pointerEvents = 'auto';
+      timeoutRef.current = null;
     }, 300);
   }, []);
 

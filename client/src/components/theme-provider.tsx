@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -54,6 +54,7 @@ export function ThemeProvider({
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load preferences from backend on mount
   useEffect(() => {
@@ -90,7 +91,7 @@ export function ThemeProvider({
           }
         }
       } catch (error) {
-        console.error("Failed to load user preferences:", error);
+        console.warn("Failed to load user preferences:", error);
         // Use localStorage as fallback
         const savedTheme = localStorage.getItem(storageKey) as Theme;
         if (savedTheme) {
@@ -165,9 +166,25 @@ export function ThemeProvider({
       const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка при обновлении темы";
       console.warn("Failed to update theme class:", error);
       setError(`Ошибка применения темы: ${errorMessage}`);
-      setTimeout(() => setError(null), 5000); // Clear error after 5 seconds
+      // Clear previous timer if exists
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+      }
+      errorTimerRef.current = setTimeout(() => {
+        setError(null);
+        errorTimerRef.current = null;
+      }, 5000);
     }
   }, [theme, preferences]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+      }
+    };
+  }, []);
 
   const updatePreferences = async (newPreferences: Partial<UserPreferences>) => {
     try {
@@ -195,19 +212,26 @@ export function ThemeProvider({
         });
 
         if (!response.ok) {
-          console.error("Failed to save preferences to backend");
+          console.warn("Failed to save preferences to backend");
           // Don't revert local changes - user sees immediate feedback
           // Backend sync will be retried on next app load
         }
       } catch (error) {
-        console.error("Failed to sync preferences:", error);
+        console.warn("Failed to sync preferences:", error);
         // Don't revert local changes - offline support
       }
     }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка";
       setError(`Ошибка сохранения настроек: ${errorMessage}`);
-      setTimeout(() => setError(null), 5000);
+      // Clear previous timer if exists
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+      }
+      errorTimerRef.current = setTimeout(() => {
+        setError(null);
+        errorTimerRef.current = null;
+      }, 5000);
       throw error; // Re-throw so UI components can handle it
     }
   };

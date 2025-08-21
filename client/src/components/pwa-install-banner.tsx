@@ -27,14 +27,13 @@ export default function PWAInstallBanner() {
 
     // Check if this is a mobile device
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile && deferredPrompt) {
-      setShowBanner(true);
-    }
+    // Banner will be shown when beforeinstallprompt fires
+    // No need to check deferredPrompt here as it's null on mount
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, [deferredPrompt]);
+  }, []); // Remove deferredPrompt dependency to prevent unnecessary re-renders
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
@@ -50,12 +49,12 @@ export default function PWAInstallBanner() {
       const { outcome } = await deferredPrompt.userChoice;
       
       if (outcome === "accepted") {
-        console.log('PWA установлено!');
+        // PWA successfully installed
         setShowBanner(false);
         localStorage.setItem('pwa-install-banner-dismissed', 'true');
       }
     } catch (error) {
-      console.error('Ошибка установки PWA:', error);
+      console.warn('Ошибка установки PWA:', error);
     } finally {
       setIsInstalling(false);
       setDeferredPrompt(null);

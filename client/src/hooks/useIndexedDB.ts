@@ -1,51 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { indexedDBService, CartItem, Order, Address, PaymentMethod, UserProfile } from '@/lib/indexeddb';
 
 export function useCart() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadCart();
-  }, []);
-
-  const loadCart = async () => {
+  const loadCart = useCallback(async () => {
     try {
       const cartItems = await indexedDBService.getCart();
       setCart(cartItems);
     } catch (error) {
-      console.error('Error loading cart:', error);
+      console.warn('Error loading cart:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addToCart = async (item: CartItem) => {
+  useEffect(() => {
+    loadCart();
+  }, [loadCart]);
+
+  const addToCart = useCallback(async (item: CartItem) => {
     try {
       await indexedDBService.addToCart(item);
       await loadCart();
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      console.warn('Error adding to cart:', error);
+      throw error; // Re-throw for UI to handle
     }
-  };
+  }, [loadCart]);
 
-  const updateCartItem = async (productId: string, quantity: number) => {
+  const updateCartItem = useCallback(async (productId: string, quantity: number) => {
     try {
       await indexedDBService.updateCartItem(productId, quantity);
       await loadCart();
     } catch (error) {
-      console.error('Error updating cart item:', error);
+      console.warn('Error updating cart item:', error);
+      throw error;
     }
-  };
+  }, [loadCart]);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     try {
       await indexedDBService.clearCart();
       setCart([]);
     } catch (error) {
-      console.error('Error clearing cart:', error);
+      console.warn('Error clearing cart:', error);
+      throw error;
     }
-  };
+  }, []);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -66,29 +69,30 @@ export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       const ordersList = await indexedDBService.getOrders();
       setOrders(ordersList);
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.warn('Error loading orders:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const saveOrder = async (order: Order) => {
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const saveOrder = useCallback(async (order: Order) => {
     try {
       await indexedDBService.saveOrder(order);
       await loadOrders();
     } catch (error) {
-      console.error('Error saving order:', error);
+      console.warn('Error saving order:', error);
+      throw error;
     }
-  };
+  }, [loadOrders]);
 
   return {
     orders,
@@ -102,29 +106,30 @@ export function useProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const userProfile = await indexedDBService.getProfile();
       setProfile(userProfile);
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.warn('Error loading profile:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const saveProfile = async (profile: UserProfile) => {
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  const saveProfile = useCallback(async (profile: UserProfile) => {
     try {
       await indexedDBService.saveProfile(profile);
       setProfile(profile);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.warn('Error saving profile:', error);
+      throw error;
     }
-  };
+  }, []);
 
   return {
     profile,
@@ -138,38 +143,40 @@ export function useAddresses() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadAddresses();
-  }, []);
-
-  const loadAddresses = async () => {
+  const loadAddresses = useCallback(async () => {
     try {
       const addressList = await indexedDBService.getAddresses();
       setAddresses(addressList);
     } catch (error) {
-      console.error('Error loading addresses:', error);
+      console.warn('Error loading addresses:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const saveAddress = async (address: Address) => {
+  useEffect(() => {
+    loadAddresses();
+  }, [loadAddresses]);
+
+  const saveAddress = useCallback(async (address: Address) => {
     try {
       await indexedDBService.saveAddress(address);
       await loadAddresses();
     } catch (error) {
-      console.error('Error saving address:', error);
+      console.warn('Error saving address:', error);
+      throw error;
     }
-  };
+  }, [loadAddresses]);
 
-  const deleteAddress = async (id: string) => {
+  const deleteAddress = useCallback(async (id: string) => {
     try {
       await indexedDBService.deleteAddress(id);
       await loadAddresses();
     } catch (error) {
-      console.error('Error deleting address:', error);
+      console.warn('Error deleting address:', error);
+      throw error;
     }
-  };
+  }, [loadAddresses]);
 
   return {
     addresses,
@@ -184,38 +191,40 @@ export function usePaymentMethods() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadPaymentMethods();
-  }, []);
-
-  const loadPaymentMethods = async () => {
+  const loadPaymentMethods = useCallback(async () => {
     try {
       const methods = await indexedDBService.getPaymentMethods();
       setPaymentMethods(methods);
     } catch (error) {
-      console.error('Error loading payment methods:', error);
+      console.warn('Error loading payment methods:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const savePaymentMethod = async (method: PaymentMethod) => {
+  useEffect(() => {
+    loadPaymentMethods();
+  }, [loadPaymentMethods]);
+
+  const savePaymentMethod = useCallback(async (method: PaymentMethod) => {
     try {
       await indexedDBService.savePaymentMethod(method);
       await loadPaymentMethods();
     } catch (error) {
-      console.error('Error saving payment method:', error);
+      console.warn('Error saving payment method:', error);
+      throw error;
     }
-  };
+  }, [loadPaymentMethods]);
 
-  const deletePaymentMethod = async (id: string) => {
+  const deletePaymentMethod = useCallback(async (id: string) => {
     try {
       await indexedDBService.deletePaymentMethod(id);
       await loadPaymentMethods();
     } catch (error) {
-      console.error('Error deleting payment method:', error);
+      console.warn('Error deleting payment method:', error);
+      throw error;
     }
-  };
+  }, [loadPaymentMethods]);
 
   return {
     paymentMethods,
