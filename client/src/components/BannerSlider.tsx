@@ -12,9 +12,9 @@ export function BannerSlider() {
     queryKey: ['/api/banners'],
     staleTime: 0, // Always consider data stale - refetch on mount
     gcTime: 0, // No cache retention
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnMount: true, // Always refetch on component mount
-    // No refetchInterval - only updates on page load/refresh/focus
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    refetchOnMount: true, // Only refetch on page load/refresh
+    // No automatic updates - only on page load/refresh
   });
 
   const visibleBanners = banners;

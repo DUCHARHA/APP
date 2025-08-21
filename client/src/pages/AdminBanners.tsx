@@ -22,8 +22,8 @@ export default function AdminBanners() {
     queryKey: ['/api/banners/all'],
     staleTime: 0, // Always refetch fresh data
     gcTime: 0, // No cache retention
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnMount: true, // Always refetch on component mount
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    refetchOnMount: true, // Only refetch on page load/refresh
   });
 
   const createBannerMutation = useMutation({

@@ -71,7 +71,7 @@ The application implements comprehensive PWA capabilities:
 
 ## State Management
 Client-side state is managed through:
-- **React Query** for server state with minimal caching (updates on page load/refresh/focus only)
+- **React Query** for server state with minimal caching (updates only on page load/refresh)
 - **Local component state** for UI interactions
 - **Custom hooks** for shared business logic (cart, geolocation)
 - **Context providers** for global UI state (toasts, tooltips)
