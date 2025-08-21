@@ -50,10 +50,9 @@ export function ThemeProvider({
   userId = "demo-user", // Default user for demo
   ...props
 }: ThemeProviderProps) {
-  // Всегда используем light тему как default, чтобы избежать случайного переключения
-  const [theme, setTheme] = useState<Theme>(
-    () => localStorage.getItem(storageKey) as Theme || "light"
-  );
+  // Получаем сохраненную тему из localStorage или используем "light" по умолчанию
+  const savedTheme = typeof window !== 'undefined' ? localStorage.getItem(storageKey) as Theme : null;
+  const [theme, setTheme] = useState<Theme>(savedTheme || "light");
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
