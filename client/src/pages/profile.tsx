@@ -67,7 +67,7 @@ export default function Profile() {
     <main className="pb-20">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="flex items-center p-4">
+        <div className="flex items-center p-4 text-[#5B21B6]">
           <Link href="/">
             <button className="mr-3 p-2 -ml-2">
               <ArrowLeft className="w-6 h-6 text-gray-600" />
@@ -76,7 +76,6 @@ export default function Profile() {
           <h1 className="text-xl font-bold text-gray-900">Профиль</h1>
         </div>
       </header>
-
       {/* User Info */}
       <section className="p-4">
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -97,10 +96,6 @@ export default function Profile() {
           </div>
         </div>
       </section>
-
-
-      
-
       {/* Menu Items */}
       <section className="px-4 pb-4">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -120,7 +115,6 @@ export default function Profile() {
           ))}
         </div>
       </section>
-
       {/* Promo Section */}
       <section className="px-4 pb-4">
         <div className="bg-gradient-to-r from-agent-purple to-purple-600 rounded-xl p-4 text-white">
@@ -133,7 +127,6 @@ export default function Profile() {
           </Button>
         </div>
       </section>
-
       {/* Logout */}
       <section className="px-4 pb-8">
         <button className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center justify-center space-x-2 text-red-500">
