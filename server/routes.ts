@@ -481,6 +481,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/banners", async (req, res) => {
+    try {
+      const bannerData = insertBannerSchema.parse(req.body);
+      const banner = await storage.createBanner(bannerData);
+      
+      // Invalidate banner cache when created
+      dataCache.delete('banners_active');
+      
+      res.status(201).json(banner);
+    } catch (error: any) {
+      console.error("Banner create error:", error);
+      res.status(400).json({ error: "Invalid banner data", details: error.message });
+    }
+  });
+
   app.post("/api/admin/banners", async (req, res) => {
     try {
       const bannerData = insertBannerSchema.parse(req.body);
@@ -488,6 +503,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(banner);
     } catch (error) {
       res.status(400).json({ error: "Invalid banner data" });
+    }
+  });
+
+  app.patch("/api/banners/:id", async (req, res) => {
+    try {
+      const bannerData = insertBannerSchema.partial().parse(req.body);
+      const banner = await storage.updateBanner(req.params.id, bannerData);
+      if (!banner) {
+        return res.status(404).json({ error: "Banner not found" });
+      }
+      
+      // Invalidate banner cache when updated
+      dataCache.delete('banners_active');
+      
+      res.json(banner);
+    } catch (error: any) {
+      console.error("Banner update error:", error);
+      res.status(400).json({ error: "Invalid banner data", details: error.message });
     }
   });
 
@@ -501,6 +534,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(banner);
     } catch (error) {
       res.status(400).json({ error: "Invalid banner data" });
+    }
+  });
+
+  app.delete("/api/banners/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteBanner(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Banner not found" });
+      }
+      
+      // Invalidate banner cache when deleted
+      dataCache.delete('banners_active');
+      
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Banner delete error:", error);
+      res.status(500).json({ error: "Failed to delete banner", details: error.message });
     }
   });
 
