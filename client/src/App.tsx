@@ -91,16 +91,32 @@ function Router() {
 }
 
 function App() {
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
+  console.log('🎨 App component rendering...');
+  
+  try {
+    return (
+      <div style={{ padding: '20px', backgroundColor: '#f0f0f0' }}>
+        <h1 style={{ color: 'black' }}>ТЕСТ - Приложение запускается!</h1>
+        <p style={{ color: 'black' }}>Если вы видите этот текст, React работает</p>
+        <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </div>
+    );
+  } catch (error) {
+    console.error('❌ Ошибка в App component:', error);
+    return (
+      <div style={{ padding: '20px', backgroundColor: '#ffcccc' }}>
+        <h1 style={{ color: 'red' }}>ОШИБКА ПРИЛОЖЕНИЯ</h1>
+        <p style={{ color: 'red' }}>Проблема: {String(error)}</p>
+      </div>
+    );
+  }
 }
 
 export default App;
