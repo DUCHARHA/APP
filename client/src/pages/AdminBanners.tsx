@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Pencil, Plus, Trash2, Eye, EyeOff, RefreshCw } from "lucide-react";
 import type { Banner } from "@shared/schema";
 
 export default function AdminBanners() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
   const { data: banners = [], isLoading } = useQuery({
@@ -45,10 +46,15 @@ export default function AdminBanners() {
       headers: { 'Content-Type': 'application/json' }
     }).then(res => res.json()),
     onSuccess: () => {
+      // Force invalidate all banner caches
       queryClient.invalidateQueries({ queryKey: ['/api/banners'] });
       queryClient.invalidateQueries({ queryKey: ['/api/banners/all'] });
+      queryClient.refetchQueries({ queryKey: ['/api/banners'] });
       setEditingBanner(null);
-      toast({ title: "Баннер обновлен", description: "Изменения сохранены" });
+      toast({ 
+        title: "Баннер обновлен", 
+        description: "Изменения сохранены. Обновите главную страницу для просмотра." 
+      });
     },
     onError: () => {
       toast({ title: "Ошибка", description: "Не удалось обновить баннер", variant: "destructive" });
@@ -115,6 +121,31 @@ export default function AdminBanners() {
       id: banner.id,
       isActive: !banner.isActive
     });
+  };
+
+  const forceRefreshCache = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate all banner caches
+      await queryClient.invalidateQueries({ queryKey: ['/api/banners'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/banners/all'] });
+      // Force refetch
+      await queryClient.refetchQueries({ queryKey: ['/api/banners'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/banners/all'] });
+      
+      toast({ 
+        title: "Кеш обновлен", 
+        description: "Изменения должны быть видны на главной странице" 
+      });
+    } catch (error) {
+      toast({ 
+        title: "Ошибка", 
+        description: "Не удалось обновить кеш", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const BannerForm = ({ banner, onSubmit, isLoading }: { banner?: Banner; onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; isLoading: boolean }) => (
@@ -291,23 +322,34 @@ export default function AdminBanners() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Управление баннерами</h1>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-create-banner">
-              <Plus className="w-4 h-4 mr-2" />
-              Создать баннер
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Создать новый баннер</DialogTitle>
-            </DialogHeader>
-            <BannerForm
-              onSubmit={handleCreateSubmit}
-              isLoading={createBannerMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={forceRefreshCache} 
+            disabled={isRefreshing}
+            data-testid="button-refresh-cache"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? "Обновление..." : "Обновить кеш"}
+          </Button>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-create-banner">
+                <Plus className="w-4 h-4 mr-2" />
+                Создать баннер
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Создать новый баннер</DialogTitle>
+              </DialogHeader>
+              <BannerForm
+                onSubmit={handleCreateSubmit}
+                isLoading={createBannerMutation.isPending}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-4">

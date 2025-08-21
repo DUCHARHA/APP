@@ -10,9 +10,11 @@ export function BannerSlider() {
 
   const { data: banners = [] } = useQuery<Banner[]>({
     queryKey: ['/api/banners'],
-    refetchInterval: 10000, // Refetch every 10 seconds for admin changes
-    staleTime: 5000, // Consider data fresh for 5 seconds only
-    gcTime: 30000, // Keep in cache for 30 seconds
+    refetchInterval: 2000, // Refetch every 2 seconds for instant admin changes
+    staleTime: 0, // Always consider data stale - always refetch
+    gcTime: 5000, // Keep in cache for 5 seconds only
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: true, // Always refetch on component mount
   });
 
   const visibleBanners = banners;
