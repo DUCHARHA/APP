@@ -104,16 +104,16 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
-        <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
           <TooltipProvider>
             <Toaster />
             <Router />
           </TooltipProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
