@@ -1,4 +1,4 @@
-import * as React from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -41,33 +41,31 @@ const initialState: ThemeProviderState = {
   error: null,
 };
 
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState);
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
   defaultTheme = "light",
   storageKey = "vite-ui-theme",
   userId = "demo-user",
+  ...props
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<Theme>("light");
-  const [preferences, setPreferences] = React.useState<UserPreferences>(initialState.preferences);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [theme, setTheme] = useState<Theme>("light");
+  const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const errorTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load theme from localStorage on mount
-  React.useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved && saved !== "system") {
-        setThemeState(saved as Theme);
-      }
-    } catch (e) {
-      console.warn("Failed to load theme from localStorage");
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    if (savedTheme && savedTheme !== "system") {
+      setTheme(savedTheme);
     }
-  }, [storageKey]);
+  }, []);
 
   // Apply theme to document
-  React.useEffect(() => {
+  useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     
@@ -80,7 +78,7 @@ export function ThemeProvider({
   }, [theme]);
 
   // Apply custom colors
-  React.useEffect(() => {
+  useEffect(() => {
     const root = window.document.documentElement;
     
     if (preferences.primaryColor) {
@@ -94,14 +92,24 @@ export function ThemeProvider({
     if (preferences.backgroundColor) {
       root.style.setProperty("--background", preferences.backgroundColor);
     }
+    
+    if (preferences.customCss) {
+      let styleElement = document.getElementById("user-custom-styles") as HTMLStyleElement;
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = "user-custom-styles";
+        document.head.appendChild(styleElement);
+      }
+      styleElement.textContent = preferences.customCss;
+    }
   }, [preferences]);
 
-  const setTheme = React.useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
+  const handleSetTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
     localStorage.setItem(storageKey, newTheme);
-  }, [storageKey]);
+  };
 
-  const updatePreferences = React.useCallback(async (newPrefs: Partial<UserPreferences>) => {
+  const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -110,7 +118,7 @@ export function ThemeProvider({
       setPreferences(updatedPrefs);
       
       if (newPrefs.theme !== undefined) {
-        setTheme(newPrefs.theme);
+        handleSetTheme(newPrefs.theme);
       }
       
       // Save to backend
@@ -128,33 +136,38 @@ export function ThemeProvider({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update preferences");
       console.error("Failed to update preferences:", err);
+      
+      // Clear error after 5 seconds
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+      }
+      errorTimerRef.current = setTimeout(() => {
+        setError(null);
+      }, 5000);
     } finally {
       setIsLoading(false);
     }
-  }, [preferences, userId, setTheme]);
+  };
 
-  const value = React.useMemo(
-    () => ({
-      theme,
-      preferences,
-      setTheme,
-      updatePreferences,
-      isLoading,
-      error,
-    }),
-    [theme, preferences, setTheme, updatePreferences, isLoading, error]
-  );
+  const value = {
+    theme,
+    preferences,
+    setTheme: handleSetTheme,
+    updatePreferences,
+    isLoading,
+    error,
+  };
 
   return (
-    <ThemeProviderContext.Provider value={value}>
+    <ThemeProviderContext.Provider {...props} value={value}>
       {children}
     </ThemeProviderContext.Provider>
   );
 }
 
 export const useTheme = () => {
-  const context = React.useContext(ThemeProviderContext);
-  if (!context) {
+  const context = useContext(ThemeProviderContext);
+  if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
