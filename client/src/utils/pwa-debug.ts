@@ -1,5 +1,7 @@
 // PWA Debug utilities
 export function debugPWAStatus() {
+  if (process.env.NODE_ENV !== 'development') return () => {};
+  
   console.log('=== PWA DEBUG INFO ===');
   
   // Check service worker
@@ -69,7 +71,7 @@ export function debugPWAStatus() {
 }
 
 // Auto-run debug in development
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   let cleanupFn: (() => void) | null = null;
   const timeoutId = setTimeout(() => {
     cleanupFn = debugPWAStatus();
