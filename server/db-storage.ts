@@ -202,12 +202,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
-    const result = await db.insert(userPreferences).values(preferences).returning();
+    const result = await db.insert(userPreferences).values({
+      ...preferences,
+      updatedAt: new Date().toISOString()
+    }).returning();
     return result[0];
   }
 
   async updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
-    const result = await db.update(userPreferences).set(preferences).where(eq(userPreferences.userId, userId)).returning();
+    const result = await db.update(userPreferences)
+      .set({
+        ...preferences,
+        updatedAt: new Date().toISOString()
+      })
+      .where(eq(userPreferences.userId, userId))
+      .returning();
     return result[0];
   }
 
@@ -371,4 +380,6 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(banners).where(eq(banners.id, id));
     return result.rowCount > 0;
   }
+
+
 }
