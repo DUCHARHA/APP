@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
-import { ErrorBoundary } from "@/components/error-boundary";
+// import { ErrorBoundary } from "@/components/error-boundary";
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import("@/pages/home"));
@@ -104,16 +104,14 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <ErrorBoundary>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </ErrorBoundary>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
