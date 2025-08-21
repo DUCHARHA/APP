@@ -44,7 +44,7 @@ export default function Admin() {
 
   const sendNotification = async () => {
     try {
-      await apiRequest('/api/notifications', 'POST', notificationData);
+      await apiRequest('POST', '/api/notifications', notificationData);
       
       // Invalidate notification queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
@@ -80,10 +80,11 @@ export default function Admin() {
         deliveryAddress: "ул. Пушкина, 25"
       };
       
-      const order = await apiRequest('/api/orders', 'POST', orderData);
+      const orderResponse = await apiRequest('POST', '/api/orders', orderData);
+      const order = await orderResponse.json();
       
       // Then update its status to trigger notification
-      await apiRequest(`/api/admin/orders/${order.id}/status`, 'PATCH', { status: "confirmed" });
+      await apiRequest('PATCH', `/api/admin/orders/${order.id}/status`, { status: "confirmed" });
       
       // Invalidate notification queries
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
@@ -111,13 +112,13 @@ export default function Admin() {
       };
       
       if (editingBanner) {
-        await apiRequest(`/api/admin/banners/${editingBanner.id}`, 'PUT', dataToSend);
+        await apiRequest('PUT', `/api/admin/banners/${editingBanner.id}`, dataToSend);
         toast({
           title: "Баннер обновлен",
           description: "Баннер успешно обновлен"
         });
       } else {
-        await apiRequest('/api/admin/banners', 'POST', dataToSend);
+        await apiRequest('POST', '/api/admin/banners', dataToSend);
         toast({
           title: "Баннер создан",
           description: "Баннер успешно создан"
@@ -431,7 +432,7 @@ export default function Admin() {
                       <span>Приоритет: {banner.priority}</span>
                       <div 
                         className="w-4 h-4 rounded border"
-                        style={{ backgroundColor: banner.backgroundColor }}
+                        style={{ backgroundColor: banner.backgroundColor || '#6366f1' }}
                       />
                       <span>{banner.backgroundColor}</span>
                     </div>

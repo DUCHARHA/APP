@@ -99,8 +99,8 @@ export default function Profile() {
       {/* Menu Items */}
       <section className="px-4 pb-4">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {menuItems.map((item, index) => (
-            <Link key={index} href={item.href}>
+          {menuItems.map((item) => (
+            <Link key={item.href} href={item.href}>
               <button className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                   <item.icon className="w-5 h-5 text-gray-600" />

@@ -41,15 +41,18 @@ export function debugPWAStatus() {
   
   // Check if beforeinstallprompt is supported
   let installPromptSupported = false;
-  window.addEventListener('beforeinstallprompt', () => {
+  const handleInstallPrompt = () => {
     installPromptSupported = true;
     console.log('beforeinstallprompt event fired - PWA is installable!');
-  });
+  };
+  window.addEventListener('beforeinstallprompt', handleInstallPrompt);
   
-  setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     if (!installPromptSupported) {
       console.log('beforeinstallprompt: Not fired (may already be installed or not installable)');
     }
+    // Cleanup event listener after check
+    window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
   }, 2000);
   
   // Check HTTPS
@@ -57,9 +60,24 @@ export function debugPWAStatus() {
   console.log('Is HTTPS:', location.protocol === 'https:');
   
   console.log('=== END PWA DEBUG ===');
+  
+  // Return cleanup function
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+  };
 }
 
 // Auto-run debug in development
 if (typeof window !== 'undefined') {
-  setTimeout(debugPWAStatus, 1000);
+  let cleanupFn: (() => void) | null = null;
+  const timeoutId = setTimeout(() => {
+    cleanupFn = debugPWAStatus();
+  }, 1000);
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    clearTimeout(timeoutId);
+    if (cleanupFn) cleanupFn();
+  });
 }

@@ -77,8 +77,8 @@ export default function Help() {
           Частые вопросы
         </h3>
         <div className="space-y-3">
-          {faqItems.map((item, index) => (
-            <details key={index} className="bg-white dark:bg-card rounded-xl shadow-sm">
+          {faqItems.map((item) => (
+            <details key={item.question} className="bg-white dark:bg-card rounded-xl shadow-sm">
               <summary className="p-4 cursor-pointer font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl">
                 {item.question}
               </summary>
