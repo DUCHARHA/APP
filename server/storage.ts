@@ -700,6 +700,31 @@ export class MemStorage implements IStorage {
     sampleOrders.forEach(order => {
       this.orders.set(order.id, order);
     });
+
+    // Create demo user
+    const demoUser: User = {
+      id: "demo-user",
+      username: "demo",
+      email: "demo@example.com",
+      phone: "+992 12 345 6789",
+      address: "ул. Рудаки, 25, кв. 10, Душанбе",
+      createdAt: new Date().toISOString()
+    };
+    this.users.set(demoUser.id, demoUser);
+
+    // Create user preferences for demo user
+    const demoPreferences: UserPreferences = {
+      id: randomUUID(),
+      userId: "demo-user",
+      theme: "light",
+      primaryColor: "#6366f1",
+      accentColor: "#10b981",
+      backgroundColor: null,
+      customCss: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.userPreferences.set(demoPreferences.id, demoPreferences);
   }
 
   async getUser(id: string): Promise<User | undefined> {
