@@ -7,7 +7,7 @@ import ProductCard from "@/components/product-card";
 import PWAInstallBanner from "@/components/pwa-install-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/NotificationBell";
-import { ColorCustomizer } from "@/components/color-customizer";
+
 import { BannerSlider } from "@/components/BannerSlider";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCart } from "@/hooks/use-cart";
@@ -133,7 +133,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <ColorCustomizer />
+            
             <ThemeToggle />
             <NotificationBell userId="demo-user" />
           </div>
