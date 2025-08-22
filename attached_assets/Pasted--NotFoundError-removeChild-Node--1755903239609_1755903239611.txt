@@ -1,0 +1,20 @@
+ехническая информация
+NotFoundError: Не удалось выполнить «removeChild» для «Node»: Узел, который необходимо удалить, не является дочерним для этого узла.
+    в промежутке
+    в див
+    в див
+    в разделе
+    при captureCommitPhaseError (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=9e119760:19577:33)
+    в див
+    на главном
+    при captureCommitPhaseError (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=9e119760:19577:33)
+    на маршруте (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9e119760:323:16)
+    на Switch (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9e119760:379:17)
+    в див
+    на маршрутизаторе (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/src/App.tsx?v=a-Ig8EuNnVMB_wiR09WCn:47:22)
+    у провайдера (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPGI7GEH.js?v=9e119760:48:15)
+    в TooltipProvider (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9e119760:61:5)
+    в QueryClientProvider (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=9e119760:2805:3)
+    на ThemeProvider (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/src/components/theme-provider.tsx:36:3)
+    в ErrorBoundary (https://7d91db0e-ec48-4845-b7a3-392af836065b-00-3px1wb53qc7n3.pike.replit.dev/src/components/error-boundary.tsx:23:5)
+    в приложении
