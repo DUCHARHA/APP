@@ -828,10 +828,14 @@ export class MemStorage implements IStorage {
 
   async getCartItems(userId: string): Promise<(CartItem & { product: Product })[]> {
     const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId);
-    return userCartItems.map(item => {
-      const product = this.products.get(item.productId!);
-      return { ...item, product: product! };
-    }).filter(item => item.product);
+    return userCartItems
+      .map(item => {
+        if (!item.productId) return null;
+        const product = this.products.get(item.productId);
+        if (!product) return null;
+        return { ...item, product };
+      })
+      .filter((item): item is (CartItem & { product: Product }) => item !== null);
   }
 
   async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
