@@ -22,6 +22,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedPromo, setCopiedPromo] = useState(false);
   const [isSearchSticky, setIsSearchSticky] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
   const { location, error: locationError } = useGeolocation();
   const { totalItems } = useCart();
   const { appliedPromo } = usePromo();
@@ -34,17 +35,27 @@ export default function Home() {
       setTimeout(() => setCopiedPromo(false), 2000);
 
     } catch (err) {
-      // Fallback for older browsers
+      // Fallback for older browsers - use try-finally to ensure cleanup
       const textArea = document.createElement("textarea");
       textArea.value = promoCode;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+      textArea.style.position = "fixed";
+      textArea.style.top = "-9999px";
+      textArea.style.left = "-9999px";
+      
+      try {
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+      } finally {
+        // Ensure safe removal - check if element is actually in the DOM
+        if (textArea.parentNode === document.body) {
+          document.body.removeChild(textArea);
+        }
+      }
 
       setCopiedPromo(true);
       setTimeout(() => setCopiedPromo(false), 2000);
-
     }
   };
 
@@ -239,7 +250,7 @@ export default function Home() {
             {categories.slice(4).map((category) => (
               <Link key={category.id} href={`/catalog/${category.id}`}>
                 <button className="w-full bg-white dark:bg-card rounded-xl p-4 shadow-sm flex items-center card-hover">
-                  {!category.imageUrl ? (
+                  {!category.imageUrl || brokenImages.has(category.id) ? (
                     <div className="w-12 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-4">
                       <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
                     </div>
@@ -248,17 +259,15 @@ export default function Home() {
                       src={category.imageUrl}
                       alt={category.name}
                       className="w-12 h-9 rounded-lg object-cover mr-4"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const placeholder = target.nextElementSibling as HTMLDivElement;
-                        if (placeholder) placeholder.style.display = 'flex';
+                      onError={() => {
+                        setBrokenImages(prev => {
+                          const newSet = new Set(prev);
+                          newSet.add(category.id);
+                          return newSet;
+                        });
                       }}
                     />
                   )}
-                  <div className="w-12 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 items-center justify-center mr-4" style={{display: 'none'}}>
-                    <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
-                  </div>
                   <div className="flex-1 text-left">
                     <h4 className="font-medium text-gray-900 dark:text-gray-100">{category.name}</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Широкий выбор товаров</p>
