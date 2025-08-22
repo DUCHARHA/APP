@@ -55,6 +55,7 @@ export function ThemeProvider({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const errorTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isUnmountedRef = useRef(false);
 
   // Load preferences from backend on mount
   useEffect(() => {
@@ -108,8 +109,8 @@ export function ThemeProvider({
 
   // Apply theme and colors to DOM
   useEffect(() => {
-    // Safety check - ensure we're in browser environment
-    if (typeof window === 'undefined' || !window.document) {
+    // Safety check - ensure we're in browser environment and component is still mounted
+    if (typeof window === 'undefined' || !window.document || isUnmountedRef.current) {
       return;
     }
 
@@ -159,8 +160,15 @@ export function ThemeProvider({
           document.head.appendChild(customStyleElement);
         }
         customStyleElement.textContent = preferences.customCss;
-      } else if (customStyleElement && customStyleElement.parentNode) {
-        customStyleElement.parentNode.removeChild(customStyleElement);
+      } else if (customStyleElement) {
+        // Safe removal - check if element is still in DOM and has correct parent
+        try {
+          if (customStyleElement.parentNode === document.head) {
+            document.head.removeChild(customStyleElement);
+          }
+        } catch (removeError) {
+          console.warn("Safe removal failed, element may have been removed already:", removeError);
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка при обновлении темы";
@@ -180,6 +188,7 @@ export function ThemeProvider({
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
+      isUnmountedRef.current = true;
       if (errorTimerRef.current) {
         clearTimeout(errorTimerRef.current);
       }
