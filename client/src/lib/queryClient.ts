@@ -62,20 +62,21 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: (failureCount, error) => {
-        // Don't retry on 4xx errors (client errors)
-        if (error && typeof error === 'object' && 'message' in error) {
-          const errorMessage = error.message as string;
-          if (errorMessage.startsWith('4')) return false;
+      retry: (failureCount, error: any) => {
+        // Не повторять попытки для 4xx ошибок
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
         }
-        // Retry network errors up to 2 times
-        return failureCount < 2;
+        return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
     mutations: {
+      onError: (error: any) => {
+        console.error('Mutation error:', error);
+        // Здесь можно добавить уведомления об ошибках
+      },
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
         if (error && typeof error === 'object' && 'message' in error) {

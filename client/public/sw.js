@@ -1,224 +1,123 @@
-// Версия кэша - заменяется при сборке
-const CACHE_VERSION = '__BUILD_VERSION__';
-const CACHE_NAME = `ducharha-pwa-${CACHE_VERSION}`;
-const STATIC_CACHE = `static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 
-// Проверяем, находимся ли мы в режиме разработки
-const isDevelopment = CACHE_VERSION === '__BUILD_VERSION__';
+const CACHE_NAME = 'ducharkha-v1.0.0';
+const STATIC_CACHE = 'ducharkha-static-v1.0.0';
+const API_CACHE = 'ducharkha-api-v1.0.0';
 
-// App Shell - core files that make the app work
-const appShellUrls = [
+// Ресурсы для кеширования при установке
+const STATIC_ASSETS = [
   '/',
-  '/catalog',
-  '/cart',
-  '/profile',
-  '/orders',
-  '/addresses',
-  '/payment-methods',
-  '/help',
-  '/manifest.webmanifest'
-];
-
-// Static assets
-const staticAssets = [
+  '/manifest.json',
   '/icons/192.png',
-  '/icons/512.png'
+  '/icons/512.png',
+  '/icons/logo.png'
 ];
 
-// Install event - cache app shell and static assets
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
-  
-  // В режиме разработки не кэшируем файлы при установке
-  if (isDevelopment) {
-    console.log('Development mode - skipping pre-caching');
-    self.skipWaiting();
-    return;
-  }
-  
+// API маршруты для кеширования
+const API_ROUTES = [
+  '/api/categories',
+  '/api/products',
+  '/api/banners'
+];
+
+self.addEventListener('install', event => {
+  console.log('SW: Installing...');
   event.waitUntil(
     Promise.all([
-      caches.open(CACHE_NAME).then((cache) => {
-        console.log('Caching app shell...');
-        return cache.addAll(appShellUrls);
+      caches.open(STATIC_CACHE).then(cache => {
+        console.log('SW: Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
       }),
-      caches.open(STATIC_CACHE).then((cache) => {
-        console.log('Caching static assets...');
-        return cache.addAll(staticAssets);
-      })
+      self.skipWaiting()
     ])
   );
-  self.skipWaiting();
 });
 
-// Fetch event - improved caching strategy
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-http requests
-  if (!request.url.startsWith('http')) {
-    return;
-  }
-
-  // Handle API requests with network-first strategy
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
-    return;
-  }
-
-  // Handle app shell files - different strategy for dev vs prod
-  if (appShellUrls.includes(url.pathname) || request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // В режиме разработки не кэшируем основные файлы
-          if (!isDevelopment && response && response.status === 200 && response.type === 'basic') {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cached version when offline (только в production)
-          if (!isDevelopment) {
-            return caches.match(request).then((cachedResponse) => {
-              return cachedResponse || caches.match('/');
-            });
-          }
-          // В development режиме просто возвращаем ошибку
-          return new Response('Offline in development mode', { 
-            status: 503, 
-            statusText: 'Service Unavailable' 
-          });
-        })
-    );
-    return;
-  }
-
-  // Handle static assets with cache-first strategy
-  event.respondWith(
-    caches.match(request)
-      .then((response) => {
-        // Return cached version if available
-        if (response) {
-          return response;
-        }
-
-        // Fetch from network and cache the response
-        return fetch(request)
-          .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            const responseClone = response.clone();
-            const cacheName = staticAssets.includes(url.pathname) ? STATIC_CACHE : DYNAMIC_CACHE;
-            
-            caches.open(cacheName).then((cache) => {
-              cache.put(request, responseClone);
-            });
-
-            return response;
-          })
-          .catch(() => {
-            return new Response('Offline', { 
-              status: 503, 
-              statusText: 'Service Unavailable',
-              headers: { 'Content-Type': 'text/plain' }
-            });
-          });
-      })
-  );
-});
-
-// Activate event - clean old caches
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
-  const currentCaches = [CACHE_NAME, STATIC_CACHE, DYNAMIC_CACHE];
-  
+self.addEventListener('activate', event => {
+  console.log('SW: Activating...');
   event.waitUntil(
     Promise.all([
-      // Удаляем все старые кэши
-      caches.keys().then((cacheNames) => {
+      // Удаляем старые кеши
+      caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (!currentCaches.includes(cacheName)) {
-              console.log('Deleting old cache:', cacheName);
+          cacheNames.map(cacheName => {
+            if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
+              console.log('SW: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       }),
-      // Немедленно берем контроль над всеми клиентами
       self.clients.claim()
     ])
   );
-  console.log('Service Worker activated and claimed all clients!');
 });
 
-// Push notification event
-self.addEventListener('push', (event) => {
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: '/icons/192.png',
-      badge: '/icons/192.png',
-      vibrate: [100, 50, 100],
-      data: {
-        dateOfArrival: Date.now(),
-        primaryKey: data.primaryKey
-      },
-      actions: [
-        {
-          action: 'explore',
-          title: 'Открыть приложение',
-          icon: '/icons/192.png'
-        },
-        {
-          action: 'close',
-          title: 'Закрыть',
-          icon: '/icons/192.png'
+self.addEventListener('fetch', event => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Кешируем только GET запросы
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // API запросы
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      caches.open(API_CACHE).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            // Кешируем только успешные ответы для определенных маршрутов
+            if (networkResponse.ok && API_ROUTES.some(route => url.pathname.startsWith(route))) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Возвращаем кешированный ответ при ошибке сети
+            return cachedResponse;
+          });
+
+          // Возвращаем кешированный ответ немедленно, обновляем в фоне
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Статические ресурсы
+  event.respondWith(
+    caches.match(request).then(response => {
+      if (response) {
+        return response;
+      }
+
+      return fetch(request).then(response => {
+        // Кешируем статические ресурсы
+        if (response.ok && (
+          request.destination === 'image' ||
+          request.destination === 'style' ||
+          request.destination === 'script' ||
+          url.pathname.endsWith('.js') ||
+          url.pathname.endsWith('.css') ||
+          url.pathname.endsWith('.png') ||
+          url.pathname.endsWith('.jpg') ||
+          url.pathname.endsWith('.svg')
+        )) {
+          const responseToCache = response.clone();
+          caches.open(STATIC_CACHE).then(cache => {
+            cache.put(request, responseToCache);
+          });
         }
-      ]
-    };
-    
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
-  }
+
+        return response;
+      });
+    })
+  );
 });
 
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
-});
-
-// Message event for communication with main thread
-self.addEventListener('message', (event) => {
+// Обработка сообщений
+self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

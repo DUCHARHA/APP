@@ -40,6 +40,31 @@ export function debugPWAStatus() {
   console.log('Current display mode:', displayMode);
   
   // Check if beforeinstallprompt is supported
+  let installPromptFired = false;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    installPromptFired = true;
+    console.log('beforeinstallprompt: Fired, app is installable');
+  });
+  
+  setTimeout(() => {
+    if (!installPromptFired) {
+      console.log('beforeinstallprompt: Not fired (may already be installed or not installable)');
+    }
+  }, 1000);
+  
+  // Check network status
+  console.log('Online status:', navigator.onLine);
+  
+  // Check storage usage
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    navigator.storage.estimate().then(estimate => {
+      console.log('Storage quota:', estimate.quota);
+      console.log('Storage usage:', estimate.usage);
+    });
+  }
+  
+  console.log('=== END PWA DEBUG ===');
+}
   let installPromptSupported = false;
   const handleInstallPrompt = () => {
     installPromptSupported = true;

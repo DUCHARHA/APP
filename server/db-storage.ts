@@ -11,7 +11,11 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-const client = neon(process.env.DATABASE_URL!);
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+const client = neon(process.env.DATABASE_URL);
 const db = drizzle(client);
 
 export class DatabaseStorage implements IStorage {
