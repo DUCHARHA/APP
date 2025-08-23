@@ -1,6 +1,4 @@
 // Utility for managing unique user sessions
-import crypto from 'crypto';
-
 const USER_SESSION_KEY = 'ducharkha_user_session';
 
 export interface UserSession {
@@ -27,17 +25,41 @@ export function generateUserId(): string {
 
 // Get or create user session
 export function getUserSession(): UserSession {
+  // Check if we're in browser environment
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    // Fallback for server-side rendering or non-browser environments
+    return {
+      userId: generateUserId(),
+      createdAt: Date.now(),
+      lastActivity: Date.now(),
+    };
+  }
+
   try {
     const saved = localStorage.getItem(USER_SESSION_KEY);
     if (saved) {
       const session: UserSession = JSON.parse(saved);
-      // Update last activity
-      session.lastActivity = Date.now();
-      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
-      return session;
+      
+      // Check for invalid demo-user sessions and force regenerate
+      if (session.userId === 'demo-user' || session.userId.includes('demo-user')) {
+        console.log('Found old demo-user session, creating new unique session...');
+        localStorage.removeItem(USER_SESSION_KEY);
+        // Fall through to create new session
+      } else {
+        // Update last activity
+        session.lastActivity = Date.now();
+        localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+        return session;
+      }
     }
   } catch (error) {
     console.warn('Failed to load user session from localStorage:', error);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(USER_SESSION_KEY);
+    } catch (clearError) {
+      console.warn('Failed to clear corrupted session data:', clearError);
+    }
   }
 
   // Create new session
@@ -47,18 +69,29 @@ export function getUserSession(): UserSession {
     lastActivity: Date.now(),
   };
 
+  console.log('Creating new user session with ID:', newSession.userId);
+
   try {
     localStorage.setItem(USER_SESSION_KEY, JSON.stringify(newSession));
   } catch (error) {
     console.warn('Failed to save user session to localStorage:', error);
+    // Continue without localStorage - session will be temporary
   }
 
   return newSession;
 }
 
-// Get current user ID
+// Get current user ID with fallback
 export function getCurrentUserId(): string {
-  return getUserSession().userId;
+  try {
+    return getUserSession().userId;
+  } catch (error) {
+    console.error('Failed to get current user ID:', error);
+    // Return a temporary fallback ID based on timestamp to avoid sharing data
+    const fallbackId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    console.warn('Using temporary fallback user ID:', fallbackId);
+    return fallbackId;
+  }
 }
 
 // Clear user session (for testing or logout)

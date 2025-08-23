@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { lazy, Suspense } from "react";
+import { initializeCacheCleanup } from "@/utils/cache-cleaner";
+import { autoFixDemoUser } from "@/utils/force-refresh";
 
 // Lazy load pages for better initial loading performance
 const Home = lazy(() => import("@/pages/home"));
@@ -27,7 +29,7 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 // Loading component for lazy routes
 const PageLoader = () => (
@@ -104,6 +106,15 @@ function Router() {
 }
 
 function App() {
+  // Clean up old cached data on app startup
+  React.useEffect(() => {
+    // First, check and fix any demo-user sessions
+    autoFixDemoUser();
+    
+    // Then run regular cache cleanup
+    initializeCacheCleanup();
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">

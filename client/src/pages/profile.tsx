@@ -1,19 +1,33 @@
 import { Link } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { type Order } from "@shared/schema";
-import { getCurrentUserId } from "@/utils/user-session";
+import { getCurrentUserId, clearUserSession } from "@/utils/user-session";
+import { forceRefreshApp } from "@/utils/force-refresh";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
   const userId = getCurrentUserId();
+  const { toast } = useToast();
   const [user, setUser] = useState({
     name: "Анна Иванова",
     email: "anna@example.com",
     phone: "+7 (999) 123-45-67",
     address: "ул. Пушкина, 25, кв. 10",
   });
+
+  const handleRefreshSession = () => {
+    toast({
+      title: "Обновление сессии",
+      description: "Очищаем кэш и перезагружаем приложение...",
+    });
+    
+    setTimeout(() => {
+      forceRefreshApp();
+    }, 1000);
+  };
   
 
   // Загружаем данные пользователя из localStorage
@@ -63,6 +77,9 @@ export default function Profile() {
       href: "/help",
     },
   ];
+
+  // Show user session info for debugging
+  const showSessionInfo = process.env.NODE_ENV === 'development';
 
   return (
     <main className="pb-20">
@@ -147,6 +164,33 @@ export default function Profile() {
           }}
         >
           <p className="text-xs text-gray-400">ДУЧАРХА v1.0.0</p>
+        </div>
+      </section>
+
+      {/* Session Management & Debug Info */}
+      <section className="p-4">
+        <div className="bg-white dark:bg-card rounded-xl p-4 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Настройки приложения</h3>
+          
+          <Button
+            onClick={handleRefreshSession}
+            variant="outline"
+            className="w-full mb-3"
+            data-testid="button-refresh-session"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Обновить приложение
+          </Button>
+          
+          {showSessionInfo && (
+            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm">
+              <p className="font-medium mb-2">Информация о сессии:</p>
+              <p className="text-gray-600 dark:text-gray-400 break-all">ID: {userId}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                Если вы видите проблемы с данными, нажмите "Обновить приложение"
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </main>
