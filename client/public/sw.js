@@ -6,7 +6,7 @@ const API_CACHE = 'ducharkha-api-v1.0.0';
 // Ресурсы для кеширования при установке
 const STATIC_ASSETS = [
   '/',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/icons/192.png',
   '/icons/512.png',
   '/icons/logo.png'

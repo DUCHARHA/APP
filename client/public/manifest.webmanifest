@@ -29,12 +29,6 @@
       "sizes": "512x512", 
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "/icons/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
     }
   ],
   "categories": ["food", "shopping", "lifestyle"],
