@@ -51,7 +51,7 @@ export default function MobileNavigation() {
       active: location.startsWith("/catalog"),
     },
     {
-      path: "/checkout",
+      path: "/cart",
       icon: ShoppingCart,
       label: "Корзина",
       active: location === "/checkout" || location === "/cart",
