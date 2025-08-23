@@ -62,6 +62,18 @@ The application features a comprehensive banner management system:
 
 This design allows for easy migration from in-memory storage to PostgreSQL without changing business logic.
 
+## Dynamic User Onboarding System (Added August 2025)
+The application features a comprehensive onboarding experience for new users:
+- **Multi-step welcome modal** with app introduction, features overview, and benefits
+- **Progressive disclosure** showing delivery options, shopping flow, and special offers
+- **Smart detection** of new vs. returning users with localStorage-based completion tracking
+- **Contextual tooltips** for key features (search, categories, profile actions)
+- **Replay functionality** allowing users to re-watch the onboarding from their profile
+- **Auto-triggers** for new users with configurable delays and manual skip options
+- **Location permission integration** requesting geolocation access during onboarding
+- **Welcome back messages** for returning users with option to replay the guide
+- **Feature highlighting** with intelligent tooltip positioning and dismissal tracking
+
 ## Progressive Web App Features
 The application implements comprehensive PWA capabilities:
 - **Service Worker** for caching and offline functionality
@@ -74,7 +86,7 @@ Client-side state is managed through:
 - **React Query** for server state with minimal caching (updates only on page load/refresh)
 - **Local component state** for UI interactions
 - **Custom hooks** for shared business logic (cart, geolocation)
-- **Context providers** for global UI state (toasts, tooltips)
+- **Context providers** for global UI state (toasts, tooltips, onboarding)
 - **No automatic refresh timers** - data updates only when user loads/refreshes pages
 
 # External Dependencies

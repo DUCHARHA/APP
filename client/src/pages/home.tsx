@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getCurrentUserId } from "@/utils/user-session";
+import { FeatureTooltip } from "@/components/onboarding";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -151,16 +152,25 @@ export default function Home() {
       <PWAInstallBanner />
       {/* Search Section - stays in place, becomes sticky when reaches top */}
       <div id="search-section" className={`${isSearchSticky ? 'fixed top-0 left-0 right-0 z-50' : 'relative'} bg-white dark:bg-card p-4 ${isSearchSticky ? 'shadow-sm' : ''}`}>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Искать в ДУЧАРХА"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
-          />
-        </div>
+        <FeatureTooltip
+          id="search-input"
+          title="Поиск товаров"
+          description="Введите название товара для быстрого поиска по всему каталогу ДУЧАРХА"
+          trigger="auto"
+          autoShowDelay={5000}
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Искать в ДУЧАРХА"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-agent-purple/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
+              data-testid="input-search-products"
+            />
+          </div>
+        </FeatureTooltip>
       </div>
       {/* Quick Actions */}
       {!debouncedSearchQuery && (
@@ -173,8 +183,17 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-3">
-              {quickCategories.map((category) => (
-                <CategoryButton key={category.id} category={category} />
+              {quickCategories.map((category, index) => (
+                <FeatureTooltip
+                  key={category.id}
+                  id={`quick-category-${index}`}
+                  title="Быстрые категории"
+                  description="Нажмите для просмотра товаров в этой категории. Это самые популярные разделы"
+                  trigger={index === 0 ? "auto" : "hover"}
+                  autoShowDelay={6000}
+                >
+                  <CategoryButton category={category} />
+                </FeatureTooltip>
               ))}
             </div>
           )}

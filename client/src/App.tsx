@@ -7,6 +7,12 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { lazy, Suspense } from "react";
 import { initializeCacheCleanup } from "@/utils/cache-cleaner";
 import { autoFixDemoUser } from "@/utils/force-refresh";
+import { 
+  OnboardingProvider, 
+  OnboardingModal, 
+  OnboardingTrigger,
+  ReturningUserWelcome 
+} from "@/components/onboarding";
 
 // Lazy load pages for better initial loading performance
 const Home = lazy(() => import("@/pages/home"));
@@ -76,32 +82,39 @@ function Router() {
   }, [location]);
 
   return (
-    <div className="max-w-md mx-auto bg-background min-h-screen relative">
-      <PWAStatus />
-      <Suspense fallback={<PageLoader />}>
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/catalog" component={Catalog} />
-          <Route path="/catalog/:categoryId" component={Catalog} />
-          <Route path="/product/:productId" component={ProductDetail} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/profile/edit" component={ProfileEdit} />
-          <Route path="/help" component={Help} />
-          <Route path="/orders" component={Orders} />
-          <Route path="/addresses" component={Addresses} />
-          <Route path="/payment-methods" component={PaymentMethods} />
-          <Route path="/admin/login" component={AdminLogin} />
-          <Route path="/admin/orders" component={AdminOrders} />
-          <Route path="/admin/banners" component={AdminBanners} />
+    <OnboardingProvider>
+      <div className="max-w-md mx-auto bg-background min-h-screen relative">
+        <PWAStatus />
+        <Suspense fallback={<PageLoader />}>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/catalog" component={Catalog} />
+            <Route path="/catalog/:categoryId" component={Catalog} />
+            <Route path="/product/:productId" component={ProductDetail} />
+            <Route path="/cart" component={Cart} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/profile" component={Profile} />
+            <Route path="/profile/edit" component={ProfileEdit} />
+            <Route path="/help" component={Help} />
+            <Route path="/orders" component={Orders} />
+            <Route path="/addresses" component={Addresses} />
+            <Route path="/payment-methods" component={PaymentMethods} />
+            <Route path="/admin/login" component={AdminLogin} />
+            <Route path="/admin/orders" component={AdminOrders} />
+            <Route path="/admin/banners" component={AdminBanners} />
 
-          <Route path="/admin" component={Admin} />
-          <Route component={NotFound} />
-        </Switch>
-      </Suspense>
-      <MobileNavigation />
-    </div>
+            <Route path="/admin" component={Admin} />
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
+        <MobileNavigation />
+        
+        {/* Onboarding Components */}
+        <OnboardingModal />
+        <OnboardingTrigger />
+        <ReturningUserWelcome />
+      </div>
+    </OnboardingProvider>
   );
 }
 

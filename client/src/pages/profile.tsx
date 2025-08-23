@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -7,10 +7,13 @@ import { type Order } from "@shared/schema";
 import { getCurrentUserId, clearUserSession } from "@/utils/user-session";
 import { forceRefreshApp } from "@/utils/force-refresh";
 import { useToast } from "@/hooks/use-toast";
+import { useOnboarding } from "@/components/onboarding";
+import { FeatureTooltip } from "@/components/onboarding/feature-tooltip";
 
 export default function Profile() {
   const userId = getCurrentUserId();
   const { toast } = useToast();
+  const { startOnboarding, isOnboardingComplete } = useOnboarding();
   const [user, setUser] = useState({
     name: "Анна Иванова",
     email: "anna@example.com",
@@ -27,6 +30,17 @@ export default function Profile() {
     setTimeout(() => {
       forceRefreshApp();
     }, 1000);
+  };
+
+  const handleStartOnboarding = () => {
+    toast({
+      title: "Запуск введения",
+      description: "Покажем вам основные возможности приложения",
+    });
+    
+    setTimeout(() => {
+      startOnboarding();
+    }, 500);
   };
   
 
@@ -78,6 +92,21 @@ export default function Profile() {
     },
   ];
 
+  const appMenuItems = [
+    {
+      icon: RotateCcw,
+      label: "Показать гид",
+      description: "Повторить введение",
+      action: handleStartOnboarding,
+    },
+    {
+      icon: RefreshCw,
+      label: "Обновить сессию",
+      description: "Очистить кэш",
+      action: handleRefreshSession,
+    },
+  ];
+
   // Show user session info for debugging
   const showSessionInfo = process.env.NODE_ENV === 'development';
 
@@ -119,7 +148,7 @@ export default function Profile() {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <button className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+              <button className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                   <item.icon className="w-5 h-5 text-gray-600" />
                 </div>
@@ -130,6 +159,44 @@ export default function Profile() {
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
             </Link>
+          ))}
+          
+          {/* App Actions Separator */}
+          <div className="bg-gray-100 px-4 py-2">
+            <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Приложение
+            </p>
+          </div>
+          
+          {/* App Menu Items */}
+          {appMenuItems.map((item, index) => (
+            <FeatureTooltip
+              key={item.label}
+              id={`profile-action-${index}`}
+              title="Полезная функция"
+              description={item.label === "Показать гид" 
+                ? "Нажмите, чтобы повторно просмотреть введение в приложение с основными возможностями"
+                : "Очистите кэш если приложение работает некорректно"
+              }
+              trigger="hover"
+            >
+              <button 
+                onClick={item.action}
+                className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                data-testid={`button-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <div className={`w-10 h-10 ${item.label === "Показать гид" ? "bg-purple-100" : "bg-blue-100"} rounded-lg flex items-center justify-center`}>
+                  <item.icon className={`w-5 h-5 ${item.label === "Показать гид" ? "text-purple-600" : "text-blue-600"}`} />
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="font-medium text-gray-900">{item.label}</h4>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
+                {item.label === "Показать гид" && (
+                  <Sparkles className="w-4 h-4 text-purple-500" />
+                )}
+              </button>
+            </FeatureTooltip>
           ))}
         </div>
       </section>
