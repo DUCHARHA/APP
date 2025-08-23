@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { getCurrentUserId } from "@/utils/user-session";
 
 type Theme = "dark" | "light" | "system";
@@ -48,9 +48,22 @@ export function ThemeProvider({
   children,
   defaultTheme = "light",
   storageKey = "vite-ui-theme",
-  userId = getCurrentUserId(), // Use dynamic user ID
+  userId, // Will be set dynamically in useEffect
   ...props
 }: ThemeProviderProps) {
+  // Get user ID safely inside component
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Set user ID after component mounts
+    try {
+      const id = userId || getCurrentUserId();
+      setCurrentUserId(id);
+    } catch (error) {
+      console.warn('Failed to get current user ID in ThemeProvider:', error);
+      setCurrentUserId('fallback_user_' + Date.now());
+    }
+  }, [userId]);
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [preferences, setPreferences] = useState<UserPreferences>(initialState.preferences);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +74,7 @@ export function ThemeProvider({
   // Load preferences from backend on mount
   useEffect(() => {
     const loadPreferences = async () => {
-      if (!userId) {
+      if (!currentUserId) {
         // Fallback to localStorage if no userId
         const savedTheme = localStorage.getItem(storageKey) as Theme;
         if (savedTheme) {
@@ -73,7 +86,7 @@ export function ThemeProvider({
 
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/users/${userId}/preferences`);
+        const response = await fetch(`/api/users/${currentUserId}/preferences`);
         if (response.ok) {
           const userPrefs = await response.json();
           setTheme(userPrefs.theme || defaultTheme);
@@ -105,8 +118,10 @@ export function ThemeProvider({
       }
     };
 
-    loadPreferences();
-  }, [userId, defaultTheme, storageKey]);
+    if (currentUserId) {
+      loadPreferences();
+    }
+  }, [currentUserId, defaultTheme, storageKey]);
 
   // Apply theme and colors to DOM
   useEffect(() => {
@@ -211,9 +226,9 @@ export function ThemeProvider({
     localStorage.setItem(storageKey, updated.theme);
 
     // Save to backend if userId is available
-    if (userId) {
+    if (currentUserId) {
       try {
-        const response = await fetch(`/api/users/${userId}/preferences`, {
+        const response = await fetch(`/api/users/${currentUserId}/preferences`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

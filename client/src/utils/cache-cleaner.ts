@@ -16,27 +16,41 @@ export function cleanOldCacheData(): void {
     let foundOldData = false;
 
     keysToCheck.forEach(key => {
-      const value = localStorage.getItem(key);
-      if (value && value.includes('demo-user')) {
-        console.log(`Removing old cached data from ${key}`);
-        localStorage.removeItem(key);
-        foundOldData = true;
+      try {
+        const value = localStorage.getItem(key);
+        if (value && value.includes('demo-user')) {
+          console.log(`Removing old cached data from ${key}`);
+          localStorage.removeItem(key);
+          foundOldData = true;
+        }
+      } catch (error) {
+        console.warn(`Failed to check key ${key}:`, error);
       }
     });
 
-    // Clear any React Query cache if it exists
-    if (window.localStorage) {
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.includes('react-query') || key.includes('tanstack')) {
-          const value = localStorage.getItem(key);
-          if (value && value.includes('demo-user')) {
-            console.log(`Removing old query cache from ${key}`);
-            localStorage.removeItem(key);
-            foundOldData = true;
+    // More aggressive cleanup for all localStorage keys
+    try {
+      const allKeys = Object.keys(localStorage);
+      allKeys.forEach(key => {
+        try {
+          if (key.includes('react-query') || 
+              key.includes('tanstack') || 
+              key.includes('query-cache') ||
+              key.startsWith('rq-') ||
+              key.startsWith('tanstack-query-')) {
+            const value = localStorage.getItem(key);
+            if (value && (value.includes('demo-user') || value.includes('"demo-user"'))) {
+              console.log(`Removing old query cache from ${key}`);
+              localStorage.removeItem(key);
+              foundOldData = true;
+            }
           }
+        } catch (error) {
+          console.warn(`Failed to process key ${key}:`, error);
         }
       });
+    } catch (error) {
+      console.warn('Failed to iterate localStorage keys:', error);
     }
 
     if (foundOldData) {
