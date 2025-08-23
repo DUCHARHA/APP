@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema } from "@shared/schema";
@@ -32,7 +32,89 @@ function logError(error: any, context: string, req: any) {
   });
 }
 
+// Helper function to generate secure token
+function generateSecureToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Helper function to verify admin credentials
+function verifyAdminCredentials(username: string, password: string): boolean {
+  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  
+  return username === adminUsername && password === adminPassword;
+}
+
+// Middleware to check admin authentication
+function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  
+  const token = authHeader.substring(7);
+  
+  // Simple token validation - in production, use JWT or session-based auth
+  if (!token || token.length !== 64) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+      
+      if (verifyAdminCredentials(username, password)) {
+        const token = generateSecureToken();
+        res.json({ 
+          token,
+          message: "Login successful" 
+        });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
+    } catch (error) {
+      logError(error, 'POST /api/admin/login', req);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Promo codes API
+  app.get("/api/promo-codes/validate/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      // Server-side promo codes validation
+      const promoCodes = [
+        { code: "ПЕРВЫЙ", discount: 20, description: "Скидка 20% на первый заказ", isActive: true },
+        { code: "ДРУЗЬЯМ", discount: 15, description: "Скидка 15% для друзей", isActive: true },
+        { code: "ЛЕТОМ", discount: 10, description: "Летняя скидка 10%", isActive: true },
+      ];
+      
+      const promoCode = promoCodes.find(
+        promo => promo.code.toUpperCase() === code.toUpperCase() && promo.isActive
+      );
+      
+      if (promoCode) {
+        res.json({ valid: true, ...promoCode });
+      } else {
+        res.status(404).json({ valid: false, error: "Промокод не найден или неактивен" });
+      }
+    } catch (error) {
+      logError(error, 'GET /api/promo-codes/validate', req);
+      res.status(500).json({ error: "Failed to validate promo code" });
+    }
+  });
+
   // Categories (with caching)
   app.get("/api/categories", async (req, res) => {
     try {
@@ -217,6 +299,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cart", async (req, res) => {
     try {
       const cartItemData = insertCartItemSchema.parse(req.body);
+      
+      // Validate quantity before adding to cart
+      if (cartItemData.quantity && (cartItemData.quantity < 1 || cartItemData.quantity > 99)) {
+        return res.status(400).json({ error: "Invalid quantity. Must be between 1 and 99" });
+      }
+      
       const cartItem = await storage.addToCart(cartItemData);
       
       // Invalidate cart cache for this user
@@ -237,6 +325,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/cart/:id", async (req, res) => {
     try {
       const { quantity } = req.body;
+      
+      // Validate quantity
+      if (typeof quantity !== 'number' || quantity < 0 || quantity > 99) {
+        return res.status(400).json({ error: "Invalid quantity. Must be between 0 and 99" });
+      }
+      
       const cartItem = await storage.updateCartItem(req.params.id, quantity);
       if (!cartItem) {
         return res.status(404).json({ error: "Cart item not found" });
@@ -289,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get("/api/admin/orders", async (req, res) => {
+  app.get("/api/admin/orders", requireAdminAuth, async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
       res.json(orders);
@@ -298,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/orders/:orderId/status", async (req, res) => {
+  app.patch("/api/admin/orders/:orderId/status", requireAdminAuth, async (req, res) => {
     try {
       const { status } = req.body;
       const order = await storage.updateOrderStatus(req.params.orderId, status);
@@ -453,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/banners", async (req, res) => {
+  app.get("/api/admin/banners", requireAdminAuth, async (req, res) => {
     try {
       const banners = await storage.getAllBanners();
       res.json(banners);
@@ -477,7 +571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/banners", async (req, res) => {
+  app.post("/api/admin/banners", requireAdminAuth, async (req, res) => {
     try {
       const bannerData = insertBannerSchema.parse(req.body);
       const banner = await storage.createBanner(bannerData);
@@ -505,7 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/banners/:id", async (req, res) => {
+  app.put("/api/admin/banners/:id", requireAdminAuth, async (req, res) => {
     try {
       const bannerData = insertBannerSchema.partial().parse(req.body);
       const banner = await storage.updateBanner(req.params.id, bannerData);

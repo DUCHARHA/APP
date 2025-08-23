@@ -60,18 +60,43 @@ export default function AdminOrders() {
 
   const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
-    queryFn: () => fetch("/api/admin/orders").then(res => res.json()),
+    queryFn: async () => {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch("/api/admin/orders", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
+          setLocation("/admin/login");
+          throw new Error("Unauthorized");
+        }
+        throw new Error("Failed to fetch orders");
+      }
+      return res.json();
+    },
     refetchInterval: 30000, // Обновление каждые 30 секунд
   });
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
+      const token = localStorage.getItem("adminToken");
       const response = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ status }),
       });
-      if (!response.ok) throw new Error("Failed to update order");
+      if (!response.ok) {
+        if (response.status === 401) {
+          setLocation("/admin/login");
+          throw new Error("Unauthorized");
+        }
+        throw new Error("Failed to update order");
+      }
       return response.json();
     },
     onSuccess: () => {

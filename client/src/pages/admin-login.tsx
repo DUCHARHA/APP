@@ -17,18 +17,34 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Простая авторизация для демо
-    if (credentials.username === "admin" && credentials.password === "admin123") {
-      localStorage.setItem("adminToken", "admin-authenticated");
-      toast({
-        title: "Вход выполнен",
-        description: "Добро пожаловать в панель управления",
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
       });
-      setLocation("/admin/orders");
-    } else {
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("adminToken", data.token);
+        toast({
+          title: "Вход выполнен",
+          description: "Добро пожаловать в панель управления",
+        });
+        setLocation("/admin/orders");
+      } else {
+        toast({
+          title: "Ошибка входа",
+          description: "Неверный логин или пароль",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Ошибка входа",
-        description: "Неверный логин или пароль",
+        title: "Ошибка сети",
+        description: "Не удалось подключиться к серверу",
         variant: "destructive",
       });
     }
@@ -111,13 +127,6 @@ export default function AdminLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Демо-доступ:</h4>
-            <p className="text-sm text-gray-600">
-              <strong>Логин:</strong> admin<br />
-              <strong>Пароль:</strong> admin123
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
