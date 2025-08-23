@@ -1,11 +1,18 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { indexedDBService } from "./lib/indexeddb";
-import "./utils/pwa-debug";
 
-// Initialize IndexedDB
-indexedDBService.init().catch(console.error);
+// Initialize IndexedDB lazily to improve initial load time
+if (typeof window !== 'undefined') {
+  import("./lib/indexeddb").then(({ indexedDBService }) => {
+    indexedDBService.init().catch(console.error);
+  });
+
+  // Load PWA debug only in development
+  if (process.env.NODE_ENV === 'development') {
+    import("./utils/pwa-debug");
+  }
+}
 
 // Register Service Worker with aggressive update strategy
 if ('serviceWorker' in navigator) {

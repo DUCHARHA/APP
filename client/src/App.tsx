@@ -4,27 +4,37 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
-import Home from "@/pages/home";
-import Catalog from "@/pages/catalog";
-import ProductDetail from "@/pages/product-detail";
-import Cart from "@/pages/cart";
-import Checkout from "@/pages/checkout";
-import Orders from "@/pages/orders";
-import Addresses from "@/pages/addresses";
-import PaymentMethods from "@/pages/payment-methods";
-import Profile from "@/pages/profile";
-import ProfileEdit from "@/pages/profile-edit";
-import Help from "@/pages/help";
-import AdminLogin from "@/pages/admin-login";
-import AdminOrders from "@/pages/admin-orders";
-import Admin from "@/pages/admin";
-import AdminBanners from "@/pages/AdminBanners";
+import { lazy, Suspense } from "react";
 
-import NotFound from "@/pages/not-found";
+// Lazy load pages for better initial loading performance
+const Home = lazy(() => import("@/pages/home"));
+const Catalog = lazy(() => import("@/pages/catalog"));
+const ProductDetail = lazy(() => import("@/pages/product-detail"));
+const Cart = lazy(() => import("@/pages/cart"));
+const Checkout = lazy(() => import("@/pages/checkout"));
+const Orders = lazy(() => import("@/pages/orders"));
+const Addresses = lazy(() => import("@/pages/addresses"));
+const PaymentMethods = lazy(() => import("@/pages/payment-methods"));
+const Profile = lazy(() => import("@/pages/profile"));
+const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
+const Help = lazy(() => import("@/pages/help"));
+const AdminLogin = lazy(() => import("@/pages/admin-login"));
+const AdminOrders = lazy(() => import("@/pages/admin-orders"));
+const Admin = lazy(() => import("@/pages/admin"));
+const AdminBanners = lazy(() => import("@/pages/AdminBanners"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useEffect, useRef } from "react";
+
+// Loading component for lazy routes
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5B21B6]"></div>
+  </div>
+);
 
 // Store scroll positions for each page
 const scrollPositions = new Map<string, number>();
@@ -66,26 +76,28 @@ function Router() {
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen relative">
       <PWAStatus />
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/catalog" component={Catalog} />
-        <Route path="/catalog/:categoryId" component={Catalog} />
-        <Route path="/product/:productId" component={ProductDetail} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/checkout" component={Checkout} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/profile/edit" component={ProfileEdit} />
-        <Route path="/help" component={Help} />
-        <Route path="/orders" component={Orders} />
-        <Route path="/addresses" component={Addresses} />
-        <Route path="/payment-methods" component={PaymentMethods} />
-        <Route path="/admin/login" component={AdminLogin} />
-        <Route path="/admin/orders" component={AdminOrders} />
-        <Route path="/admin/banners" component={AdminBanners} />
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/catalog" component={Catalog} />
+          <Route path="/catalog/:categoryId" component={Catalog} />
+          <Route path="/product/:productId" component={ProductDetail} />
+          <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/profile/edit" component={ProfileEdit} />
+          <Route path="/help" component={Help} />
+          <Route path="/orders" component={Orders} />
+          <Route path="/addresses" component={Addresses} />
+          <Route path="/payment-methods" component={PaymentMethods} />
+          <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin/orders" component={AdminOrders} />
+          <Route path="/admin/banners" component={AdminBanners} />
 
-        <Route path="/admin" component={Admin} />
-        <Route component={NotFound} />
-      </Switch>
+          <Route path="/admin" component={Admin} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
       <MobileNavigation />
     </div>
   );

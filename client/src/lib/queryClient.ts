@@ -62,15 +62,19 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 10, // Увеличиваем до 10 минут для лучшего кеширования
+      gcTime: 1000 * 60 * 30, // Кеш хранится 30 минут в памяти
       refetchOnWindowFocus: false,
+      refetchOnMount: false, // Не перезагружать при монтировании если данные свежие
+      refetchOnReconnect: false, // Не перезагружать при восстановлении соединения
       retry: (failureCount, error: any) => {
         // Не повторять попытки для 4xx ошибок
         if (error?.status >= 400 && error?.status < 500) {
           return false;
         }
-        return failureCount < 3;
+        return failureCount < 2; // Уменьшаем количество попыток для быстрой отдачи
       },
+      retryDelay: 500, // Уменьшаем задержку между попытками
     },
     mutations: {
       onError: (error: any) => {

@@ -59,17 +59,20 @@ export default function Home() {
     }
   };
 
-  const { data: categories = [] } = useQuery<Category[]>({
+  // Priority loading: Load categories first as they're needed for quick actions
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     staleTime: 600000, // Cache categories for 10 minutes
     refetchInterval: false, // Categories rarely change
   });
 
-  const { data: popularProducts = [] } = useQuery<Product[]>({
+  // Load products after a slight delay to avoid blocking the UI
+  const { data: popularProducts = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products", "popular"],
     queryFn: () => fetch("/api/products?popular=true").then(res => res.json()),
     staleTime: 300000, // Cache popular products for 5 minutes
     refetchInterval: false, // Disable automatic refetching
+    enabled: true, // Load immediately but with lower priority
   });
 
   // Debounce search query to avoid excessive API calls
@@ -161,11 +164,19 @@ export default function Home() {
       {/* Quick Actions */}
       {!debouncedSearchQuery && (
         <section className="px-4.5 relative z-20 my-3.5">
-          <div className="grid grid-cols-4 gap-3">
-            {quickCategories.map((category) => (
-              <CategoryButton key={category.id} category={category} />
-            ))}
-          </div>
+          {categoriesLoading ? (
+            <div className="grid grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl h-20 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-3">
+              {quickCategories.map((category) => (
+                <CategoryButton key={category.id} category={category} />
+              ))}
+            </div>
+          )}
         </section>
       )}
       {/* Promo Banner */}
@@ -227,11 +238,18 @@ export default function Home() {
           )}
         </div>
 
-        {displayProducts.length === 0 ? (
+        {productsLoading || displayProducts.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">
-              {debouncedSearchQuery ? "Товары не найдены" : "Загрузка товаров..."}
-            </p>
+            {productsLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#5B21B6]"></div>
+                <p className="text-gray-500 dark:text-gray-400">Загрузка товаров...</p>
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400">
+                {debouncedSearchQuery ? "Товары не найдены" : "Товары временно недоступны"}
+              </p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
