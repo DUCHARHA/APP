@@ -13,10 +13,11 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Banner } from "@shared/schema";
+import { getCurrentUserId } from "@/utils/user-session";
 
 export default function Admin() {
   const [notificationData, setNotificationData] = useState({
-    userId: "demo-user",
+    userId: getCurrentUserId(),
     title: "",
     message: "",
     type: "info"
@@ -56,7 +57,7 @@ export default function Admin() {
       
       // Reset form
       setNotificationData({
-        userId: "demo-user",
+        userId: getCurrentUserId(),
         title: "",
         message: "",
         type: "info"
@@ -74,7 +75,7 @@ export default function Admin() {
     try {
       // First create an order
       const orderData = {
-        userId: "demo-user",
+        userId: getCurrentUserId(),
         totalAmount: "500.00",
         status: "pending",
         deliveryAddress: "ул. Пушкина, 25"
@@ -461,7 +462,7 @@ export default function Admin() {
                   id="userId"
                   value={notificationData.userId}
                   onChange={(e) => setNotificationData({ ...notificationData, userId: e.target.value })}
-                  placeholder="demo-user"
+                  placeholder="ID пользователя"
                 />
               </div>
               

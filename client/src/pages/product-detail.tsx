@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { getCurrentUserId } from "@/utils/user-session";
 
 export default function ProductDetail() {
   const { productId } = useParams();
   const [quantity, setQuantity] = useState(1);
   const { toast } = useToast();
-  const userId = "demo-user"; // In real app, get from auth
+  const userId = getCurrentUserId();
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["/api/products", productId],

@@ -6,6 +6,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useState } from "react";
+import { getCurrentUserId } from "@/utils/user-session";
 
 interface ProductCardProps {
   product: Product;
@@ -16,7 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { cartItems } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const userId = "demo-user"; // In real app, get from auth
+  const userId = getCurrentUserId();
 
   // Find current quantity of this product in cart
   const cartItem = cartItems.find(item => item.productId === product.id);

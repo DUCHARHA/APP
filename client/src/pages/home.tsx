@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
 import { useDebounce } from "@/hooks/use-debounce";
+import { getCurrentUserId } from "@/utils/user-session";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -138,7 +139,7 @@ export default function Home() {
           <div className="flex items-center space-x-2">
             
             <ThemeToggle />
-            <NotificationBell userId="demo-user" />
+            <NotificationBell userId={getCurrentUserId()} />
           </div>
         </div>
       </header>

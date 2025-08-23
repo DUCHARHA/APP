@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { type Order } from "@shared/schema";
+import { getCurrentUserId } from "@/utils/user-session";
 
 export default function Profile() {
-  const userId = "demo-user";
+  const userId = getCurrentUserId();
   const [user, setUser] = useState({
     name: "Анна Иванова",
     email: "anna@example.com",

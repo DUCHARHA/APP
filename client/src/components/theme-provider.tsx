@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { getCurrentUserId } from "@/utils/user-session";
 
 type Theme = "dark" | "light" | "system";
 
@@ -47,7 +48,7 @@ export function ThemeProvider({
   children,
   defaultTheme = "light",
   storageKey = "vite-ui-theme",
-  userId = "demo-user", // Default user for demo
+  userId = getCurrentUserId(), // Use dynamic user ID
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme);

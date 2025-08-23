@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { usePromo } from "@/hooks/use-promo";
 import { X } from "lucide-react";
+import { getCurrentUserId } from "@/utils/user-session";
 
 type CartItemWithProduct = CartItem & { product: Product };
 
@@ -34,7 +35,7 @@ export default function Checkout() {
   const [promoInput, setPromoInput] = useState("");
   const { toast } = useToast();
   const { appliedPromo, removePromoCode, calculateDiscount, applyPromoCode } = usePromo();
-  const userId = "demo-user"; // In real app, get from auth
+  const userId = getCurrentUserId();
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],

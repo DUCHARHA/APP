@@ -4,9 +4,10 @@ import { ArrowLeft, Clock, CheckCircle, Package, Truck } from "lucide-react";
 import { type Order } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getCurrentUserId } from "@/utils/user-session";
 
 export default function Orders() {
-  const userId = "demo-user"; // In real app, get from auth
+  const userId = getCurrentUserId();
   const { toast } = useToast();
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({

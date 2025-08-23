@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { type CartItem, type Product } from "@shared/schema";
+import { getCurrentUserId } from "@/utils/user-session";
 
 type CartItemWithProduct = CartItem & { product: Product };
 
 export function useCart() {
-  const userId = "demo-user"; // In real app, get from auth context
+  const userId = getCurrentUserId();
 
   const { data: cartItems = [] } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { usePromo } from "@/hooks/use-promo";
 import { X } from "lucide-react";
+import { getCurrentUserId } from "@/utils/user-session";
 
 type CartItemWithProduct = CartItem & { product: Product };
 
@@ -15,7 +16,7 @@ export default function Cart() {
   const { toast } = useToast();
   const { totalItems, totalPrice } = useCart();
   const { appliedPromo, removePromoCode, calculateDiscount, calculateTotal } = usePromo();
-  const userId = "demo-user"; // In real app, get from auth
+  const userId = getCurrentUserId();
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],
