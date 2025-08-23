@@ -149,9 +149,6 @@ export default function AdminOrders() {
                 variant="outline"
                 onClick={handleLogout}
                 size="sm"
-              >
-                Выйти
-              </Button>
                 data-testid="button-logout"
               >
                 <LogOut className="w-4 h-4 mr-2" />

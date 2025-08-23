@@ -63,46 +63,21 @@ export function debugPWAStatus() {
     });
   }
   
-  console.log('=== END PWA DEBUG ===');
-}
-  let installPromptSupported = false;
-  const handleInstallPrompt = () => {
-    installPromptSupported = true;
-    console.log('beforeinstallprompt event fired - PWA is installable!');
-  };
-  window.addEventListener('beforeinstallprompt', handleInstallPrompt);
-  
-  const timeoutId = setTimeout(() => {
-    if (!installPromptSupported) {
-      console.log('beforeinstallprompt: Not fired (may already be installed or not installable)');
-    }
-    // Cleanup event listener after check
-    window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
-  }, 2000);
-  
   // Check HTTPS
   console.log('Protocol:', location.protocol);
   console.log('Is HTTPS:', location.protocol === 'https:');
   
   console.log('=== END PWA DEBUG ===');
-  
-  // Return cleanup function
-  return () => {
-    clearTimeout(timeoutId);
-    window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
-  };
 }
 
 // Auto-run debug in development
 if (typeof window !== 'undefined') {
-  let cleanupFn: (() => void) | null = null;
   const timeoutId = setTimeout(() => {
-    cleanupFn = debugPWAStatus();
+    debugPWAStatus();
   }, 1000);
   
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
     clearTimeout(timeoutId);
-    if (cleanupFn) cleanupFn();
   });
 }
