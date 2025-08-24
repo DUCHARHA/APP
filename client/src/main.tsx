@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { statusBarManager } from "./utils/status-bar-manager";
+import { PWADetector } from "./utils/pwa-detection";
 
 // Initialize IndexedDB lazily to improve initial load time
 if (typeof window !== 'undefined') {
@@ -38,6 +39,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   // В production - сначала очищаем старое, потом регистрируем новое
   console.log('🚀 Production режим: настройка PWA');
+  PWADetector.debugPWAStatus();
   cleanupOldCaches().then(() => {
     // Регистрируем новый service worker только после очистки старых
     if ('serviceWorker' in navigator) {

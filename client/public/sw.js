@@ -7,7 +7,8 @@ const STATIC_FILES = [
   '/',
   '/manifest.webmanifest',
   '/icons/192.png',
-  '/icons/512.png'
+  '/icons/512.png',
+  '/icons/logo.png'
 ];
 
 // Установка SW - кэшируем основные файлы

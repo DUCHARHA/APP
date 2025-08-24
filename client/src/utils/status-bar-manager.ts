@@ -1,4 +1,3 @@
-
 // Управление цветами status bar для PWA
 export class StatusBarManager {
   private static instance: StatusBarManager;
@@ -11,6 +10,12 @@ export class StatusBarManager {
       StatusBarManager.instance = new StatusBarManager();
     }
     return StatusBarManager.instance;
+  }
+
+  // Проверяем, запущено ли приложение в standalone режиме
+  private isStandalone(): boolean {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           (window.navigator as any).standalone === true;
   }
 
   // Установка черного цвета (для splash screen)
@@ -26,15 +31,15 @@ export class StatusBarManager {
   // Универсальная установка цвета
   setColor(color: string): void {
     if (this.currentColor === color) return;
-    
+
     this.currentColor = color;
-    
+
     // Обновляем мета-тег theme-color
     this.updateThemeColorMeta(color);
-    
+
     // Для Android Chrome
     this.updateAndroidStatusBar(color);
-    
+
     // Для iOS Safari
     this.updateIOSStatusBar(color);
   }
@@ -50,7 +55,7 @@ export class StatusBarManager {
       // Обновляем мета-теги для разных цветовых схем
       const lightThemeMeta = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: light)"]') as HTMLMetaElement;
       const darkThemeMeta = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]') as HTMLMetaElement;
-      
+
       if (lightThemeMeta) lightThemeMeta.content = color;
       if (darkThemeMeta) darkThemeMeta.content = color;
 
@@ -72,7 +77,7 @@ export class StatusBarManager {
 
       // Обновляем CSS переменную для дополнительной стилизации
       document.documentElement.style.setProperty('--status-bar-color', color);
-      
+
     } catch (error) {
       console.warn('Ошибка обновления Android status bar:', error);
     }
@@ -82,7 +87,7 @@ export class StatusBarManager {
     try {
       // Для iOS устанавливаем стиль в зависимости от цвета
       let statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]') as HTMLMetaElement;
-      
+
       if (statusBarMeta) {
         // Если цвет темный, используем light-content, если светлый - dark-content
         const isLightColor = this.isLightColor(color);
@@ -91,7 +96,7 @@ export class StatusBarManager {
 
       // Устанавливаем цвет фона под status bar
       document.documentElement.style.setProperty('--ios-status-bar-bg', color);
-      
+
     } catch (error) {
       console.warn('Ошибка обновления iOS status bar:', error);
     }

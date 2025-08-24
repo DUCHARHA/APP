@@ -43,7 +43,7 @@ export default function Home() {
       textArea.style.position = "fixed";
       textArea.style.top = "-9999px";
       textArea.style.left = "-9999px";
-      
+
       try {
         document.body.appendChild(textArea);
         textArea.focus();
@@ -138,7 +138,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            
+
             <ThemeToggle />
             <NotificationBell userId={getCurrentUserId()} />
           </div>
