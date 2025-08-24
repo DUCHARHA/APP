@@ -45,6 +45,15 @@ export default function Cart() {
 
       return { previousCart };
     },
+    onSuccess: (data, { id }) => {
+      // Обновляем конкретный элемент реальными данными
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === id ? data : item
+        );
+      });
+    },
     onError: (error, variables, context) => {
       console.error('Update quantity error:', error);
       if (context?.previousCart) {
@@ -55,9 +64,6 @@ export default function Cart() {
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
@@ -90,9 +96,6 @@ export default function Cart() {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
-    },
   });
 
   const clearCartMutation = useMutation({
@@ -110,6 +113,10 @@ export default function Cart() {
 
       return { previousCart };
     },
+    onSuccess: () => {
+      // Подтверждаем очистку корзины
+      queryClient.setQueryData(["/api/cart", userId], []);
+    },
     onError: (error, variables, context) => {
       console.error('Clear cart error:', error);
       if (context?.previousCart) {
@@ -120,9 +127,6 @@ export default function Cart() {
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 

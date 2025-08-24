@@ -39,16 +39,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       return response.json();
     },
     onMutate: async () => {
-      // Оптимистичное обновление
       setIsAdded(true);
-
-      // Отменяем текущие запросы
       await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
 
-      // Получаем текущие данные
       const previousCart = queryClient.getQueryData(["/api/cart", userId]);
 
-      // Оптимистично обновляем кэш
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
         const existingItem = old.find((item: any) => item.product.id === product.id);
@@ -60,7 +55,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           );
         } else {
           return [...old, {
-            id: `temp-${product.id}`,
+            id: `temp-${Date.now()}-${product.id}`,
             userId,
             productId: product.id,
             quantity: 1,
@@ -71,12 +66,25 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       return { previousCart };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Обновляем кэш реальными данными с сервера
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        const hasTemp = old.find((item: any) => item.id.startsWith('temp-'));
+        if (hasTemp) {
+          // Заменяем временную запись на реальную
+          return old.map((item: any) => 
+            item.id.startsWith('temp-') && item.productId === product.id
+              ? { ...item, id: data.id }
+              : item
+          );
+        }
+        return old;
+      });
       setTimeout(() => setIsAdded(false), 2000);
     },
     onError: (error, variables, context) => {
       console.error('Add to cart error:', error);
-      // Откатываем оптимистичное обновление
       if (context?.previousCart) {
         queryClient.setQueryData(["/api/cart", userId], context.previousCart);
       }
@@ -87,10 +95,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      // Перезагружаем данные в фоне для синхронизации
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
-    },
+    // Убираем onSettled с invalidateQueries - это вызывает конфликты
   });
 
   const updateQuantityMutation = useMutation({
@@ -119,6 +124,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       return { previousCart };
     },
+    onSuccess: (data) => {
+      // Синхронизируем с сервером только в случае успеха
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === cartItem.id 
+            ? data
+            : item
+        );
+      });
+    },
     onError: (error, variables, context) => {
       console.error('Update quantity error:', error);
       if (context?.previousCart) {
@@ -129,9 +145,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
@@ -165,44 +178,56 @@ export default function ProductCard({ product }: ProductCardProps) {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
-    },
+    // Убираем onSettled полностью - оптимистичного обновления достаточно
   });
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isProcessing || addToCartMutation.isPending) return;
+    
     setIsProcessing(true);
-    addToCartMutation.mutate();
-    setTimeout(() => setIsProcessing(false), 1000);
+    addToCartMutation.mutate(undefined, {
+      onSettled: () => {
+        setIsProcessing(false);
+      }
+    });
   };
 
   const handleIncreaseQuantity = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isProcessing || addToCartMutation.isPending || updateQuantityMutation.isPending) return;
+    if (isProcessing) return;
+    
     setIsProcessing(true);
+    
     if (currentQuantity === 0) {
-      addToCartMutation.mutate();
+      addToCartMutation.mutate(undefined, {
+        onSettled: () => setIsProcessing(false)
+      });
     } else {
-      updateQuantityMutation.mutate({ quantity: currentQuantity + 1 });
+      updateQuantityMutation.mutate({ quantity: currentQuantity + 1 }, {
+        onSettled: () => setIsProcessing(false)
+      });
     }
-    setTimeout(() => setIsProcessing(false), 500);
   };
 
   const handleDecreaseQuantity = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isProcessing || removeItemMutation.isPending || updateQuantityMutation.isPending) return;
+    if (isProcessing) return;
+    
     setIsProcessing(true);
+    
     if (currentQuantity === 1) {
-      removeItemMutation.mutate();
+      removeItemMutation.mutate(undefined, {
+        onSettled: () => setIsProcessing(false)
+      });
     } else {
-      updateQuantityMutation.mutate({ quantity: currentQuantity - 1 });
+      updateQuantityMutation.mutate({ quantity: currentQuantity - 1 }, {
+        onSettled: () => setIsProcessing(false)
+      });
     }
-    setTimeout(() => setIsProcessing(false), 500);
   };
 
   return (
