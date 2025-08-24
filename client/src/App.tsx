@@ -6,11 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { lazy, Suspense } from "react";
 import { autoFixDemoUser } from "@/utils/force-refresh";
-import {
-  OnboardingProvider,
-  OnboardingModal,
+import { 
+  OnboardingProvider, 
+  OnboardingModal, 
   OnboardingTrigger,
-  ReturningUserWelcome
+  ReturningUserWelcome 
 } from "@/components/onboarding";
 
 // Lazy load pages for better initial loading performance
@@ -35,8 +35,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
-import { statusBarManager } from "./utils/status-bar-manager";
-import { HonorPWAFallback } from "./components/honor-pwa-fallback";
+import { statusBarManager } from "@/utils/status-bar-manager";
 import React, { useEffect, useRef } from "react";
 
 // Loading component for lazy routes
@@ -56,7 +55,7 @@ function Router() {
   useEffect(() => {
     let isStale = false;
     let rafId: number | null = null;
-
+    
     // Save scroll position of previous page
     if (previousLocation.current && previousLocation.current !== location) {
       scrollPositions.set(previousLocation.current, window.scrollY);
@@ -96,7 +95,7 @@ function Router() {
     }
 
     previousLocation.current = location;
-
+    
     return () => {
       isStale = true;
       if (rafId !== null) {
@@ -132,7 +131,7 @@ function Router() {
           </Switch>
         </Suspense>
         <MobileNavigation />
-
+        
         {/* Onboarding Components */}
         <OnboardingModal />
         <OnboardingTrigger />
@@ -147,7 +146,7 @@ function App() {
   React.useEffect(() => {
     // First, check and fix any demo-user sessions
     autoFixDemoUser();
-
+    
   }, []);
 
   return (

@@ -11,13 +11,9 @@ export class PWADetector {
     const isIOSStandalone = (window.navigator as any).standalone === true;
     
     // Проверка по параметру URL (из манифеста)
-    const hasA2HSParam = new URLSearchParams(window.location.search).get('utm_source') === 'pwa' ||
-                         new URLSearchParams(window.location.search).get('source') === 'a2hs';
+    const hasA2HSParam = new URLSearchParams(window.location.search).get('source') === 'a2hs';
     
-    // Специальная проверка для Honor устройств
-    const isHonorPWA = this.isRunningAsPWAOnHonor();
-    
-    return isStandalone || isIOSStandalone || hasA2HSParam || isHonorPWA;
+    return isStandalone || isIOSStandalone || hasA2HSParam;
   }
 
   // Проверяем поддержку PWA в браузере
@@ -29,33 +25,12 @@ export class PWADetector {
   static getBrowserInfo(): string {
     const ua = navigator.userAgent;
     
-    if (ua.includes('HuaweiBrowser') || ua.includes('Honor')) return 'honor';
     if (ua.includes('Chrome') && !ua.includes('Edg')) return 'chrome';
     if (ua.includes('Firefox')) return 'firefox';
     if (ua.includes('Safari') && !ua.includes('Chrome')) return 'safari';
     if (ua.includes('Edg')) return 'edge';
-    if (ua.includes('SamsungBrowser')) return 'samsung';
-    if (ua.includes('MiuiBrowser')) return 'miui';
     
     return 'unknown';
-  }
-
-  // Проверяем, является ли устройство Honor/Huawei
-  static isHonorDevice(): boolean {
-    const ua = navigator.userAgent;
-    return ua.includes('Honor') || ua.includes('HONOR') || ua.includes('Huawei') || ua.includes('HuaweiBrowser');
-  }
-
-  // Специальная проверка PWA для Honor устройств
-  static isRunningAsPWAOnHonor(): boolean {
-    if (!this.isHonorDevice()) return false;
-    
-    // Honor может показывать PWA как отдельное приложение, но без display-mode: standalone
-    const hasA2HSParam = new URLSearchParams(window.location.search).get('utm_source') === 'pwa';
-    const isFullScreen = window.innerHeight === screen.height;
-    const hasNoAddressBar = !window.locationbar.visible;
-    
-    return hasA2HSParam || isFullScreen || hasNoAddressBar;
   }
 
   // Проверяем, нужно ли показывать кнопку установки
