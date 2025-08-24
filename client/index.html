@@ -6,7 +6,18 @@
     <link rel="apple-touch-icon" href="/icons/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ДУЧАРХА - Доставка продуктов</title>
-    <meta name="description" content="Экспресс-доставка продуктов за 10-15 минут. Свежие продукты и готовая еда с доставкой на дом.">
+    <meta name="description" content="Экспресс-доставка продуктов за 10-15 минут" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PWA Status Bar Colors -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="msapplication-navbutton-color" content="#000000" />
+
+    <!-- Android Chrome -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#000000" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.webmanifest">
@@ -26,15 +37,15 @@
 
     <!-- Enable source maps for better Visual Editor integration -->
     <meta name="vite:devtools" content="enabled">
-    
+
     <!-- Preload critical resources -->
     <link rel="preload" href="/icons/logo.png" as="image" type="image/png">
-    
-    <!-- Fonts with display=swap for faster initial render -->
+
+    <!-- Fonts with display=swap for faster initial load -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome with lower priority -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>

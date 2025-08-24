@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { statusBarManager } from "./utils/status-bar-manager";
 
 // Initialize IndexedDB lazily to improve initial load time
 if (typeof window !== 'undefined') {
@@ -73,5 +74,13 @@ if (process.env.NODE_ENV === 'development') {
     }
   });
 }
+
+// Устанавливаем черный цвет status bar при запуске (splash screen)
+statusBarManager.setBlack();
+
+// Через небольшую задержку переключаемся на фиолетовый (когда приложение загрузилось)
+setTimeout(() => {
+  statusBarManager.setPurple();
+}, 1000);
 
 createRoot(document.getElementById("root")!).render(<App />);

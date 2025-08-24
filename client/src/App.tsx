@@ -35,6 +35,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
+import { statusBarManager } from "@/utils/status-bar-manager";
 import React, { useEffect, useRef } from "react";
 
 // Loading component for lazy routes
@@ -58,6 +59,15 @@ function Router() {
     // Save scroll position of previous page
     if (previousLocation.current && previousLocation.current !== location) {
       scrollPositions.set(previousLocation.current, window.scrollY);
+    }
+
+    // Управление цветом status bar в зависимости от страницы
+    if (location === '/') {
+      // На главной странице используем фиолетовый цвет
+      statusBarManager.setPurple();
+    } else {
+      // На остальных страницах тоже фиолетовый (можно настроить по страницам)
+      statusBarManager.setPurple();
     }
 
     // Restore scroll position or scroll to top for new pages

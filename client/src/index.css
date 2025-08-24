@@ -73,6 +73,31 @@
   body {
     @apply bg-background text-foreground font-inter antialiased;
   }
+
+  /* Поддержка цветов status bar */
+  html {
+    --status-bar-color: #000000;
+    --ios-status-bar-bg: #000000;
+  }
+
+  /* Для iOS PWA - цвет фона под status bar */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      padding-top: env(safe-area-inset-top, 0);
+      background: linear-gradient(to bottom, var(--ios-status-bar-bg) 0, var(--ios-status-bar-bg) env(safe-area-inset-top, 0), var(--background) env(safe-area-inset-top, 0));
+    }
+  }
+
+  /* Для Android PWA */
+  @media (display-mode: standalone) {
+    body {
+      background-color: var(--status-bar-color);
+    }
+    
+    .max-w-md {
+      background-color: var(--background);
+    }
+  }
 }
 
 @layer components {
