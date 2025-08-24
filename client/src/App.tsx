@@ -35,6 +35,7 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
 import React, { useEffect, useRef } from "react";
 
 // Loading component for lazy routes
@@ -143,14 +144,16 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
+      <DOMProtectionWrapper onDOMError={(error) => console.warn('DOM Error защищен:', error.message)}>
+        <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </DOMProtectionWrapper>
     </ErrorBoundary>
   );
 }

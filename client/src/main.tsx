@@ -8,23 +8,30 @@ if (typeof window !== 'undefined') {
     indexedDBService.init().catch(console.error);
   });
 
-  // Load PWA debug only in development
+  // Development-specific initialization
   if (process.env.NODE_ENV === 'development') {
     import("./utils/pwa-debug");
+    import("./utils/cache-killer").then(({ clearAllCaches, unregisterAllServiceWorkers }) => {
+      // Очищаем кэши и отключаем SW в разработке
+      Promise.all([
+        clearAllCaches(),
+        unregisterAllServiceWorkers()
+      ]).then(() => {
+        console.log('🧹 Среда разработки очищена от кэшей');
+      });
+    });
   }
 }
 
-// Register Service Worker with aggressive update strategy
-if ('serviceWorker' in navigator) {
+// Service Worker registration - only in production
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('✅ Service Worker зарегистрирован:', registration);
         
-        // Проверяем обновления только в production
-        if (process.env.NODE_ENV === 'production') {
-          registration.update();
-        }
+        // Агрессивная стратегия обновления для production
+        registration.update();
         
         // Обработчик новых версий Service Worker
         registration.addEventListener('updatefound', () => {
@@ -47,29 +54,65 @@ if ('serviceWorker' in navigator) {
           }
         });
         
-        // Перезагружаем страницу при смене контроллера (только в production)
+        // Автоматическое обновление при смене контроллера
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('🔄 Контроллер изменился');
-          if (process.env.NODE_ENV === 'production') {
-            console.log('🔄 Перезагружаем страницу');
-            window.location.reload();
+          console.log('🔄 Контроллер изменился, обновляем страницу');
+          // Принудительно очищаем кэши перед перезагрузкой
+          if ('caches' in window) {
+            caches.keys().then((cacheNames) => {
+              return Promise.all(
+                cacheNames.map((cacheName) => caches.delete(cacheName))
+              );
+            }).then(() => {
+              window.location.reload();
+            }).catch(() => {
+              // В случае ошибки очистки кэша все равно перезагружаемся
+              window.location.reload();
+            });
           } else {
-            console.log('🚧 Разработка: пропускаем перезагрузку для избежания DOM ошибок');
+            window.location.reload();
           }
         });
         
-        // Проверяем обновления при каждом обновлении страницы (только в production)
-        if (process.env.NODE_ENV === 'production') {
-          window.addEventListener('beforeunload', () => {
-            console.log('🔄 Страница обновляется, проверяем обновления SW');
-            registration.update();
-          });
-        }
+        // Периодическая проверка обновлений
+        setInterval(() => {
+          registration.update();
+        }, 60000); // Каждую минуту
+        
+        // Проверяем обновления при фокусе на странице
+        window.addEventListener('focus', () => {
+          registration.update();
+        });
+        
+        // Проверяем обновления при каждом обновлении страницы
+        window.addEventListener('beforeunload', () => {
+          registration.update();
+        });
       })
       .catch((registrationError) => {
         console.error('❌ Ошибка регистрации Service Worker:', registrationError);
       });
   });
+} else if (process.env.NODE_ENV === 'development') {
+  console.log('🚧 Разработка: Service Worker отключен для избежания проблем с кэшем');
+  
+  // Очищаем все кэши в разработке
+  if ('caches' in window) {
+    caches.keys().then(cacheNames => {
+      Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    });
+  }
+  
+  // Отключаем существующие service worker'ы
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
