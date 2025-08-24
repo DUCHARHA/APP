@@ -7,112 +7,71 @@ if (typeof window !== 'undefined') {
   import("./lib/indexeddb").then(({ indexedDBService }) => {
     indexedDBService.init().catch(console.error);
   });
+}
 
-  // Development-specific initialization
-  if (process.env.NODE_ENV === 'development') {
-    import("./utils/pwa-debug");
-    import("./utils/cache-killer").then(({ clearAllCaches, unregisterAllServiceWorkers }) => {
-      // Очищаем кэши и отключаем SW в разработке
-      Promise.all([
-        clearAllCaches(),
-        unregisterAllServiceWorkers()
-      ]).then(() => {
-        console.log('🧹 Среда разработки очищена от кэшей');
-      });
-    });
+// Функция для принудительной очистки всех старых кэшей и service worker'ов
+async function cleanupOldCaches() {
+  try {
+    // 1. Очистка всех кэшей
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      console.log('✅ Все старые кэши очищены');
+    }
+
+    // 2. Удаление всех старых service worker'ов
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg => reg.unregister()));
+      console.log('✅ Все старые service worker\s удалены');
+    }
+  } catch (error) {
+    console.warn('Ошибка при очистке:', error);
   }
 }
 
-// Service Worker registration - only in production
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('✅ Service Worker зарегистрирован:', registration);
-        
-        // Агрессивная стратегия обновления для production
-        registration.update();
-        
-        // Обработчик новых версий Service Worker
-        registration.addEventListener('updatefound', () => {
-          console.log('🆕 Найдена новая версия Service Worker');
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              console.log('📊 Статус нового SW:', newWorker.state);
-              if (newWorker.state === 'installed') {
-                if (navigator.serviceWorker.controller) {
-                  // Автоматически активируем новую версию
-                  console.log('⚡ Активируем новую версию Service Worker');
+// В development режиме - полная очистка и отключение PWA
+if (process.env.NODE_ENV === 'development') {
+  console.log('🚧 Режим разработки: PWA отключен');
+  cleanupOldCaches();
+} else {
+  // В production - сначала очищаем старое, потом регистрируем новое
+  console.log('🚀 Production режим: настройка PWA');
+  cleanupOldCaches().then(() => {
+    // Регистрируем новый service worker только после очистки старых
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', {
+          updateViaCache: 'none', // Не кэшируем сам service worker
+        })
+        .then((registration) => {
+          console.log('✅ Новый Service Worker зарегистрирован');
+          
+          // Автоматическое обновление при обнаружении новой версии
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // Активируем новую версию сразу
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
-                } else {
-                  // Первая установка
-                  console.log('🎉 Service Worker установлен впервые');
                 }
-              }
-            });
-          }
-        });
-        
-        // Автоматическое обновление при смене контроллера
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('🔄 Контроллер изменился, обновляем страницу');
-          // Принудительно очищаем кэши перед перезагрузкой
-          if ('caches' in window) {
-            caches.keys().then((cacheNames) => {
-              return Promise.all(
-                cacheNames.map((cacheName) => caches.delete(cacheName))
-              );
-            }).then(() => {
-              window.location.reload();
-            }).catch(() => {
-              // В случае ошибки очистки кэша все равно перезагружаемся
-              window.location.reload();
-            });
-          } else {
+              });
+            }
+          });
+
+          // Перезагружаем страницу при смене контроллера
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('🔄 Обновление активировано, перезагружаем страницу');
             window.location.reload();
-          }
+          });
+        })
+        .catch((error) => {
+          console.error('❌ Ошибка регистрации SW:', error);
         });
-        
-        // Периодическая проверка обновлений
-        setInterval(() => {
-          registration.update();
-        }, 60000); // Каждую минуту
-        
-        // Проверяем обновления при фокусе на странице
-        window.addEventListener('focus', () => {
-          registration.update();
-        });
-        
-        // Проверяем обновления при каждом обновлении страницы
-        window.addEventListener('beforeunload', () => {
-          registration.update();
-        });
-      })
-      .catch((registrationError) => {
-        console.error('❌ Ошибка регистрации Service Worker:', registrationError);
       });
+    }
   });
-} else if (process.env.NODE_ENV === 'development') {
-  console.log('🚧 Разработка: Service Worker отключен для избежания проблем с кэшем');
-  
-  // Очищаем все кэши в разработке
-  if ('caches' in window) {
-    caches.keys().then(cacheNames => {
-      Promise.all(
-        cacheNames.map(cacheName => caches.delete(cacheName))
-      );
-    });
-  }
-  
-  // Отключаем существующие service worker'ы
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      for (let registration of registrations) {
-        registration.unregister();
-      }
-    });
-  }
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

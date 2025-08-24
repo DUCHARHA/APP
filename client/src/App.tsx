@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { lazy, Suspense } from "react";
-import { initializeCacheCleanup } from "@/utils/cache-cleaner";
 import { autoFixDemoUser } from "@/utils/force-refresh";
 import { 
   OnboardingProvider, 
@@ -138,8 +137,6 @@ function App() {
     // First, check and fix any demo-user sessions
     autoFixDemoUser();
     
-    // Then run regular cache cleanup
-    initializeCacheCleanup();
   }, []);
 
   return (

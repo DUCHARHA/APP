@@ -1,123 +1,92 @@
+// Минимальный Service Worker для PWA
+const CACHE_NAME = 'ducharkha-v2025-01';
+const STATIC_CACHE = 'static-v2025-01';
 
-const CACHE_NAME = 'ducharkha-v1.0.0';
-const STATIC_CACHE = 'ducharkha-static-v1.0.0';
-const API_CACHE = 'ducharkha-api-v1.0.0';
-
-// Ресурсы для кеширования при установке
-const STATIC_ASSETS = [
+// Файлы для кэширования
+const STATIC_FILES = [
   '/',
   '/manifest.webmanifest',
   '/icons/192.png',
-  '/icons/512.png',
-  '/icons/logo.png'
+  '/icons/512.png'
 ];
 
-// API маршруты для кеширования
-const API_ROUTES = [
-  '/api/categories',
-  '/api/products',
-  '/api/banners'
-];
-
-self.addEventListener('install', event => {
-  console.log('SW: Installing...');
+// Установка SW - кэшируем основные файлы
+self.addEventListener('install', (event) => {
+  console.log('📦 SW установка');
   event.waitUntil(
     Promise.all([
-      caches.open(STATIC_CACHE).then(cache => {
-        console.log('SW: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+      // Очищаем все старые кэши при установке
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames
+            .filter(name => name !== CACHE_NAME && name !== STATIC_CACHE)
+            .map(name => caches.delete(name))
+        );
       }),
-      self.skipWaiting()
-    ])
+      // Кэшируем новые файлы
+      caches.open(STATIC_CACHE).then(cache => {
+        return cache.addAll(STATIC_FILES);
+      })
+    ]).then(() => {
+      // Принудительно активируем новую версию
+      self.skipWaiting();
+    })
   );
 });
 
-self.addEventListener('activate', event => {
-  console.log('SW: Activating...');
+// Активация SW - берем контроль над всеми клиентами
+self.addEventListener('activate', (event) => {
+  console.log('⚡ SW активация');
   event.waitUntil(
     Promise.all([
-      // Удаляем старые кеши
+      // Очищаем старые кэши
       caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.map(cacheName => {
-            if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
-              console.log('SW: Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
+          cacheNames
+            .filter(name => name !== CACHE_NAME && name !== STATIC_CACHE)
+            .map(name => caches.delete(name))
         );
       }),
+      // Берем контроль над всеми клиентами
       self.clients.claim()
     ])
   );
 });
 
-self.addEventListener('fetch', event => {
+// Обработка запросов - минимальная стратегия
+self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
-
-  // Кешируем только GET запросы
-  if (request.method !== 'GET') {
-    return;
-  }
-
-  // API запросы
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      caches.open(API_CACHE).then(cache => {
-        return cache.match(request).then(cachedResponse => {
-          const fetchPromise = fetch(request).then(networkResponse => {
-            // Кешируем только успешные ответы для определенных маршрутов
-            if (networkResponse.ok && API_ROUTES.some(route => url.pathname.startsWith(route))) {
-              cache.put(request, networkResponse.clone());
-            }
-            return networkResponse;
-          }).catch(() => {
-            // Возвращаем кешированный ответ при ошибке сети
-            return cachedResponse;
-          });
-
-          // Возвращаем кешированный ответ немедленно, обновляем в фоне
-          return cachedResponse || fetchPromise;
-        });
-      })
-    );
-    return;
-  }
-
-  // Статические ресурсы
+  
+  // Только для GET запросов
+  if (request.method !== 'GET') return;
+  
+  // Игнорируем API запросы - всегда идем в сеть
+  if (request.url.includes('/api/')) return;
+  
   event.respondWith(
-    caches.match(request).then(response => {
-      if (response) {
-        return response;
-      }
-
-      return fetch(request).then(response => {
-        // Кешируем статические ресурсы
-        if (response.ok && (
-          request.destination === 'image' ||
-          request.destination === 'style' ||
-          request.destination === 'script' ||
-          url.pathname.endsWith('.js') ||
-          url.pathname.endsWith('.css') ||
-          url.pathname.endsWith('.png') ||
-          url.pathname.endsWith('.jpg') ||
-          url.pathname.endsWith('.svg')
-        )) {
-          const responseToCache = response.clone();
-          caches.open(STATIC_CACHE).then(cache => {
-            cache.put(request, responseToCache);
+    // Сначала пробуем сеть, потом кэш
+    fetch(request)
+      .then(response => {
+        // Кэшируем успешные ответы
+        if (response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseClone);
           });
         }
-
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // В случае ошибки сети - проверяем кэш
+        return caches.match(request).then(cachedResponse => {
+          return cachedResponse || new Response('Offline', { status: 503 });
+        });
+      })
   );
 });
 
-// Обработка сообщений
-self.addEventListener('message', event => {
+// Обработка сообщений от клиента
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
