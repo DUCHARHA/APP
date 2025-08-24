@@ -1,6 +1,7 @@
-// Минимальный Service Worker для PWA
-const CACHE_NAME = 'ducharkha-v2025-01';
-const STATIC_CACHE = 'static-v2025-01';
+// Стабильный Service Worker для PWA
+const APP_VERSION = '1.0.0';
+const CACHE_NAME = `ducharkha-app-${APP_VERSION}`;
+const STATIC_CACHE = `static-${APP_VERSION}`;
 
 // Файлы для кэширования
 const STATIC_FILES = [
@@ -68,9 +69,13 @@ self.addEventListener('fetch', (event) => {
     // Сначала пробуем сеть, потом кэш
     fetch(request)
       .then(response => {
-        // Кэшируем успешные ответы
+        // Кэшируем успешные ответы с заголовками
         if (response.status === 200) {
           const responseClone = response.clone();
+          // Добавляем заголовки для предотвращения перевода
+          const headers = new Headers(response.headers);
+          headers.set('Content-Language', 'ru');
+          
           caches.open(CACHE_NAME).then(cache => {
             cache.put(request, responseClone);
           });
