@@ -110,6 +110,15 @@ export default function Checkout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
+    onError: (error) => {
+      console.error('Failed to clear cart after order:', error);
+      // Show warning but don't block the user - order was still created
+      toast({
+        title: "Внимание",
+        description: "Заказ оформлен, но корзина не очистилась. Обновите страницу.",
+        variant: "destructive",
+      });
+    },
   });
 
   const onSubmit = (data: CheckoutForm) => {

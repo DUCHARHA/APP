@@ -690,9 +690,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/:userId/preferences", async (req, res) => {
     try {
       const preferencesData = insertUserPreferencesSchema.partial().parse(req.body);
-      const preferences = await storage.updateUserPreferences(req.params.userId, preferencesData);
+      let preferences = await storage.updateUserPreferences(req.params.userId, preferencesData);
+      
+      // Если настройки не найдены, создаем их
       if (!preferences) {
-        return res.status(404).json({ error: "User preferences not found" });
+        const newPreferencesData = {
+          userId: req.params.userId,
+          theme: "light",
+          primaryColor: "#6366f1",
+          accentColor: "#10b981",
+          language: "ru",
+          notifications: true,
+          ...preferencesData
+        };
+        preferences = await storage.createUserPreferences(newPreferencesData);
       }
       
       // Clear cache for this user's preferences
