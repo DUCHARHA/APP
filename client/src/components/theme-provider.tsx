@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { getCurrentUserId } from "@/utils/user-session";
+import { safeRemoveChild, safeAppendChild, safeQuerySelector } from "@/utils/dom-safety";
 
 type Theme = "dark" | "light" | "system";
 
@@ -168,23 +169,19 @@ export function ThemeProvider({
         throw new Error("Document head недоступен");
       }
 
-      let customStyleElement = document.getElementById("user-custom-styles");
+      let customStyleElement = safeQuerySelector("#user-custom-styles") as HTMLStyleElement | null;
       if (preferences.customCss) {
         if (!customStyleElement) {
           customStyleElement = document.createElement("style");
           customStyleElement.id = "user-custom-styles";
-          document.head.appendChild(customStyleElement);
+          safeAppendChild(document.head, customStyleElement);
         }
-        customStyleElement.textContent = preferences.customCss;
+        if (customStyleElement) {
+          customStyleElement.textContent = preferences.customCss;
+        }
       } else if (customStyleElement) {
-        // Safe removal - check if element is still in DOM and has correct parent
-        try {
-          if (customStyleElement.parentNode === document.head) {
-            document.head.removeChild(customStyleElement);
-          }
-        } catch (removeError) {
-          console.warn("Safe removal failed, element may have been removed already:", removeError);
-        }
+        // Safe removal using our utility
+        safeRemoveChild(document.head, customStyleElement);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка при обновлении темы";

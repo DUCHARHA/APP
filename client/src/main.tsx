@@ -21,8 +21,10 @@ if ('serviceWorker' in navigator) {
       .then((registration) => {
         console.log('✅ Service Worker зарегистрирован:', registration);
         
-        // Немедленно проверяем обновления
-        registration.update();
+        // Проверяем обновления только в production
+        if (process.env.NODE_ENV === 'production') {
+          registration.update();
+        }
         
         // Обработчик новых версий Service Worker
         registration.addEventListener('updatefound', () => {
@@ -45,17 +47,24 @@ if ('serviceWorker' in navigator) {
           }
         });
         
-        // Перезагружаем страницу при смене контроллера
+        // Перезагружаем страницу при смене контроллера (только в production)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('🔄 Контроллер изменился, перезагружаем страницу');
-          window.location.reload();
+          console.log('🔄 Контроллер изменился');
+          if (process.env.NODE_ENV === 'production') {
+            console.log('🔄 Перезагружаем страницу');
+            window.location.reload();
+          } else {
+            console.log('🚧 Разработка: пропускаем перезагрузку для избежания DOM ошибок');
+          }
         });
         
-        // Проверяем обновления при каждом обновлении страницы
-        window.addEventListener('beforeunload', () => {
-          console.log('🔄 Страница обновляется, проверяем обновления SW');
-          registration.update();
-        });
+        // Проверяем обновления при каждом обновлении страницы (только в production)
+        if (process.env.NODE_ENV === 'production') {
+          window.addEventListener('beforeunload', () => {
+            console.log('🔄 Страница обновляется, проверяем обновления SW');
+            registration.update();
+          });
+        }
       })
       .catch((registrationError) => {
         console.error('❌ Ошибка регистрации Service Worker:', registrationError);

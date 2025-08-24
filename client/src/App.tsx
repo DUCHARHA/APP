@@ -53,6 +53,7 @@ function Router() {
 
   useEffect(() => {
     let isStale = false;
+    let rafId: number | null = null;
     
     // Save scroll position of previous page
     if (previousLocation.current && previousLocation.current !== location) {
@@ -63,14 +64,23 @@ function Router() {
     const savedPosition = scrollPositions.get(location);
     if (savedPosition !== undefined) {
       // Use requestAnimationFrame to ensure DOM is ready and prevent stale state
-      requestAnimationFrame(() => {
-        if (!isStale) {
-          window.scrollTo(0, savedPosition);
+      rafId = requestAnimationFrame(() => {
+        if (!isStale && document.body) {
+          try {
+            window.scrollTo(0, savedPosition);
+          } catch (error) {
+            console.warn('Scroll position restore failed:', error);
+          }
         }
+        rafId = null;
       });
     } else {
-      if (!isStale) {
-        window.scrollTo(0, 0);
+      if (!isStale && document.body) {
+        try {
+          window.scrollTo(0, 0);
+        } catch (error) {
+          console.warn('Scroll to top failed:', error);
+        }
       }
     }
 
@@ -78,6 +88,9 @@ function Router() {
     
     return () => {
       isStale = true;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
     };
   }, [location]);
 
