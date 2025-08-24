@@ -32,16 +32,32 @@ export default function Cart() {
       if (!response.ok) throw new Error("Failed to update cart item");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
+    onMutate: async ({ id, quantity }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === id ? { ...item, quantity } : item
+        );
+      });
+
+      return { previousCart };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Update quantity error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
       toast({
         title: "Ошибка сети",
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
@@ -52,16 +68,30 @@ export default function Cart() {
       });
       if (!response.ok) throw new Error("Failed to remove cart item");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.filter((item: any) => item.id !== id);
+      });
+
+      return { previousCart };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Remove item error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
       toast({
         title: "Ошибка сети",
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
@@ -72,7 +102,26 @@ export default function Cart() {
       });
       if (!response.ok) throw new Error("Failed to clear cart");
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], []);
+
+      return { previousCart };
+    },
+    onError: (error, variables, context) => {
+      console.error('Clear cart error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });

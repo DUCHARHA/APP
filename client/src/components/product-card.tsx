@@ -17,6 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { cartItems } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const userId = getCurrentUserId();
 
   // Find current quantity of this product in cart
@@ -172,27 +173,36 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isProcessing || addToCartMutation.isPending) return;
+    setIsProcessing(true);
     addToCartMutation.mutate();
+    setTimeout(() => setIsProcessing(false), 1000);
   };
 
   const handleIncreaseQuantity = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isProcessing || addToCartMutation.isPending || updateQuantityMutation.isPending) return;
+    setIsProcessing(true);
     if (currentQuantity === 0) {
       addToCartMutation.mutate();
     } else {
       updateQuantityMutation.mutate({ quantity: currentQuantity + 1 });
     }
+    setTimeout(() => setIsProcessing(false), 500);
   };
 
   const handleDecreaseQuantity = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isProcessing || removeItemMutation.isPending || updateQuantityMutation.isPending) return;
+    setIsProcessing(true);
     if (currentQuantity === 1) {
       removeItemMutation.mutate();
     } else {
       updateQuantityMutation.mutate({ quantity: currentQuantity - 1 });
     }
+    setTimeout(() => setIsProcessing(false), 500);
   };
 
   return (
@@ -228,12 +238,12 @@ export default function ProductCard({ product }: ProductCardProps) {
               // Show simple add button when item not in cart
               <button
                 onClick={handleAddToCart}
-                disabled={addToCartMutation.isPending}
+                disabled={addToCartMutation.isPending || isProcessing}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                   isAdded
                     ? "bg-electric-green"
                     : "bg-agent-purple hover:bg-agent-purple/90"
-                }`}
+                } ${(addToCartMutation.isPending || isProcessing) ? "opacity-70 cursor-not-allowed" : ""}`}
                 data-testid="button-add-to-cart"
               >
                 {isAdded ? (
@@ -247,8 +257,10 @@ export default function ProductCard({ product }: ProductCardProps) {
               <div className="flex items-center space-x-1" data-testid={`quantity-controls-${product.id}`}>
                 <button
                   onClick={handleDecreaseQuantity}
-                  disabled={updateQuantityMutation.isPending || removeItemMutation.isPending}
-                  className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+                  disabled={updateQuantityMutation.isPending || removeItemMutation.isPending || isProcessing}
+                  className={`w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors ${
+                    (updateQuantityMutation.isPending || removeItemMutation.isPending || isProcessing) ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   data-testid={`button-decrease-${product.id}`}
                 >
                   <Minus className="w-3 h-3 text-gray-600 dark:text-gray-300" />
@@ -263,8 +275,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                 <button
                   onClick={handleIncreaseQuantity}
-                  disabled={addToCartMutation.isPending || updateQuantityMutation.isPending}
-                  className="w-7 h-7 rounded-lg bg-agent-purple hover:bg-agent-purple/90 flex items-center justify-center transition-colors"
+                  disabled={addToCartMutation.isPending || updateQuantityMutation.isPending || isProcessing}
+                  className={`w-7 h-7 rounded-lg bg-agent-purple hover:bg-agent-purple/90 flex items-center justify-center transition-colors ${
+                    (addToCartMutation.isPending || updateQuantityMutation.isPending || isProcessing) ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   data-testid={`button-increase-${product.id}`}
                 >
                   <Plus className="w-3 h-3 text-white" />

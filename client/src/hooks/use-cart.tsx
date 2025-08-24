@@ -9,10 +9,13 @@ export function useCart() {
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],
-    staleTime: 60000, // Увеличиваем время кэша до 1 минуты
+    staleTime: 300000, // 5 минут кэша
+    gcTime: 600000, // 10 минут в памяти
     refetchInterval: false,
-    refetchOnWindowFocus: false, // Отключаем перезагрузку при фокусе
-    refetchOnMount: false, // Не перезагружаем при монтировании если есть кэш
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: 1, // Меньше попыток при ошибках
   });
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
