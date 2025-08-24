@@ -1,6 +1,7 @@
-// Минимальный Service Worker для PWA
-const CACHE_NAME = 'ducharkha-v2025-01';
-const STATIC_CACHE = 'static-v2025-01';
+// Service Worker для PWA с улучшенной совместимостью
+const CACHE_NAME = 'ducharkha-v2025-02';
+const STATIC_CACHE = 'static-v2025-02';
+const DYNAMIC_CACHE = 'dynamic-v2025-02';
 
 // Файлы для кэширования
 const STATIC_FILES = [
@@ -90,5 +91,75 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+});
+
+// Событие для отслеживания установки PWA
+self.addEventListener('appinstalled', (event) => {
+  console.log('✅ PWA успешно установлено');
+  
+  // Отправляем сообщение клиенту об успешной установке
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'PWA_INSTALLED',
+        message: 'PWA успешно установлено'
+      });
+    });
+  });
+});
+
+// Улучшенная обработка запросов для Honor/Huawei устройств
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  
+  // Только для GET запросов
+  if (request.method !== 'GET') return;
+  
+  // Игнорируем API запросы
+  if (request.url.includes('/api/')) return;
+  
+  // Для Honor устройств - всегда обновляем кэш
+  const isHonorDevice = self.navigator.userAgent.includes('Honor') || 
+                       self.navigator.userAgent.includes('HONOR') ||
+                       self.navigator.userAgent.includes('Huawei');
+  
+  if (isHonorDevice) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then(cachedResponse => {
+            return cachedResponse || new Response('Offline', { status: 503 });
+          });
+        })
+    );
+  } else {
+    // Стандартная обработка для других устройств
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then(cachedResponse => {
+            return cachedResponse || new Response('Offline', { status: 503 });
+          });
+        })
+    );
   }
 });
