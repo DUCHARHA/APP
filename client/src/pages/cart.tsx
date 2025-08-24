@@ -33,7 +33,7 @@ export default function Cart() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
     onError: (error) => {
       console.error('Update quantity error:', error);
@@ -53,7 +53,7 @@ export default function Cart() {
       if (!response.ok) throw new Error("Failed to remove cart item");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
     onError: (error) => {
       console.error('Remove item error:', error);
@@ -73,7 +73,7 @@ export default function Cart() {
       if (!response.ok) throw new Error("Failed to clear cart");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 

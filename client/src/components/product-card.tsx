@@ -37,24 +37,63 @@ export default function ProductCard({ product }: ProductCardProps) {
       if (!response.ok) throw new Error("Failed to add to cart");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onMutate: async () => {
+      // Оптимистичное обновление
       setIsAdded(true);
-      setTimeout(() => setIsAdded(false), 1000);
+
+      // Отменяем текущие запросы
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+
+      // Получаем текущие данные
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      // Оптимистично обновляем кэш
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        const existingItem = old.find((item: any) => item.product.id === product.id);
+        if (existingItem) {
+          return old.map((item: any) => 
+            item.product.id === product.id 
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          return [...old, {
+            id: `temp-${product.id}`,
+            userId,
+            productId: product.id,
+            quantity: 1,
+            product
+          }];
+        }
+      });
+
+      return { previousCart };
     },
-    onError: (error) => {
+    onSuccess: () => {
+      setTimeout(() => setIsAdded(false), 2000);
+    },
+    onError: (error, variables, context) => {
       console.error('Add to cart error:', error);
+      // Откатываем оптимистичное обновление
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
+      setIsAdded(false);
       toast({
         title: "Ошибка сети",
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      // Перезагружаем данные в фоне для синхронизации
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
+    },
   });
 
   const updateQuantityMutation = useMutation({
     mutationFn: async ({ quantity }: { quantity: number }) => {
-      if (!cartItem) throw new Error("Item not in cart");
       const response = await fetch(`/api/cart/${cartItem.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -63,37 +102,70 @@ export default function ProductCard({ product }: ProductCardProps) {
       if (!response.ok) throw new Error("Failed to update cart item");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onMutate: async ({ quantity }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === cartItem.id 
+            ? { ...item, quantity }
+            : item
+        );
+      });
+
+      return { previousCart };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Update quantity error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
       toast({
         title: "Ошибка сети",
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
   const removeItemMutation = useMutation({
     mutationFn: async () => {
-      if (!cartItem) throw new Error("Item not in cart");
       const response = await fetch(`/api/cart/${cartItem.id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to remove cart item");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.filter((item: any) => item.id !== cartItem.id);
+      });
+
+      return { previousCart };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Remove item error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
       toast({
         title: "Ошибка сети",
         description: "Проверьте интернет соединение и попробуйте снова",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
   });
 
@@ -151,7 +223,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="font-bold text-gray-900 dark:text-gray-100" data-testid="text-product-price">
               {parseFloat(product.price).toFixed(0)} с.
             </span>
-            
+
             {currentQuantity === 0 ? (
               // Show simple add button when item not in cart
               <button
@@ -181,14 +253,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 >
                   <Minus className="w-3 h-3 text-gray-600 dark:text-gray-300" />
                 </button>
-                
+
                 <span 
                   className="w-8 text-center font-bold text-sm text-gray-900 dark:text-gray-100"
                   data-testid={`text-quantity-${product.id}`}
                 >
                   {currentQuantity}
                 </span>
-                
+
                 <button
                   onClick={handleIncreaseQuantity}
                   disabled={addToCartMutation.isPending || updateQuantityMutation.isPending}

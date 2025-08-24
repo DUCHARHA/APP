@@ -7,14 +7,16 @@ type CartItemWithProduct = CartItem & { product: Product };
 export function useCart() {
   const userId = getCurrentUserId();
 
-  const { data: cartItems = [] } = useQuery<CartItemWithProduct[]>({
+  const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],
-    staleTime: 30000, // Cache cart data for 30 seconds
-    refetchInterval: false, // Disable automatic refetching
+    staleTime: 60000, // Увеличиваем время кэша до 1 минуты
+    refetchInterval: false,
+    refetchOnWindowFocus: false, // Отключаем перезагрузку при фокусе
+    refetchOnMount: false, // Не перезагружаем при монтировании если есть кэш
   });
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-  
+
   const totalPrice = cartItems.reduce((total, item) => {
     return total + (parseFloat(item.product.price) * item.quantity);
   }, 0);
