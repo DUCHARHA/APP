@@ -30,13 +30,13 @@
   --chart-4: hsl(147.1429 78.5047% 41.9608%);
   --chart-5: hsl(341.4894 75.2000% 50.9804%);
   --radius: 0.75rem;
-  
+
   /* Brand colors - dynamically overridable */
   --agent-purple: hsl(271 89% 40%);
   --electric-green: hsl(158.1 64.4% 51.6%);
   --bright-orange: hsl(24.6 95% 53.1%);
   --font-inter: 'Inter', system-ui, sans-serif;
-  
+
   /* Custom user preference slots */
   --user-primary: var(--primary);
   --user-accent: var(--electric-green);
@@ -84,26 +84,18 @@
   @supports (-webkit-touch-callout: none) {
     body {
       padding-top: env(safe-area-inset-top, 0);
-      background: var(--ios-status-bar-bg) !important;
+      background: linear-gradient(to bottom, var(--ios-status-bar-bg) 0, var(--ios-status-bar-bg) env(safe-area-inset-top, 0), var(--background) env(safe-area-inset-top, 0));
     }
   }
 
-  /* Для Android PWA - убираем белый фон */
+  /* Для Android PWA */
   @media (display-mode: standalone) {
-    html, body {
-      background-color: var(--status-bar-color) !important;
+    body {
+      background-color: var(--status-bar-color);
     }
-    
-    #root, .max-w-md {
-      background-color: var(--background);
-      min-height: 100vh;
-    }
-  }
 
-  /* Убираем белый фон при загрузке для всех PWA */
-  @media (display-mode: standalone), (display-mode: minimal-ui) {
-    html {
-      background-color: var(--status-bar-color) !important;
+    .max-w-md {
+      background-color: var(--background);
     }
   }
 }
