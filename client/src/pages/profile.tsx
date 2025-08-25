@@ -15,9 +15,9 @@ export default function Profile() {
   const { toast } = useToast();
   const { startOnboarding, isOnboardingComplete } = useOnboarding();
   const [user, setUser] = useState({
-    name: "Анна Иванова",
+    name: "Фируз Пулотов",
     email: "anna@example.com",
-    phone: "+7 (999) 123-45-67",
+    phone: "+7 (952) 270-47-18",
     address: "ул. Пушкина, 25, кв. 10",
   });
 
