@@ -17,7 +17,6 @@ import {
 const Home = lazy(() => import("@/pages/home"));
 const Catalog = lazy(() => import("@/pages/catalog"));
 const ProductDetail = lazy(() => import("@/pages/product-detail"));
-const Cart = lazy(() => import("@/pages/cart"));
 const Checkout = lazy(() => import("@/pages/checkout"));
 const Orders = lazy(() => import("@/pages/orders"));
 const Addresses = lazy(() => import("@/pages/addresses"));
@@ -114,7 +113,6 @@ function Router() {
             <Route path="/catalog" component={Catalog} />
             <Route path="/catalog/:categoryId" component={Catalog} />
             <Route path="/product/:productId" component={ProductDetail} />
-            <Route path="/cart" component={Cart} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/profile" component={Profile} />
             <Route path="/profile/edit" component={ProfileEdit} />

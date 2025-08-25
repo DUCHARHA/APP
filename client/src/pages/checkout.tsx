@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, MapPin, CreditCard, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Clock, CheckCircle, Plus, Minus, Trash2 } from "lucide-react";
 import { type CartItem, type Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -51,10 +51,18 @@ export default function Checkout() {
     },
   });
 
+  // helper: безопасно приводим цену к числу
+  const toNumber = (p?: number | string | null) => {
+    if (typeof p === 'number') return p;
+    if (p == null) return 0;
+    const v = parseFloat(String(p).replace(',', '.'));
+    return Number.isFinite(v) ? v : 0;
+  };
+
   const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => {
-      return total + (parseFloat(item.product.price) * item.quantity);
-    }, 0);
+    return (cartItems ?? [])
+      .filter((i) => i && i.product && Number.isFinite(i.quantity) && i.quantity > 0)
+      .reduce((total, item) => total + toNumber(item.product.price) * item.quantity, 0);
   };
 
   const subtotal = calculateSubtotal();
@@ -120,6 +128,90 @@ export default function Checkout() {
       });
     },
   });
+
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ id, quantity }: { id: string; quantity: number }) => {
+      const response = await fetch(`/api/cart/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+      if (!response.ok) throw new Error("Failed to update cart item");
+      return response.json();
+    },
+    onMutate: async ({ id, quantity }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === id ? { ...item, quantity } : item
+        );
+      });
+
+      return { previousCart };
+    },
+    onSuccess: (data, { id }) => {
+      // Обновляем конкретный элемент реальными данными
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.map((item: any) => 
+          item.id === id ? data : item
+        );
+      });
+    },
+    onError: (error, variables, context) => {
+      console.error('Update quantity error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/cart/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove cart item");
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/cart", userId] });
+      const previousCart = queryClient.getQueryData(["/api/cart", userId]);
+
+      queryClient.setQueryData(["/api/cart", userId], (old: any) => {
+        if (!old) return [];
+        return old.filter((item: any) => item.id !== id);
+      });
+
+      return { previousCart };
+    },
+    onError: (error, variables, context) => {
+      console.error('Remove item error:', error);
+      if (context?.previousCart) {
+        queryClient.setQueryData(["/api/cart", userId], context.previousCart);
+      }
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте интернет соединение и попробуйте снова",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleQuantityChange = (id: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeItemMutation.mutate(id);
+    } else {
+      updateQuantityMutation.mutate({ id, quantity });
+    }
+  };
 
   const onSubmit = (data: CheckoutForm) => {
     createOrderMutation.mutate(data);
@@ -254,22 +346,67 @@ export default function Checkout() {
             <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center space-x-3">
-                  <img
-                    src={item.product.imageUrl || ""}
-                    alt={item.product.name}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 text-sm">
+                  {!item.product.imageUrl ? (
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="text-gray-400 dark:text-gray-600 text-center">
+                        <div className="text-lg">📦</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={item.product.imageUrl}
+                      alt={item.product.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const placeholder = target.nextElementSibling as HTMLDivElement;
+                        if (placeholder) placeholder.style.display = 'flex';
+                      }}
+                    />
+                  )}
+                  <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center" style={{display: 'none'}}>
+                    <div className="text-gray-400 dark:text-gray-600 text-center">
+                      <div className="text-lg">📦</div>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 text-sm truncate">
                       {item.product.name}
                     </h4>
                     <p className="text-xs text-gray-500">{item.product.weight}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">{item.quantity} шт</p>
-                    <p className="font-semibold text-gray-900">
-                      {(parseFloat(item.product.price) * item.quantity).toFixed(0)} с.
+                    <p className="font-semibold text-gray-900 text-sm">
+                      {toNumber(item.product.price).toFixed(0)} с.
                     </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                      className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      disabled={updateQuantityMutation.isPending}
+                    >
+                      <Minus className="w-3 h-3 text-gray-600" />
+                    </button>
+                    <span className="w-8 text-center font-medium text-sm">
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                      className="w-7 h-7 rounded-lg bg-agent-purple flex items-center justify-center hover:bg-agent-purple/90 transition-colors"
+                      disabled={updateQuantityMutation.isPending}
+                    >
+                      <Plus className="w-3 h-3 text-white" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeItemMutation.mutate(item.id)}
+                      className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center hover:bg-red-200 transition-colors ml-2"
+                      disabled={removeItemMutation.isPending}
+                    >
+                      <Trash2 className="w-3 h-3 text-red-600" />
+                    </button>
                   </div>
                 </div>
               ))}

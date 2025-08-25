@@ -34,8 +34,6 @@ export function useCart() {
     .filter((i) => i && i.product && Number.isFinite(i.quantity) && i.quantity > 0)
     .reduce((total, item) => total + toNumber(item.product.price) * item.quantity, 0);
 
-  // Диагностика (временный лог)
-  console.log('cartItems:', cartItems);
 
   return {
     cartItems,
