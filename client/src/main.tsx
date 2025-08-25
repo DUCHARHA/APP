@@ -4,6 +4,14 @@ import "./index.css";
 import { statusBarManager } from "./utils/status-bar-manager";
 import { PWADetector } from "./utils/pwa-detection";
 
+// Security: Disable console logs in production to prevent data leaks
+if (import.meta.env.PROD) {
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+  // console.error and console.warn are kept for debugging critical issues
+}
+
 // Initialize IndexedDB lazily to improve initial load time
 if (typeof window !== 'undefined') {
   import("./lib/indexeddb").then(({ indexedDBService }) => {

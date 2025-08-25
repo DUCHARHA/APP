@@ -46,7 +46,7 @@ export class PWADetector {
       browser: this.getBrowserInfo(),
       displayMode: this.getDisplayMode(),
       hasServiceWorker: 'serviceWorker' in navigator,
-      userAgent: navigator.userAgent
+      userAgent: import.meta.env.PROD ? '[Hidden for security]' : navigator.userAgent
     });
   }
 

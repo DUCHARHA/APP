@@ -69,7 +69,7 @@ export function getUserSession(): UserSession {
     lastActivity: Date.now(),
   };
 
-  console.log('Creating new user session with ID:', newSession.userId);
+  // Security: Don't log user IDs in production
 
   try {
     localStorage.setItem(USER_SESSION_KEY, JSON.stringify(newSession));
@@ -89,7 +89,7 @@ export function getCurrentUserId(): string {
     console.error('Failed to get current user ID:', error);
     // Return a temporary fallback ID based on timestamp to avoid sharing data
     const fallbackId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    console.warn('Using temporary fallback user ID:', fallbackId);
+    console.warn('Using temporary fallback user ID (ID hidden for security)');
     return fallbackId;
   }
 }

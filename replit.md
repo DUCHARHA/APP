@@ -81,6 +81,14 @@ The application implements comprehensive PWA capabilities:
 - **Install prompt** component for encouraging app installation
 - **Offline-first approach** with cached resources and API responses
 
+## Security and Privacy (Added August 2025)
+The application implements comprehensive security measures to protect user data:
+- **Console Log Protection**: All console.log, console.info, and console.debug are disabled in production to prevent data leaks
+- **User Data Protection**: No user IDs, tokens, emails, or personal data are logged in production
+- **Secure Logging**: Only console.error and console.warn remain active for critical issue debugging
+- **Data Minimization**: Debug logs show only necessary technical information without exposing user data
+- **GDPR Compliance**: Logging practices comply with data protection regulations
+
 ## State Management
 Client-side state is managed through:
 - **React Query** for server state with minimal caching (updates only on page load/refresh)

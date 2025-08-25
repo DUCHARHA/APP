@@ -33,10 +33,10 @@ export function debugUserSession(): void {
   if (typeof window === 'undefined') return;
 
   const sessionData = localStorage.getItem('ducharkha_user_session');
-  console.log('Current session data:', sessionData);
+  console.log('Session data exists:', !!sessionData);
   
-  const allLocalStorage = {...localStorage};
-  console.log('All localStorage data:', allLocalStorage);
+  const localStorageKeys = Object.keys(localStorage);
+  console.log('localStorage keys count:', localStorageKeys.length);
 }
 
 // Auto-clear on app load if demo-user detected
@@ -59,7 +59,7 @@ export function autoFixDemoUser(): void {
       try {
         const value = localStorage.getItem(key);
         if (value && value.includes('demo-user')) {
-          console.log(`Clearing demo-user data from ${key}`);
+          console.log('Clearing demo-user data (key hidden for security)');
           localStorage.removeItem(key);
           shouldRefresh = true;
         }
