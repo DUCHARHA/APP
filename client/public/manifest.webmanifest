@@ -39,5 +39,9 @@
   },
   "protocol_handlers": [],
   "edge_side_panel": {},
-  "screenshots": []
+  "screenshots": [],
+  "shortcuts": [],
+  "file_handlers": [],
+  "handle_links": "preferred",
+  "capture_links": "existing-client-navigate"
 }

@@ -72,9 +72,11 @@ self.addEventListener('fetch', (event) => {
         // Кэшируем успешные ответы с заголовками
         if (response.status === 200) {
           const responseClone = response.clone();
-          // Добавляем заголовки для предотвращения перевода
+          // Добавляем заголовки для предотвращения перевода и стабильной работы PWA
           const headers = new Headers(response.headers);
           headers.set('Content-Language', 'ru');
+          headers.set('X-Content-Type-Options', 'nosniff');
+          headers.set('X-Frame-Options', 'SAMEORIGIN');
           
           caches.open(CACHE_NAME).then(cache => {
             cache.put(request, responseClone);
