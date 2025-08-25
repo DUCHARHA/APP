@@ -84,18 +84,26 @@
   @supports (-webkit-touch-callout: none) {
     body {
       padding-top: env(safe-area-inset-top, 0);
-      background: linear-gradient(to bottom, var(--ios-status-bar-bg) 0, var(--ios-status-bar-bg) env(safe-area-inset-top, 0), var(--background) env(safe-area-inset-top, 0));
+      background: var(--ios-status-bar-bg) !important;
     }
   }
 
-  /* Для Android PWA */
+  /* Для Android PWA - убираем белый фон */
   @media (display-mode: standalone) {
-    body {
-      background-color: var(--status-bar-color);
+    html, body {
+      background-color: var(--status-bar-color) !important;
     }
     
-    .max-w-md {
+    #root, .max-w-md {
       background-color: var(--background);
+      min-height: 100vh;
+    }
+  }
+
+  /* Убираем белый фон при загрузке для всех PWA */
+  @media (display-mode: standalone), (display-mode: minimal-ui) {
+    html {
+      background-color: var(--status-bar-color) !important;
     }
   }
 }

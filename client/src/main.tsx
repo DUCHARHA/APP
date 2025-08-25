@@ -77,12 +77,7 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-// Устанавливаем черный цвет status bar при запуске (splash screen)
-statusBarManager.setBlack();
-
-// Через небольшую задержку переключаемся на фиолетовый (когда приложение загрузилось)
-setTimeout(() => {
-  statusBarManager.setPurple();
-}, 1000);
+// Сразу устанавливаем фиолетовый цвет status bar - убираем мигание
+statusBarManager.setPurple();
 
 createRoot(document.getElementById("root")!).render(<App />);
