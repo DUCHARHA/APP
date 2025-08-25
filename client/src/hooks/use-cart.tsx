@@ -18,11 +18,24 @@ export function useCart() {
     retry: false, // Убираем ретраи для избежания конфликтов
   });
 
-  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = (cartItems ?? [])
+    .filter((i) => i && Number.isFinite(i.quantity) && i.quantity > 0)
+    .reduce((total, item) => total + item.quantity, 0);
 
-  const totalPrice = cartItems.reduce((total, item) => {
-    return total + (parseFloat(item.product.price) * item.quantity);
-  }, 0);
+  // helper: безопасно приводим цену к числу
+  const toNumber = (p?: number | string | null) => {
+    if (typeof p === 'number') return p;
+    if (p == null) return 0;
+    const v = parseFloat(String(p).replace(',', '.'));
+    return Number.isFinite(v) ? v : 0;
+  };
+
+  const totalPrice = (cartItems ?? [])
+    .filter((i) => i && i.product && Number.isFinite(i.quantity) && i.quantity > 0)
+    .reduce((total, item) => total + toNumber(item.product.price) * item.quantity, 0);
+
+  // Диагностика (временный лог)
+  console.log('cartItems:', cartItems);
 
   return {
     cartItems,
