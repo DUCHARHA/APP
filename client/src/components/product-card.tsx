@@ -26,31 +26,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      const requestData = {
-        userId,
-        productId: product.id,
-        quantity: 1,
-      };
-      console.log("🛒 Product being added to cart:", {
-        productData: product,
-        requestData,
-        productId: product.id,
-        hasId: !!product.id,
-        productKeys: Object.keys(product || {})
-      });
-      
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({
+          userId,
+          productId: product.id,
+          quantity: 1,
+        }),
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ Server error for product:", product.id, "Response:", response.status, errorText);
-        throw new Error(`Failed to add to cart: ${response.status} ${errorText}`);
-      }
-      
+      if (!response.ok) throw new Error("Failed to add to cart");
       return response.json();
     },
     onMutate: async () => {
@@ -61,10 +46,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
-        const existingItem = old.find((item: any) => item.product.id === product.id);
+        const existingItem = old.find((item: any) => item?.product?.id === product.id);
         if (existingItem) {
           return old.map((item: any) => 
-            item.product.id === product.id 
+            item?.product?.id === product.id 
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
@@ -85,11 +70,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       // Обновляем кэш реальными данными с сервера
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
-        const hasTemp = old.find((item: any) => item.id.startsWith('temp-'));
+        const hasTemp = old.find((item: any) => item?.id?.startsWith('temp-'));
         if (hasTemp) {
           // Заменяем временную запись на реальную
           return old.map((item: any) => 
-            item.id.startsWith('temp-') && item.productId === product.id
+            item?.id?.startsWith('temp-') && item.productId === product.id
               ? { ...item, id: data.id }
               : item
           );
