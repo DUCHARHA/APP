@@ -76,8 +76,8 @@
 
   /* Поддержка цветов status bar */
   html {
-    --status-bar-color: #000000;
-    --ios-status-bar-bg: #000000;
+    --status-bar-color: #5B21B6;
+    --ios-status-bar-bg: #5B21B6;
   }
 
   /* Для iOS PWA - цвет фона под status bar */
