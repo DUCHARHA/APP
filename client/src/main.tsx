@@ -19,33 +19,46 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Функция для принудительной очистки всех старых кэшей и service worker'ов
+// Умная очистка только устаревших кэшей (версионированная)
 async function cleanupOldCaches() {
   try {
-    // 1. Очистка всех кэшей
+    const APP_CACHE_VERSION = 'v2';
+    const APP_CACHE_PREFIX = 'ducharkha-';
+    
+    // 1. Очистка только старых версий наших кэшей
     if ('caches' in window) {
       const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(name => caches.delete(name)));
-      console.log('✅ Все старые кэши очищены');
+      // Удаляем только старые версии наших кэшей, не все кэши
+      const oldCaches = cacheNames.filter(name => 
+        name.startsWith(APP_CACHE_PREFIX) && 
+        !name.includes(APP_CACHE_VERSION)
+      );
+      
+      if (oldCaches.length > 0) {
+        await Promise.all(oldCaches.map(name => caches.delete(name)));
+        console.log(`✅ Очищено ${oldCaches.length} устаревших кэшей`);
+      } else {
+        console.log('✅ Нет устаревших кэшей для очистки');
+      }
     }
 
-    // 2. Удаление всех старых service worker'ов
-    if ('serviceWorker' in navigator) {
+    // 2. В dev режиме отписываем SW для чистого тестирования
+    if (import.meta.env.DEV && 'serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map(reg => reg.unregister()));
-      console.log('✅ Все старые service worker\s удалены');
+      console.log('🧹 Dev: Service Workers отписаны для чистого тестирования');
     }
   } catch (error) {
     console.warn('Ошибка при очистке:', error);
   }
 }
 
-// В development режиме - полная очистка и отключение PWA
-if (process.env.NODE_ENV === 'development') {
+// В development режиме - отключение PWA и очистка для тестирования
+if (import.meta.env.DEV) {
   console.log('🚧 Режим разработки: PWA отключен');
   cleanupOldCaches();
 } else {
-  // В production - сначала очищаем старое, потом регистрируем новое
+  // В production - умная очистка и регистрация PWA
   console.log('🚀 Production режим: настройка PWA');
   PWADetector.debugPWAStatus();
   cleanupOldCaches().then(() => {

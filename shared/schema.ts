@@ -60,6 +60,7 @@ export const orders = pgTable("orders", {
   deliveryAddress: text("delivery_address").notNull(),
   comment: text("comment"),
   packerComment: text("packer_comment"),
+  promoCode: text("promo_code"), // Добавляем поле для промокода
   createdAt: text("created_at").default(sql`now()`),
 });
 
@@ -122,6 +123,7 @@ export const insertCartItemSchema = createInsertSchema(cartItems).omit({
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
+  totalAmount: true, // Сервер вычислит сумму сам для безопасности
   createdAt: true,
 });
 

@@ -32,6 +32,9 @@ function logError(error: any, context: string, req: any) {
   });
 }
 
+// Store valid admin tokens with expiration
+const validAdminTokens = new Map<string, { expires: number }>();
+
 // Helper function to generate secure token
 function generateSecureToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -45,6 +48,16 @@ function verifyAdminCredentials(username: string, password: string): boolean {
   return username === adminUsername && password === adminPassword;
 }
 
+// Helper function to clean expired tokens
+function cleanExpiredTokens(): void {
+  const now = Date.now();
+  for (const [token, data] of validAdminTokens.entries()) {
+    if (data.expires < now) {
+      validAdminTokens.delete(token);
+    }
+  }
+}
+
 // Middleware to check admin authentication
 function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -55,9 +68,13 @@ function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   
   const token = authHeader.substring(7);
   
-  // Simple token validation - in production, use JWT or session-based auth
-  if (!token || token.length !== 64) {
-    return res.status(401).json({ error: "Invalid token" });
+  // Clean expired tokens first
+  cleanExpiredTokens();
+  
+  // Check if token exists and is not expired
+  const tokenData = validAdminTokens.get(token);
+  if (!tokenData || tokenData.expires < Date.now()) {
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
   
   next();
@@ -75,8 +92,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (verifyAdminCredentials(username, password)) {
         const token = generateSecureToken();
+        const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+        
+        // Store token with expiration
+        validAdminTokens.set(token, { expires });
+        
         res.json({ 
           token,
+          expires,
           message: "Login successful" 
         });
       } else {

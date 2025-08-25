@@ -78,7 +78,7 @@ export default function Checkout() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          totalAmount: finalTotal.toString(),
+          // Убираем totalAmount - сервер пересчитает сумму сам для безопасности
           deliveryAddress: orderData.deliveryAddress,
           comment: orderData.comment,
           packerComment: orderData.packerComment,
@@ -116,7 +116,7 @@ export default function Checkout() {
       if (!response.ok) throw new Error("Failed to clear cart");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", userId] });
     },
     onError: (error) => {
       console.error('Failed to clear cart after order:', error);

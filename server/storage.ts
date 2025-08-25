@@ -683,6 +683,7 @@ export class MemStorage implements IStorage {
         deliveryAddress: "ул. Рудаки, 25, кв. 10",
         comment: "Домофон 15К",
         packerComment: "Бананы спелые, молоко свежее",
+        promoCode: null,
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
       },
       {
@@ -693,6 +694,7 @@ export class MemStorage implements IStorage {
         deliveryAddress: "ул. Сомони, 12, офис 205",
         comment: "Звонить в офис",
         packerComment: null,
+        promoCode: "ПЕРВЫЙ",
         createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
       }
     ];
@@ -889,6 +891,41 @@ export class MemStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
+    
+    // БЕЗОПАСНОСТЬ: Пересчитываем totalAmount на сервере на основе корзины
+    if (!insertOrder.userId) {
+      throw new Error("User ID is required for creating an order");
+    }
+    
+    const userId = insertOrder.userId!; // Проверили выше, что не null
+    const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId && item.userId !== null);
+    let calculatedTotal = 0;
+    
+    for (const cartItem of userCartItems) {
+      const product = this.products.get(cartItem.productId);
+      if (product) {
+        const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+        calculatedTotal += price * cartItem.quantity;
+      }
+    }
+    
+    // Применяем промокод если есть
+    if (insertOrder.promoCode) {
+      const promoCodes = [
+        { code: "ПЕРВЫЙ", discount: 20, isActive: true },
+        { code: "ДРУЗЬЯМ", discount: 15, isActive: true },
+        { code: "ЛЕТОМ", discount: 10, isActive: true },
+      ];
+      
+      const promoCode = promoCodes.find(promo => 
+        promo.code.toUpperCase() === insertOrder.promoCode?.toUpperCase() && promo.isActive
+      );
+      
+      if (promoCode) {
+        calculatedTotal = calculatedTotal * (1 - promoCode.discount / 100);
+      }
+    }
+    
     const order: Order = { 
       ...insertOrder, 
       id, 
@@ -896,7 +933,9 @@ export class MemStorage implements IStorage {
       userId: insertOrder.userId || null,
       status: insertOrder.status || "pending",
       comment: insertOrder.comment || null,
-      packerComment: insertOrder.packerComment || null
+      packerComment: insertOrder.packerComment || null,
+      totalAmount: calculatedTotal.toFixed(2), // Используем пересчитанную сумму
+      promoCode: insertOrder.promoCode || null // Обрабатываем undefined
     };
     this.orders.set(id, order);
     return order;

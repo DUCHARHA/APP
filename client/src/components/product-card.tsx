@@ -100,6 +100,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const updateQuantityMutation = useMutation({
     mutationFn: async ({ quantity }: { quantity: number }) => {
+      if (!cartItem?.id) {
+        throw new Error("Cart item not found");
+      }
       const response = await fetch(`/api/cart/${cartItem.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -114,7 +117,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       const previousCart = queryClient.getQueryData(["/api/cart", userId]);
 
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
-        if (!old) return [];
+        if (!old || !cartItem?.id) return old || [];
         return old.map((item: any) => 
           item.id === cartItem.id 
             ? { ...item, quantity }
@@ -127,7 +130,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     onSuccess: (data) => {
       // Синхронизируем с сервером только в случае успеха
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
-        if (!old) return [];
+        if (!old || !cartItem?.id) return old || [];
         return old.map((item: any) => 
           item.id === cartItem.id 
             ? data
@@ -150,6 +153,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const removeItemMutation = useMutation({
     mutationFn: async () => {
+      if (!cartItem?.id) {
+        throw new Error("Cart item not found");
+      }
       const response = await fetch(`/api/cart/${cartItem.id}`, {
         method: "DELETE",
       });
@@ -161,7 +167,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       const previousCart = queryClient.getQueryData(["/api/cart", userId]);
 
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
-        if (!old) return [];
+        if (!old || !cartItem?.id) return old || [];
         return old.filter((item: any) => item.id !== cartItem.id);
       });
 
