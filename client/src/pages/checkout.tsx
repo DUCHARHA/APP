@@ -244,14 +244,14 @@ export default function Checkout() {
   if (cartItems.length === 0) {
     return (
       <div className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4 bg-[#5B21B6]">
+        <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
+          <div className="flex items-center p-4">
             <Link href="/">
-              <button className="mr-3 p-2 -ml-2 text-[#ffffff]">
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              <button className="mr-3 p-2 -ml-2">
+                <ArrowLeft className="w-6 h-6 text-white" />
               </button>
             </Link>
-            <h1 className="text-xl font-bold text-[#ffffff]">Оформление заказа</h1>
+            <h1 className="text-xl font-bold text-white">Оформление заказа</h1>
           </div>
         </header>
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -320,14 +320,14 @@ export default function Checkout() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="flex items-center p-4 bg-[#5B21B6]">
+      <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
+        <div className="flex items-center p-4">
           <Link href="/">
-            <button className="mr-3 p-2 -ml-2 text-[#ffffff]">
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            <button className="mr-3 p-2 -ml-2">
+              <ArrowLeft className="w-6 h-6 text-white" />
             </button>
           </Link>
-          <h1 className="text-xl font-bold text-[#ffffff]">Оформление заказа</h1>
+          <h1 className="text-xl font-bold text-white">Оформление заказа</h1>
         </div>
       </header>
       <Form {...form}>
