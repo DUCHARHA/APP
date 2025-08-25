@@ -26,16 +26,31 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
+      const requestData = {
+        userId,
+        productId: product.id,
+        quantity: 1,
+      };
+      console.log("🛒 Product being added to cart:", {
+        productData: product,
+        requestData,
+        productId: product.id,
+        hasId: !!product.id,
+        productKeys: Object.keys(product || {})
+      });
+      
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          productId: product.id,
-          quantity: 1,
-        }),
+        body: JSON.stringify(requestData),
       });
-      if (!response.ok) throw new Error("Failed to add to cart");
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Server error for product:", product.id, "Response:", response.status, errorText);
+        throw new Error(`Failed to add to cart: ${response.status} ${errorText}`);
+      }
+      
       return response.json();
     },
     onMutate: async () => {

@@ -24,11 +24,21 @@ export default function ProductDetail() {
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: () => apiRequest("/api/cart", "POST", {
-      userId,
-      productId,
-      quantity,
-    }),
+    mutationFn: () => {
+      const requestData = {
+        userId,
+        productId,
+        quantity,
+      };
+      console.log("🛒 Product Detail: Adding to cart:", {
+        productFromQuery: product,
+        requestData,
+        productIdFromUrl: productId,
+        hasProductId: !!productId,
+      });
+      
+      return apiRequest("/api/cart", "POST", requestData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
