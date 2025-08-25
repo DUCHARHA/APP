@@ -62,7 +62,7 @@ export default function Checkout() {
   const calculateSubtotal = () => {
     return (cartItems ?? [])
       .filter((i) => i && i.product && Number.isFinite(i.quantity) && i.quantity > 0)
-      .reduce((total, item) => total + toNumber(item.product.price) * item.quantity, 0);
+      .reduce((total, item) => total + toNumber(item?.product?.price) * item.quantity, 0);
   };
 
   const subtotal = calculateSubtotal();
@@ -153,11 +153,11 @@ export default function Checkout() {
       return { previousCart };
     },
     onSuccess: (data, { id }) => {
-      // Обновляем конкретный элемент реальными данными
+      // Обновляем конкретный элемент реальными данными, сохраняя product
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
         return old.map((item: any) => 
-          item.id === id ? data : item
+          item.id === id ? { ...data, product: item.product } : item
         );
       });
     },
@@ -346,7 +346,7 @@ export default function Checkout() {
             <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center space-x-3">
-                  {!item.product.imageUrl ? (
+                  {!item?.product?.imageUrl ? (
                     <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <div className="text-gray-400 dark:text-gray-600 text-center">
                         <div className="text-lg">📦</div>
@@ -354,8 +354,8 @@ export default function Checkout() {
                     </div>
                   ) : (
                     <img
-                      src={item.product.imageUrl}
-                      alt={item.product.name}
+                      src={item?.product?.imageUrl}
+                      alt={item?.product?.name ?? 'Товар'}
                       className="w-16 h-16 rounded-lg object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -372,11 +372,11 @@ export default function Checkout() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900 text-sm truncate">
-                      {item.product.name}
+                      {item?.product?.name ?? 'Товар'}
                     </h4>
-                    <p className="text-xs text-gray-500">{item.product.weight}</p>
+                    <p className="text-xs text-gray-500">{item?.product?.weight ?? ''}</p>
                     <p className="font-semibold text-gray-900 text-sm">
-                      {toNumber(item.product.price).toFixed(0)} с.
+                      {toNumber(item?.product?.price).toFixed(0)} с.
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
