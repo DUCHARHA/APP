@@ -28,6 +28,7 @@ const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const AdminOrders = lazy(() => import("@/pages/admin-orders"));
 const Admin = lazy(() => import("@/pages/admin"));
 const AdminBanners = lazy(() => import("@/pages/AdminBanners"));
+const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 import MobileNavigation from "@/components/mobile-navigation";
@@ -123,6 +124,7 @@ function Router() {
             <Route path="/admin/login" component={AdminLogin} />
             <Route path="/admin/orders" component={AdminOrders} />
             <Route path="/admin/banners" component={AdminBanners} />
+            <Route path="/admin/notifications" component={AdminNotifications} />
 
             <Route path="/admin" component={Admin} />
             <Route component={NotFound} />

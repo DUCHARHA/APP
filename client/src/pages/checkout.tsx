@@ -92,6 +92,8 @@ export default function Checkout() {
     onSuccess: (order) => {
       // Clear cart after successful order
       clearCartMutation.mutate();
+      // Invalidate orders query to refresh user's order history
+      queryClient.invalidateQueries({ queryKey: [`/api/orders/${userId}`] });
       setOrderId(order.id);
       setIsOrderPlaced(true);
       toast({

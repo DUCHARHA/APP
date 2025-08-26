@@ -51,11 +51,11 @@ function verifyAdminCredentials(username: string, password: string): boolean {
 // Helper function to clean expired tokens
 function cleanExpiredTokens(): void {
   const now = Date.now();
-  for (const [token, data] of validAdminTokens.entries()) {
+  validAdminTokens.forEach((data, token) => {
     if (data.expires < now) {
       validAdminTokens.delete(token);
     }
-  }
+  });
 }
 
 // Middleware to check admin authentication

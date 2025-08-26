@@ -11,7 +11,7 @@ export default function Orders() {
   const { toast } = useToast();
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({
-    queryKey: ["/api/orders", userId],
+    queryKey: [`/api/orders/${userId}`],
   });
 
   const cancelOrderMutation = useMutation({
@@ -23,7 +23,7 @@ export default function Orders() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/orders/${userId}`] });
       toast({
         title: "Заказ отменен",
         description: "Ваш заказ успешно отменен",
@@ -82,7 +82,7 @@ export default function Orders() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/orders/${userId}`] });
       toast({
         title: "Заказ удален",
         description: "Заказ успешно удален из истории",
