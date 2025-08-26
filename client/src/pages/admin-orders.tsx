@@ -270,7 +270,7 @@ export default function AdminOrders() {
             filteredOrders
               .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
               .map((order) => {
-                const StatusIcon = statusIcons[order.status as keyof typeof statusIcons];
+                const StatusIcon = statusIcons[order.status as keyof typeof statusIcons] || AlertCircle;
                 
                 return (
                   <Card key={order.id} data-testid={`order-card-${order.id}`}>
@@ -278,9 +278,9 @@ export default function AdminOrders() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-3">
-                            <Badge className={`${statusColors[order.status as keyof typeof statusColors]} border`}>
+                            <Badge className={`${statusColors[order.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800 border-gray-200"} border`}>
                               <StatusIcon className="w-3 h-3 mr-1" />
-                              {statusLabels[order.status as keyof typeof statusLabels]}
+                              {statusLabels[order.status as keyof typeof statusLabels] || order.status}
                             </Badge>
                             <span className="text-sm text-gray-500">
                               Заказ #{order.id.slice(-8)}
