@@ -642,6 +642,30 @@ export class MemStorage implements IStorage {
         buttonLink: "/catalog",
         isActive: true,
         priority: 1
+      },
+      {
+        title: "Скидка 20% на первый заказ",
+        subtitle: "Специальное предложение",
+        message: "Используйте промокод ПЕРВЫЙ при оформлении заказа",
+        type: "promo",
+        backgroundColor: "#dc2626",
+        textColor: "#ffffff",
+        buttonText: "Получить скидку",
+        buttonLink: "/catalog",
+        isActive: true,
+        priority: 2
+      },
+      {
+        title: "Бесплатная доставка от 1000 сом",
+        subtitle: "Выгодные условия",
+        message: "Доставляем бесплатно при заказе от 1000 сом",
+        type: "info",
+        backgroundColor: "#059669",
+        textColor: "#ffffff",
+        buttonText: "Заказать сейчас",
+        buttonLink: "/catalog",
+        isActive: true,
+        priority: 3
       }
     ];
 
