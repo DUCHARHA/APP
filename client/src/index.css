@@ -142,6 +142,15 @@
     background: transparent !important;
   }
 
+  /* Remove any background from banner text containers */
+  .banner-slider-content {
+    background: transparent !important;
+  }
+  
+  .banner-slider-content * {
+    background: transparent !important;
+  }
+
   .card-hover {
     transition: all 0.3s ease;
   }
