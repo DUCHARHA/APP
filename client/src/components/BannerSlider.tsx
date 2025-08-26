@@ -5,19 +5,47 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { Banner } from "@shared/schema";
 
+// Cache for banners in localStorage
+const BANNERS_CACHE_KEY = 'ducharcha_banners_cache';
+
+const getCachedBanners = (): Banner[] => {
+  try {
+    const cached = localStorage.getItem(BANNERS_CACHE_KEY);
+    return cached ? JSON.parse(cached) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedBanners = (banners: Banner[]) => {
+  try {
+    localStorage.setItem(BANNERS_CACHE_KEY, JSON.stringify(banners));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
 export function BannerSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [cachedBanners, setCachedBannersState] = useState<Banner[]>(getCachedBanners());
 
-  const { data: banners = [] } = useQuery<Banner[]>({
+  const { data: banners = [], isLoading } = useQuery<Banner[]>({
     queryKey: ['/api/banners'],
-    staleTime: 0, // Always consider data stale - refetch on mount
-    gcTime: 0, // No cache retention
-    refetchOnWindowFocus: false, // Don't refetch on tab switch
-    refetchOnMount: true, // Only refetch on page load/refresh
-    // No automatic updates - only on page load/refresh
+    staleTime: 300000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
-  const visibleBanners = banners;
+  // Update cache when new banners arrive
+  useEffect(() => {
+    if (banners.length > 0) {
+      setCachedBanners(banners);
+      setCachedBannersState(banners);
+    }
+  }, [banners]);
+
+  // Use cached banners if available, otherwise show loading or fresh data
+  const visibleBanners = banners.length > 0 ? banners : cachedBanners;
 
   useEffect(() => {
     if (visibleBanners.length <= 1) return;
@@ -29,8 +57,6 @@ export function BannerSlider() {
     return () => clearInterval(interval);
   }, [visibleBanners.length]); // Only reset when banners change, not on slide change
 
-
-
   const handlePrevious = () => {
     setCurrentSlide(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1);
   };
@@ -39,8 +65,8 @@ export function BannerSlider() {
     setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
   };
 
-  if (visibleBanners.length === 0) {
-    // Loading state - show minimal placeholder
+  // Only show loading state if no cached banners AND currently loading
+  if (visibleBanners.length === 0 && isLoading) {
     return (
       <section className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mt-4 mb-4 rounded-lg bg-[#5B21B6]">
         <div className="relative z-10 flex flex-col justify-center h-full py-4">
@@ -52,6 +78,11 @@ export function BannerSlider() {
         </div>
       </section>
     );
+  }
+
+  // Don't render anything if no banners at all
+  if (visibleBanners.length === 0) {
+    return null;
   }
 
   const currentBanner = visibleBanners[currentSlide];
@@ -158,14 +189,14 @@ export function BannerSlider() {
         </div>
       )}
       {/* Floating decorative elements - show for all banners but more prominent for main banner */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 floating-elements"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
-      {/* Extra animation elements for main banner */}
+      <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/3 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
+      {/* Extra animation elements for main banner - made very subtle */}
       {currentBanner.priority === 0 && (
         <>
-          <div className="absolute top-1/4 left-3/4 w-20 h-20 bg-white/8 rounded-full floating-elements" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-1/4 right-1/2 w-12 h-12 bg-white/6 rounded-full floating-elements" style={{ animationDelay: '3s' }}></div>
+          <div className="absolute top-1/4 left-3/4 w-20 h-20 bg-white/4 rounded-full floating-elements" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-1/4 right-1/2 w-12 h-12 bg-white/3 rounded-full floating-elements" style={{ animationDelay: '3s' }}></div>
         </>
       )}
     </section>

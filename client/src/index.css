@@ -137,6 +137,11 @@
     }
   }
 
+  /* Ensure banner content doesn't have unwanted backgrounds */
+  .banner-content * {
+    background: transparent !important;
+  }
+
   .card-hover {
     transition: all 0.3s ease;
   }
