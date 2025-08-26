@@ -113,7 +113,7 @@ export default function AdminNotifications() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12">
           <div className="flex items-center h-16">
             <Button
               variant="ghost"
@@ -140,7 +140,7 @@ export default function AdminNotifications() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-6 lg:px-12 py-8">
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Быстрые шаблоны</h2>

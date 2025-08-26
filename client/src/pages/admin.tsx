@@ -149,7 +149,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
@@ -178,9 +178,9 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-6 lg:px-12 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Управление системой
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-6">
             {adminSections.map((section) => (
               <Card 
                 key={section.title}
