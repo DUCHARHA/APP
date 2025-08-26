@@ -41,7 +41,7 @@ export function BannerSlider() {
   if (visibleBanners.length === 0) {
     // Loading state - show minimal placeholder
     return (
-      <section className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg bg-[#5B21B6]">
+      <section className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mt-4 mb-6 rounded-lg bg-[#5B21B6]">
         <div className="relative z-10 flex flex-col justify-center h-full py-4">
           <div className="animate-pulse">
             <div className="h-6 bg-white/20 rounded mb-3 w-3/4"></div>
@@ -78,7 +78,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 rounded-lg transition-all duration-700 ease-in-out"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mt-4 rounded-lg transition-all duration-700 ease-in-out"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
