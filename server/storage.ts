@@ -437,7 +437,7 @@ export class MemStorage implements IStorage {
         description: "Сладкие красные яблоки", 
         price: "159.00", 
         weight: "1кг", 
-        imageUrl: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
+        imageUrl: "https://images.unsplash.com/photo-1567306757458-49563074659c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200", 
         categoryId: Array.from(this.categories.values()).find(c => c.slug === "vegetables")?.id, 
         isPopular: true,
         ingredients: "Яблоки свежие",
@@ -620,57 +620,34 @@ export class MemStorage implements IStorage {
     // Create sample banners
     const sampleBanners = [
       {
-        id: randomUUID(),
         title: "Доставка продуктов быстрее, чем поход в магазин",
         subtitle: "Экспресс доставка",
         message: "Свежие продукты к вашему столу за 10-15 минут",
-        type: "promo",
-        backgroundColor: "#22c55e",
+        type: "info",
+        backgroundColor: "#5B21B6",
         textColor: "#ffffff",
         buttonText: "",
         buttonLink: "",
         isActive: true,
-        priority: 0,
-        startDate: null,
-        endDate: null,
-        createdAt: new Date().toISOString()
+        priority: 0
       },
       {
-        id: randomUUID(),
-        title: "RC Cola - Освежись сейчас!",
-        subtitle: "Партнерская акция",
-        message: "Получи RC Cola бесплатно при заказе от 50 сомони",
-        type: "partnership",
-        backgroundColor: "#f97316",
-        textColor: "#ffffff",
-        buttonText: "Получить колу",
-        buttonLink: "/catalog",
-        isActive: true,
-        priority: 1,
-        startDate: null,
-        endDate: null,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: randomUUID(),
-        title: "Скидка 20% на первый заказ",
-        subtitle: "Промокод\n",
-        message: "Используйте промокод при оформлении заказа и получите скидку 20%",
+        title: "Добро пожаловать в ДУЧАРХА!",
+        subtitle: "Новые возможности",
+        message: "Откройте для себя мир быстрой доставки продуктов прямо к вашему дому.",
         type: "promo",
-        backgroundColor: "#3b82f6",
+        backgroundColor: "#6366f1",
         textColor: "#ffffff",
-        buttonText: "Скопировать промокод",
+        buttonText: "Начать покупки",
         buttonLink: "/catalog",
         isActive: true,
-        priority: 2,
-        startDate: null,
-        endDate: null,
-        createdAt: new Date().toISOString()
+        priority: 1
       }
     ];
 
-    sampleBanners.forEach(banner => {
-      this.banners.set(banner.id, banner);
+    sampleBanners.forEach((banner, index) => {
+      const id = `banner-${index + 1}-${Date.now()}`;
+      this.banners.set(id, { ...banner, id });
     });
 
     // Seed sample orders for demo
@@ -891,16 +868,16 @@ export class MemStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
-    
+
     // БЕЗОПАСНОСТЬ: Пересчитываем totalAmount на сервере на основе корзины
     if (!insertOrder.userId) {
       throw new Error("User ID is required for creating an order");
     }
-    
+
     const userId = insertOrder.userId!; // Проверили выше, что не null
     const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId && item.userId !== null);
     let calculatedTotal = 0;
-    
+
     for (const cartItem of userCartItems) {
       const product = this.products.get(cartItem.productId);
       if (product) {
@@ -908,7 +885,7 @@ export class MemStorage implements IStorage {
         calculatedTotal += price * cartItem.quantity;
       }
     }
-    
+
     // Применяем промокод если есть
     if (insertOrder.promoCode) {
       const promoCodes = [
@@ -916,16 +893,16 @@ export class MemStorage implements IStorage {
         { code: "ДРУЗЬЯМ", discount: 15, isActive: true },
         { code: "ЛЕТОМ", discount: 10, isActive: true },
       ];
-      
+
       const promoCode = promoCodes.find(promo => 
         promo.code.toUpperCase() === insertOrder.promoCode?.toUpperCase() && promo.isActive
       );
-      
+
       if (promoCode) {
         calculatedTotal = calculatedTotal * (1 - promoCode.discount / 100);
       }
     }
-    
+
     const order: Order = { 
       ...insertOrder, 
       id, 

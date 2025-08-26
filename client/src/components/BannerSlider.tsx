@@ -40,27 +40,16 @@ export function BannerSlider() {
   };
 
   if (visibleBanners.length === 0) {
-    // Default banner when no active banners
+    // Loading state - show minimal placeholder
     return (
-      <section className="gradient-hero text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg">
+      <section className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mb-6 rounded-lg bg-[#5B21B6]">
         <div className="relative z-10 flex flex-col justify-center h-full py-4">
-          <div className="flex items-center mb-3">
-            <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
-              <Clock className="mr-1 w-4 h-4" />
-              10-15 мин
-            </div>
-            <span className="text-white/80 text-sm">Экспресс доставка</span>
+          <div className="animate-pulse">
+            <div className="h-6 bg-white/20 rounded mb-3 w-3/4"></div>
+            <div className="h-4 bg-white/10 rounded mb-2 w-full"></div>
+            <div className="h-4 bg-white/10 rounded w-2/3"></div>
           </div>
-          <h2 className="text-2xl font-bold mb-3 leading-tight">
-            Доставка продуктов быстрее, чем поход в магазин
-          </h2>
-          <p className="text-white/90 leading-relaxed">
-            Свежие продукты к вашему столу за 10-15 минут
-          </p>
         </div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 floating-elements"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 floating-elements" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full floating-elements" style={{ animationDelay: '4s' }}></div>
       </section>
     );
   }
