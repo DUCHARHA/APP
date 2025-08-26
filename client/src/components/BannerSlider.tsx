@@ -136,7 +136,7 @@ export function BannerSlider() {
         </>
       )}
       {/* Banner content */}
-      <div className="relative z-10 w-full flex flex-col justify-center h-full py-4">
+      <div className="relative z-10 w-full flex flex-col justify-center h-full py-4 bg-transparent banner-slider-content">
         <div className="flex items-center mb-3">
           {(currentBanner.subtitle === 'Экспресс доставка' && currentBanner.priority === 0) && (
             <div className="delivery-pulse bg-electric-green text-white px-3 py-1 rounded-full text-sm font-semibold mr-3 flex items-center">
