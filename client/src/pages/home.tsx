@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Clock, Search, Zap, Truck, Shield, Check } from "lucide-react";
 import { Link } from "wouter";
 import { type Category, type Product } from "@shared/schema";
-import CategoryButton from "@/components/category-button";
+
 import ProductCard from "@/components/product-card";
 import PWAInstallBanner from "@/components/pwa-install-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -175,7 +175,31 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-4 gap-3">
               {quickCategories.map((category) => (
-                <CategoryButton key={category.id} category={category} />
+                <Link key={category.id} href={`/catalog/${category.id}`}>
+                  <button className="bg-white dark:bg-card rounded-xl p-4 shadow-sm text-center card-hover w-full">
+                    {!category.imageUrl || brokenImages.has(category.id) ? (
+                      <div className="w-12 h-9 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
+                      </div>
+                    ) : (
+                      <img
+                        src={category.imageUrl}
+                        alt={category.name}
+                        className="w-12 h-9 mx-auto mb-2 rounded-lg object-cover"
+                        onError={() => {
+                          setBrokenImages(prev => {
+                            const newSet = new Set(prev);
+                            newSet.add(category.id);
+                            return newSet;
+                          });
+                        }}
+                      />
+                    )}
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200 line-clamp-1">
+                      {category.name}
+                    </span>
+                  </button>
+                </Link>
               ))}
             </div>
           )}
