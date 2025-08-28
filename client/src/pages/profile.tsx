@@ -9,7 +9,7 @@ import { forceRefreshApp } from "@/utils/force-refresh";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding";
 import { FeatureTooltip } from "@/components/onboarding/feature-tooltip";
-import PWAInstallBanner from "@/components/pwa-install-banner";
+import PWAInstallBannerProfile from "@/components/pwa-install-banner-profile";
 
 export default function Profile() {
   const userId = getCurrentUserId();
@@ -203,7 +203,7 @@ export default function Profile() {
       </section>
       {/* PWA Install Section */}
       <section className="px-4 pb-4">
-        <PWAInstallBanner />
+        <PWAInstallBannerProfile />
       </section>
       {/* Logout */}
       <section className="px-4 pb-8">
