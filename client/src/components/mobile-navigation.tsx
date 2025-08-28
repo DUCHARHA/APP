@@ -1,46 +1,22 @@
 import { useLocation } from "wouter";
 import { Home, Grid, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback } from "react";
 
 export default function MobileNavigation() {
   const [location, setLocation] = useLocation();
   const { totalItems } = useCart();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-  
-  // Handle navigation with debouncing
+  // Simple navigation handler without debouncing
   const handleNavigation = useCallback((path: string) => {
     return (e: React.MouseEvent) => {
-      const target = e.currentTarget as HTMLElement;
-      if (target.style.pointerEvents === 'none') {
-        e.preventDefault();
-        return;
+      e.preventDefault();
+      // Only navigate if we're not already on this path
+      if (location !== path) {
+        setLocation(path);
       }
-      target.style.pointerEvents = 'none';
-      
-      // Clear previous timeout if exists
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      
-      // Navigate to the path
-      setLocation(path);
-      
-      timeoutRef.current = setTimeout(() => {
-        target.style.pointerEvents = 'auto';
-        timeoutRef.current = null;
-      }, 300);
     };
-  }, [setLocation]);
+  }, [location, setLocation]);
 
   const navigationItems = [
     {
