@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Clock, Search, Zap, Truck, Shield, Check } from "lucide-react";
 import { Link } from "wouter";
 import { type Category, type Product } from "@shared/schema";
-
+import CategoryButton from "@/components/category-button";
 import ProductCard from "@/components/product-card";
 import PWAInstallBanner from "@/components/pwa-install-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -163,7 +163,24 @@ export default function Home() {
           />
         </div>
       </div>
-      
+      {/* Quick Actions */}
+      {!debouncedSearchQuery && (
+        <section className="px-4.5 relative z-20 my-3.5">
+          {categoriesLoading ? (
+            <div className="grid grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl h-20 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-3">
+              {quickCategories.map((category) => (
+                <CategoryButton key={category.id} category={category} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
       {/* Promo Banner */}
       {!debouncedSearchQuery && (
         <section className="p-4">
