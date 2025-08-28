@@ -323,38 +323,121 @@ export default function AdminBanners() {
   }
 
   return (
-    <div className="p-6 lg:px-12 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Управление баннерами</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={forceRefreshCache} 
-            disabled={isRefreshing}
-            data-testid="button-refresh-cache"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? "Обновление..." : "Обновить кеш"}
-          </Button>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="button-create-banner">
-                <Plus className="w-4 h-4 mr-2" />
-                Создать баннер
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Header */}
+      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50 sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                onClick={() => window.history.back()}
+                className="mr-3 p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-5 h-5" />
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Создать новый баннер</DialogTitle>
-              </DialogHeader>
-              <BannerForm
-                onSubmit={handleCreateSubmit}
-                isLoading={createBannerMutation.isPending}
-              />
-            </DialogContent>
-          </Dialog>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-75 animate-pulse"></div>
+                  <div className="relative bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
+                    <Globe className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                    Управление баннерами
+                  </h1>
+                  <p className="text-sm lg:text-base text-slate-500 dark:text-slate-400">
+                    Промо контент и объявления
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={forceRefreshCache} 
+                disabled={isRefreshing}
+                className="bg-white/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
+                data-testid="button-refresh-cache"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{isRefreshing ? "Обновление..." : "Обновить кеш"}</span>
+              </Button>
+              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                    data-testid="button-create-banner"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Создать баннер
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Создать новый баннер</DialogTitle>
+                  </DialogHeader>
+                  <BannerForm
+                    onSubmit={handleCreateSubmit}
+                    isLoading={createBannerMutation.isPending}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 lg:py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <Globe className="w-6 h-6 lg:w-8 lg:h-8 text-purple-100" />
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">Всего</Badge>
+              </div>
+              <p className="text-2xl lg:text-3xl font-bold mb-1">{banners.length}</p>
+              <p className="text-purple-100 text-sm">Всех баннеров</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <CheckCircle className="w-6 h-6 lg:w-8 lg:h-8 text-green-100" />
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              </div>
+              <p className="text-2xl lg:text-3xl font-bold mb-1">{banners.filter((b: any) => b.active).length}</p>
+              <p className="text-green-100 text-sm">Активных</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <PauseCircle className="w-6 h-6 lg:w-8 lg:h-8 text-orange-100" />
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">Неактивные</Badge>
+              </div>
+              <p className="text-2xl lg:text-3xl font-bold mb-1">{banners.filter((b: any) => !b.active).length}</p>
+              <p className="text-orange-100 text-sm">Отключено</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <Star className="w-6 h-6 lg:w-8 lg:h-8 text-blue-100" />
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">Приоритет</Badge>
+              </div>
+              <p className="text-2xl lg:text-3xl font-bold mb-1">{Math.max(...banners.map((b: any) => b.priority || 0), 0)}</p>
+              <p className="text-blue-100 text-sm">Макс приоритет</p>
+            </CardContent>
+          </Card>
+        </div>
 
       <div className="grid gap-4">
         {(banners as Banner[]).map((banner: Banner) => (
