@@ -201,6 +201,16 @@ export class DatabaseStorage implements IStorage {
 
   // User Preferences
   async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    // Check if user exists, create if not
+    const existingUser = await this.getUser(userId);
+    if (!existingUser) {
+      await this.createUser({
+        id: userId,
+        username: `user_${userId.slice(0, 8)}`,
+        email: `${userId}@temp.local`
+      });
+    }
+    
     const result = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
     return result[0];
   }
@@ -265,6 +275,16 @@ export class DatabaseStorage implements IStorage {
 
   // Cart
   async getCartItems(userId: string): Promise<(CartItem & { product: Product })[]> {
+    // Check if user exists, create if not
+    const existingUser = await this.getUser(userId);
+    if (!existingUser) {
+      await this.createUser({
+        id: userId,
+        username: `user_${userId.slice(0, 8)}`,
+        email: `${userId}@temp.local`
+      });
+    }
+    
     const result = await db
       .select({
         id: cartItems.id,
@@ -287,6 +307,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
+    // Check if user exists, create if not
+    if (cartItem.userId) {
+      const existingUser = await this.getUser(cartItem.userId);
+      if (!existingUser) {
+        // Create user automatically with minimal data
+        await this.createUser({
+          id: cartItem.userId,
+          username: `user_${cartItem.userId.slice(0, 8)}`,
+          email: `${cartItem.userId}@temp.local`
+        });
+      }
+    }
+    
     const result = await db.insert(cartItems).values(cartItem).returning();
     return result[0];
   }
