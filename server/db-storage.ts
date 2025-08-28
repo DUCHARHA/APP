@@ -307,21 +307,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
-    // Check if user exists, create if not
+    // Ensure user exists before adding to cart
     if (cartItem.userId) {
-      const existingUser = await this.getUser(cartItem.userId);
-      if (!existingUser) {
-        // Create user automatically with minimal data
-        await this.createUser({
-          id: cartItem.userId,
-          username: `user_${cartItem.userId.slice(0, 8)}`,
-          email: `${cartItem.userId}@temp.local`
-        });
+      try {
+        const existingUser = await this.getUser(cartItem.userId);
+        if (!existingUser) {
+          // Create user automatically with minimal data
+          await this.createUser({
+            id: cartItem.userId,
+            username: `user_${cartItem.userId.slice(0, 8)}`,
+            email: `${cartItem.userId}@temp.local`
+          });
+        }
+      } catch (error) {
+        // If user creation fails, try to insert anyway (user might exist due to race condition)
+        console.warn('Failed to create user, attempting cart insert anyway:', error);
       }
     }
     
-    const result = await db.insert(cartItems).values(cartItem).returning();
-    return result[0];
+    try {
+      const result = await db.insert(cartItems).values(cartItem).returning();
+      return result[0];
+    } catch (error: any) {
+      // If foreign key constraint fails, try creating user again
+      if (error.message?.includes('foreign key constraint') && cartItem.userId) {
+        try {
+          await this.createUser({
+            id: cartItem.userId,
+            username: `user_${cartItem.userId.slice(0, 8)}`,
+            email: `${cartItem.userId}@temp.local`
+          });
+          // Try again after creating user
+          const result = await db.insert(cartItems).values(cartItem).returning();
+          return result[0];
+        } catch (retryError) {
+          console.error('Failed to create user and add to cart:', retryError);
+          throw retryError;
+        }
+      }
+      throw error;
+    }
   }
 
   async updateCartItem(id: string, quantity: number): Promise<CartItem | undefined> {
