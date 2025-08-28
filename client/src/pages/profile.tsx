@@ -9,6 +9,7 @@ import { forceRefreshApp } from "@/utils/force-refresh";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding";
 import { FeatureTooltip } from "@/components/onboarding/feature-tooltip";
+import PWAInstallBanner from "@/components/pwa-install-banner";
 
 export default function Profile() {
   const userId = getCurrentUserId();
@@ -200,17 +201,9 @@ export default function Profile() {
           ))}
         </div>
       </section>
-      {/* Promo Section */}
+      {/* PWA Install Section */}
       <section className="px-4 pb-4">
-        <div className="bg-gradient-to-r from-agent-purple to-purple-600 rounded-xl p-4 text-white">
-          <h3 className="font-bold text-lg mb-1">ДУЧАРХА Премиум</h3>
-          <p className="text-purple-100 text-sm mb-3">
-            Бесплатная доставка и скидки до 15%
-          </p>
-          <Button className="bg-white text-agent-purple hover:bg-gray-100">
-            Узнать больше
-          </Button>
-        </div>
+        <PWAInstallBanner />
       </section>
       {/* Logout */}
       <section className="px-4 pb-8">
