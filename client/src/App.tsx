@@ -155,10 +155,12 @@ function App() {
       <DOMProtectionWrapper onDOMError={(error) => console.warn('DOM Error защищен:', error.message)}>
         <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
           <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
+            <PWAProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </PWAProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </DOMProtectionWrapper>
