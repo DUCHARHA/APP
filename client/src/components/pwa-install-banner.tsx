@@ -3,13 +3,13 @@ import { usePWA } from "@/contexts/pwa-context";
 
 export default function PWAInstallBanner() {
   const { 
-    showInstallBanner, 
+    showHomeBanner, 
     isInstalling, 
     handleInstall, 
-    handleDismiss 
+    handleDismissHome 
   } = usePWA();
 
-  if (!showInstallBanner) return null;
+  if (!showHomeBanner) return null;
 
   return (
     <div className="mx-4 mb-4 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
@@ -44,7 +44,7 @@ export default function PWAInstallBanner() {
             </button>
 
             <button
-              onClick={handleDismiss}
+              onClick={handleDismissHome}
               className="text-purple-100 hover:text-white px-2"
               data-testid="button-dismiss-pwa-banner"
             >

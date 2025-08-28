@@ -4,12 +4,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface PWAContextType {
   showInstallBanner: boolean;
   setShowInstallBanner: (show: boolean) => void;
+  showHomeBanner: boolean;
+  setShowHomeBanner: (show: boolean) => void;
   deferredPrompt: any;
   setDeferredPrompt: (prompt: any) => void;
   isInstalling: boolean;
   setIsInstalling: (installing: boolean) => void;
   handleInstall: () => Promise<void>;
-  handleDismiss: () => void;
+  handleDismissHome: () => void;
 }
 
 const PWAContext = createContext<PWAContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ interface PWAProviderProps {
 
 export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showHomeBanner, setShowHomeBanner] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalling, setIsInstalling] = useState(false);
 
@@ -36,11 +39,14 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
       e.preventDefault();
       setDeferredPrompt(e);
       
-      // Check if banner was previously dismissed
-      const dismissed = localStorage.getItem('pwa-install-banner-dismissed');
-      if (!dismissed) {
-        setShowInstallBanner(true);
+      // Check if home banner was previously dismissed
+      const homeDismissed = localStorage.getItem('pwa-home-banner-dismissed');
+      if (!homeDismissed) {
+        setShowHomeBanner(true);
       }
+      
+      // Profile banner always shows if PWA is installable
+      setShowInstallBanner(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -48,6 +54,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     // Check if app is already installed
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setShowInstallBanner(false);
+      setShowHomeBanner(false);
     }
 
     return () => {
@@ -71,7 +78,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
       if (outcome === "accepted") {
         // PWA successfully installed
         setShowInstallBanner(false);
-        localStorage.setItem('pwa-install-banner-dismissed', 'true');
+        setShowHomeBanner(false);
+        localStorage.setItem('pwa-home-banner-dismissed', 'true');
       }
     } catch (error) {
       console.warn('Ошибка установки PWA:', error);
@@ -81,20 +89,22 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     }
   };
 
-  const handleDismiss = () => {
-    setShowInstallBanner(false);
-    localStorage.setItem('pwa-install-banner-dismissed', 'true');
+  const handleDismissHome = () => {
+    setShowHomeBanner(false);
+    localStorage.setItem('pwa-home-banner-dismissed', 'true');
   };
 
   const value: PWAContextType = {
     showInstallBanner,
     setShowInstallBanner,
+    showHomeBanner,
+    setShowHomeBanner,
     deferredPrompt,
     setDeferredPrompt,
     isInstalling,
     setIsInstalling,
     handleInstall,
-    handleDismiss,
+    handleDismissHome,
   };
 
   return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;
