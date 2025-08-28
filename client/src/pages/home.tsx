@@ -163,48 +163,7 @@ export default function Home() {
           />
         </div>
       </div>
-      {/* Quick Actions */}
-      {!debouncedSearchQuery && (
-        <section className="px-4.5 relative z-20 my-3.5">
-          {categoriesLoading ? (
-            <div className="grid grid-cols-4 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl h-20 animate-pulse"></div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-4 gap-3">
-              {quickCategories.map((category) => (
-                <Link key={category.id} href={`/catalog/${category.id}`}>
-                  <button className="bg-white dark:bg-card rounded-xl p-4 shadow-sm text-center card-hover w-full">
-                    {!category.imageUrl || brokenImages.has(category.id) ? (
-                      <div className="w-12 h-9 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                        <span className="text-gray-400 dark:text-gray-500 text-xs">📋</span>
-                      </div>
-                    ) : (
-                      <img
-                        src={category.imageUrl}
-                        alt={category.name}
-                        className="w-12 h-9 mx-auto mb-2 rounded-lg object-cover"
-                        onError={() => {
-                          setBrokenImages(prev => {
-                            const newSet = new Set(prev);
-                            newSet.add(category.id);
-                            return newSet;
-                          });
-                        }}
-                      />
-                    )}
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200 line-clamp-1">
-                      {category.name}
-                    </span>
-                  </button>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
+      
       {/* Promo Banner */}
       {!debouncedSearchQuery && (
         <section className="p-4">
