@@ -1,11 +1,10 @@
-import { useLocation, useRouter } from "wouter";
+import { useLocation } from "wouter";
 import { Home, Grid, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useCallback, useRef, useEffect } from "react";
 
 export default function MobileNavigation() {
-  const [location] = useLocation();
-  const router = useRouter();
+  const [location, setLocation] = useLocation();
   const { totalItems } = useCart();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -34,14 +33,14 @@ export default function MobileNavigation() {
       }
       
       // Navigate to the path
-      router.push(path);
+      setLocation(path);
       
       timeoutRef.current = setTimeout(() => {
         target.style.pointerEvents = 'auto';
         timeoutRef.current = null;
       }, 300);
     };
-  }, [router]);
+  }, [setLocation]);
 
   const navigationItems = [
     {
