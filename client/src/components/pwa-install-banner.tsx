@@ -1,72 +1,15 @@
-import { useState, useEffect } from "react";
 import { X, Smartphone, Download } from "lucide-react";
+import { usePWA } from "@/contexts/pwa-context";
 
 export default function PWAInstallBanner() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showBanner, setShowBanner] = useState(false);
-  const [isInstalling, setIsInstalling] = useState(false);
+  const { 
+    showInstallBanner, 
+    isInstalling, 
+    handleInstall, 
+    handleDismiss 
+  } = usePWA();
 
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      
-      // Check if banner was previously dismissed
-      const dismissed = localStorage.getItem('pwa-install-banner-dismissed');
-      if (!dismissed) {
-        setShowBanner(true);
-      }
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    // Check if app is already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setShowBanner(false);
-    }
-
-    // Check if this is a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    // Banner will be shown when beforeinstallprompt fires
-    // No need to check deferredPrompt here as it's null on mount
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    };
-  }, []); // Remove deferredPrompt dependency to prevent unnecessary re-renders
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) {
-      // Fallback for browsers that don't support beforeinstallprompt
-      alert('Чтобы установить приложение:\n\n1. Нажмите меню браузера (⋮)\n2. Выберите "Добавить на главный экран"\n3. Подтвердите установку');
-      return;
-    }
-
-    setIsInstalling(true);
-    
-    try {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === "accepted") {
-        // PWA successfully installed
-        setShowBanner(false);
-        localStorage.setItem('pwa-install-banner-dismissed', 'true');
-      }
-    } catch (error) {
-      console.warn('Ошибка установки PWA:', error);
-    } finally {
-      setIsInstalling(false);
-      setDeferredPrompt(null);
-    }
-  };
-
-  const handleDismiss = () => {
-    setShowBanner(false);
-    localStorage.setItem('pwa-install-banner-dismissed', 'true');
-  };
-
-  if (!showBanner) return null;
+  if (!showInstallBanner) return null;
 
   return (
     <div className="mx-4 mb-4 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
@@ -75,12 +18,12 @@ export default function PWAInstallBanner() {
         <div className="absolute -top-4 -right-4 w-24 h-24 bg-white rounded-full"></div>
         <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white rounded-full"></div>
       </div>
-      
+
       <div className="relative flex items-center">
         <div className="bg-white bg-opacity-20 p-3 rounded-lg mr-4">
           <Smartphone className="w-6 h-6 text-white" />
         </div>
-        
+
         <div className="flex-1">
           <h3 className="font-bold text-lg mb-1">
             Установите приложение ДУЧАРХА
@@ -88,7 +31,7 @@ export default function PWAInstallBanner() {
           <p className="text-sm text-purple-100 mb-3">
             Быстрый доступ с главного экрана • Работает офлайн • Без рекламы браузера
           </p>
-          
+
           <div className="flex gap-2">
             <button
               onClick={handleInstall}
@@ -99,7 +42,7 @@ export default function PWAInstallBanner() {
               <Download className="w-4 h-4" />
               {isInstalling ? 'Установка...' : 'Установить'}
             </button>
-            
+
             <button
               onClick={handleDismiss}
               className="text-purple-100 hover:text-white px-2"
