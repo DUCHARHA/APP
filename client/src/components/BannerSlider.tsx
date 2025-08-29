@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ const setCachedBanners = (banners: Banner[]) => {
 export function BannerSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [cachedBanners, setCachedBannersState] = useState<Banner[]>(getCachedBanners());
+  const isMountedRef = useRef(true);
 
   const { data: banners = [], isLoading } = useQuery<Banner[]>({
     queryKey: ['/api/banners'],
@@ -36,9 +37,16 @@ export function BannerSlider() {
     refetchOnMount: true,
   });
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Update cache when new banners arrive
   useEffect(() => {
-    if (banners.length > 0) {
+    if (banners.length > 0 && isMountedRef.current) {
       setCachedBanners(banners);
       setCachedBannersState(banners);
     }
@@ -51,18 +59,26 @@ export function BannerSlider() {
     if (visibleBanners.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
+      if (isMountedRef.current) {
+        setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
+      }
     }, 7000); // Change slide every 7 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [visibleBanners.length]); // Only reset when banners change, not on slide change
 
   const handlePrevious = () => {
-    setCurrentSlide(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1);
+    if (isMountedRef.current) {
+      setCurrentSlide(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1);
+    }
   };
 
   const handleNext = () => {
-    setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
+    if (isMountedRef.current) {
+      setCurrentSlide(prev => (prev + 1) % visibleBanners.length);
+    }
   };
 
   // Only show loading state if no cached banners AND currently loading
