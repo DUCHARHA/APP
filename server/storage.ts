@@ -904,11 +904,12 @@ export class MemStorage implements IStorage {
       throw new Error("User ID is required for creating an order");
     }
 
-    const userId = insertOrder.userId; // Type assertion не нужен, проверили выше
-    const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId && item.userId !== null);
+    const userId = insertOrder.userId as string; // Приводим к string, так как проверили выше что не null
+    const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId);
     let calculatedTotal = 0;
 
     for (const cartItem of userCartItems) {
+      if (!cartItem.productId) continue; // Пропускаем если productId null
       const product = this.products.get(cartItem.productId);
       if (product) {
         const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
