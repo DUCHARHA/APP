@@ -108,7 +108,7 @@ function Router() {
 
   return (
     <OnboardingProvider>
-      <div className="max-w-md mx-auto bg-background min-h-screen relative">
+      <div className="max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto bg-background min-h-screen relative">
         <PWAStatus />
         <Suspense fallback={<PageLoader />}>
           <Switch>
