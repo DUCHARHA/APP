@@ -67,7 +67,7 @@ export default function Catalog() {
       {!categoryId && !searchQuery && (
         <section className="p-4">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Категории</h3>
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             {categories.slice(0, 8).map((category) => (
               <CategoryButton key={category.id} category={category} />
             ))}
