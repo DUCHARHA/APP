@@ -57,16 +57,11 @@ function Router() {
   // Initialize app, status bar and mobile optimizations
   useEffect(() => {
     try {
-      // Ensure the setPurple method exists or is handled appropriately
-      // For example, if it's meant to be conditionally added or if it's a placeholder.
-      // Assuming for now that the fix requires adding the method in the utility file.
       statusBarManager.init();
-      // If setPurple was meant to be called here, it would be:
-      // statusBarManager.setPurple('someColorValue');
     } catch (error) {
       console.warn('Status bar initialization failed:', error);
     }
-
+    
     try {
       MobileOptimizer.init();
     } catch (error) {
