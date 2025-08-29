@@ -620,14 +620,14 @@ export class MemStorage implements IStorage {
     // Create sample banners
     const sampleBanners = [
       {
-        title: "Доставка продуктов быстрее, чем поход в магазин",
-        subtitle: "Экспресс доставка",
-        message: "Свежие продукты к вашему столу за 10-15 минут",
+        title: "Добро пожаловать в ДУЧАРХА!",
+        subtitle: "Новые возможности",
+        message: "Откройте для себя мир быстрой доставки продуктов прямо к вашему дому.",
         type: "info",
         backgroundColor: "#5B21B6",
         textColor: "#ffffff",
-        buttonText: "",
-        buttonLink: "",
+        buttonText: "Начать покупки",
+        buttonLink: "/catalog",
         isActive: true,
         priority: 0
       },

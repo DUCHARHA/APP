@@ -126,7 +126,7 @@ export function BannerSlider() {
 
   return (
     <section 
-      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 mt-4 mb-4 rounded-lg transition-all duration-700 ease-in-out"
+      className="text-white p-6 relative overflow-hidden h-[200px] flex items-center mx-4 rounded-lg transition-all duration-700 ease-in-out pt-[24px] pb-[24px] pl-[24px] pr-[24px] mt-[20px] mb-[20px] ml-[0px] mr-[0px]"
       style={{
         ...getGradientStyle(currentBanner.backgroundColor || "#6366f1"),
         color: currentBanner.textColor || "#ffffff"
