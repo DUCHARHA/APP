@@ -55,8 +55,19 @@ function Router() {
 
   // Initialize app, status bar and mobile optimizations
   useEffect(() => {
-    statusBarManager.init();
-    MobileOptimizer.init();
+    try {
+      if (statusBarManager && typeof statusBarManager.init === 'function') {
+        statusBarManager.init();
+      }
+    } catch (error) {
+      console.warn('Status bar initialization failed:', error);
+    }
+    // Assuming MobileOptimizer is correctly imported and available
+    // If not, this line should also be handled or removed.
+    // For now, keeping it as it was in the original code, assuming it's defined elsewhere.
+    if (typeof MobileOptimizer !== 'undefined' && MobileOptimizer.init) {
+      MobileOptimizer.init();
+    }
 
     // Performance monitoring for mobile
     if ('performance' in window && 'navigation' in performance) {

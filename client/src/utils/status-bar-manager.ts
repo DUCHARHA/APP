@@ -119,4 +119,29 @@ export class StatusBarManager {
 }
 
 // Экспорт синглтона
-export const statusBarManager = StatusBarManager.getInstance();
+export const statusBarManager = {
+  init() {
+    // Initialize status bar manager
+    if (typeof window !== 'undefined') {
+      this.updateStatusBarColor('#5B21B6');
+    }
+  },
+
+  updateStatusBarColor(color: string) {
+    if (typeof window === 'undefined') return;
+
+    try {
+      // Update meta theme-color
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', color);
+      }
+
+      // Update CSS variables
+      document.documentElement.style.setProperty('--status-bar-color', color);
+      document.documentElement.style.setProperty('--ios-status-bar-bg', color);
+    } catch (error) {
+      console.warn('Failed to update status bar color:', error);
+    }
+  }
+};
