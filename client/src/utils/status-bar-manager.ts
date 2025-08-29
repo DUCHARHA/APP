@@ -33,6 +33,10 @@ class StatusBarManagerClass {
     }
   }
 
+  setPurple(): void {
+    this.updateStatusBarColor('#5B21B6');
+  }
+
   private setupSafeAreaVars(): void {
     if (typeof window === 'undefined') return;
 

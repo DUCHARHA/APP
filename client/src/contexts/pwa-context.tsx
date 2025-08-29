@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface PWAContextType {
@@ -38,13 +37,13 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      
+
       // Check if home banner was previously dismissed
       const homeDismissed = localStorage.getItem('pwa-home-banner-dismissed');
       if (!homeDismissed) {
         setShowHomeBanner(true);
       }
-      
+
       // Profile banner always shows if PWA is installable
       setShowInstallBanner(true);
     };
@@ -70,11 +69,11 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     }
 
     setIsInstalling(true);
-    
+
     try {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
+
       if (outcome === "accepted") {
         // PWA successfully installed
         setShowInstallBanner(false);
