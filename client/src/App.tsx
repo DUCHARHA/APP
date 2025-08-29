@@ -57,12 +57,11 @@ function Router() {
   // Initialize app, status bar and mobile optimizations
   useEffect(() => {
     try {
-      if (statusBarManager && typeof statusBarManager.init === 'function') {
-        statusBarManager.init();
-      }
+      statusBarManager.init();
     } catch (error) {
       console.warn('Status bar initialization failed:', error);
     }
+    
     try {
       MobileOptimizer.init();
     } catch (error) {

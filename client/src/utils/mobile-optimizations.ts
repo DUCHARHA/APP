@@ -1,56 +1,29 @@
-
-export class MobileOptimizer {
-  private static instance: MobileOptimizer | null = null;
+class MobileOptimizerClass {
   private isInitialized = false;
 
-  static getInstance(): MobileOptimizer {
-    if (!MobileOptimizer.instance) {
-      MobileOptimizer.instance = new MobileOptimizer();
-    }
-    return MobileOptimizer.instance;
-  }
-
-  static init(): void {
-    const optimizer = MobileOptimizer.getInstance();
-    optimizer.initialize();
-  }
-
-  private initialize(): void {
-    if (this.isInitialized || typeof window === 'undefined') {
-      return;
-    }
+  init(): void {
+    if (this.isInitialized || typeof window === 'undefined') return;
 
     try {
-      // Setup viewport meta tag
-      this.setupViewport();
-      
-      // Setup safe area variables
-      this.setupSafeAreaVariables();
-      
-      // Setup touch optimizations
+      this.setupViewportOptimizations();
       this.setupTouchOptimizations();
-      
-      // Setup keyboard handling
-      this.setupKeyboardHandling();
-
+      this.setupPerformanceOptimizations();
       this.isInitialized = true;
-      console.log('✅ Mobile optimizations initialized');
     } catch (error) {
-      console.warn('Failed to initialize mobile optimizations:', error);
+      console.warn('Mobile optimizer initialization failed:', error);
     }
   }
 
-  private setupViewport(): void {
-    let viewport = document.querySelector('meta[name="viewport"]');
-    if (!viewport) {
-      viewport = document.createElement('meta');
-      viewport.setAttribute('name', 'viewport');
-      document.head.appendChild(viewport);
-    }
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
-  }
+  private setupViewportOptimizations(): void {
+    // Prevent zoom on input focus (iOS)
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+      if (input instanceof HTMLElement) {
+        input.style.fontSize = '16px';
+      }
+    });
 
-  private setupSafeAreaVariables(): void {
+    // Setup safe area CSS variables
     const root = document.documentElement;
     root.style.setProperty('--safe-area-top', 'env(safe-area-inset-top, 0px)');
     root.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom, 0px)');
@@ -59,56 +32,35 @@ export class MobileOptimizer {
   }
 
   private setupTouchOptimizations(): void {
-    // Disable default touch behaviors
-    document.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+    // Improve touch responsiveness
+    document.body.style.touchAction = 'manipulation';
+    document.body.style.webkitTouchCallout = 'none';
+
+    // Add touch target improvements
+    const style = document.createElement('style');
+    style.textContent = `
+      button, [role="button"], .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
-  private setupKeyboardHandling(): void {
-    if (this.isMobileDevice()) {
-      window.addEventListener('resize', this.handleResize);
-      
-      // Handle virtual keyboard
-      const inputs = document.querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-        input.addEventListener('focus', this.handleInputFocus);
-        input.addEventListener('blur', this.handleInputBlur);
-      });
-    }
+  private setupPerformanceOptimizations(): void {
+    // Enable hardware acceleration for smooth scrolling
+    document.body.style.webkitOverflowScrolling = 'touch';
+    document.body.style.overscrollBehavior = 'none';
   }
 
-  private handleTouchStart = (e: TouchEvent): void => {
-    // Allow normal touch behavior
-  };
+  detectDevice(): { isMobile: boolean; isIOS: boolean; isAndroid: boolean } {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+    const isAndroid = /android/i.test(userAgent);
 
-  private handleTouchMove = (e: TouchEvent): void => {
-    // Prevent overscroll on body
-    if ((e.target as Element)?.closest('body') && !(e.target as Element)?.closest('.mobile-scroll')) {
-      e.preventDefault();
-    }
-  };
-
-  private handleResize = (): void => {
-    const visualViewport = (window as any).visualViewport;
-    if (visualViewport) {
-      const keyboardHeight = window.innerHeight - visualViewport.height;
-      document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
-    }
-  };
-
-  private handleInputFocus = (): void => {
-    document.body.classList.add('keyboard-open');
-  };
-
-  private handleInputBlur = (): void => {
-    document.body.classList.remove('keyboard-open');
-  };
-
-  private isMobileDevice(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return { isMobile, isIOS, isAndroid };
   }
 }
 
-// Export static methods for easier usage
-export const initMobileOptimizations = () => MobileOptimizer.init();
-export default MobileOptimizer;
+export const MobileOptimizer = new MobileOptimizerClass();

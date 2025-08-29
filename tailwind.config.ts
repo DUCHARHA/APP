@@ -5,6 +5,8 @@ const config: Config = {
   content: [
     "./client/src/**/*.{js,ts,jsx,tsx,mdx}",
     "./client/index.html",
+    "./client/src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "",
   theme: {
