@@ -1,16 +1,7 @@
+
 // Менеджер для управления статус-баром на мобильных устройствах
-class StatusBarManager {
-  private static instance: StatusBarManager;
+class StatusBarManagerClass {
   private isInitialized = false;
-
-  private constructor() {}
-
-  static getInstance(): StatusBarManager {
-    if (!StatusBarManager.instance) {
-      StatusBarManager.instance = new StatusBarManager();
-    }
-    return StatusBarManager.instance;
-  }
 
   init(): void {
     if (this.isInitialized || typeof window === 'undefined') return;
@@ -59,4 +50,4 @@ class StatusBarManager {
 }
 
 // Export singleton instance
-export const statusBarManager = StatusBarManager.getInstance();
+export const statusBarManager = new StatusBarManagerClass();
