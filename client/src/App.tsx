@@ -63,12 +63,17 @@ function Router() {
     }
 
     // Управление цветом status bar в зависимости от страницы
-    if (location === '/') {
-      // На главной странице используем фиолетовый цвет
-      statusBarManager.setPurple();
-    } else {
-      // На остальных страницах тоже фиолетовый (можно настроить по страницам)
-      statusBarManager.setPurple();
+    try {
+      statusBarManager.init();
+      if (location === '/') {
+        // На главной странице используем фиолетовый цвет
+        statusBarManager.setPurple();
+      } else {
+        // На остальных страницах тоже фиолетовый (можно настроить по страницам)
+        statusBarManager.setPurple();
+      }
+    } catch (error) {
+      console.warn('Status bar manager error:', error);
     }
 
     // Restore scroll position or scroll to top for new pages
