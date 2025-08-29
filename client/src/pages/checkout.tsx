@@ -327,7 +327,7 @@ export default function Checkout() {
       <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
         <div className="flex items-center p-4">
           <Link href="/">
-            <button className="mr-3 -ml-2">
+            <button className="mr-3 p-2 -ml-2">
               <ArrowLeft className="w-6 h-6 text-white" />
             </button>
           </Link>
