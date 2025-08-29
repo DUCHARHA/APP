@@ -36,6 +36,7 @@ import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
 import { statusBarManager } from "@/utils/status-bar-manager";
+import { MobileOptimizer } from "@/utils/mobile-optimizations";
 import React, { useEffect, useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 
@@ -62,11 +63,10 @@ function Router() {
     } catch (error) {
       console.warn('Status bar initialization failed:', error);
     }
-    // Assuming MobileOptimizer is correctly imported and available
-    // If not, this line should also be handled or removed.
-    // For now, keeping it as it was in the original code, assuming it's defined elsewhere.
-    if (typeof MobileOptimizer !== 'undefined' && MobileOptimizer.init) {
+    try {
       MobileOptimizer.init();
+    } catch (error) {
+      console.warn('Mobile optimizer initialization failed:', error);
     }
 
     // Performance monitoring for mobile

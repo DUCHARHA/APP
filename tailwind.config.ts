@@ -3,9 +3,8 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: ["class"],
   content: [
-    "./client/src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./client/src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./client/src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./client/src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./client/index.html",
   ],
   prefix: "",
   theme: {
