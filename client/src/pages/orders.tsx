@@ -234,17 +234,14 @@ export default function Orders() {
                     {parseFloat(order.totalAmount).toFixed(0)} с.
                   </span>
                   <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={() => {
-                        toast({
-                          title: "Детали заказа",
-                          description: `Заказ №${order.id.slice(-6)} на сумму ${parseFloat(order.totalAmount).toFixed(0)} с.\nАдрес: ${order.deliveryAddress}\nСтатус: ${getStatusText(order.status)}`,
-                        });
-                      }}
-                      className="text-gray-500 text-sm font-medium hover:text-gray-700"
-                    >
-                      Подробнее
-                    </button>
+                    <Link href={`/order/${order.id}`}>
+                      <button 
+                        className="text-gray-500 text-sm font-medium hover:text-gray-700"
+                        data-testid={`button-order-details-${order.id.slice(-6)}`}
+                      >
+                        Подробнее
+                      </button>
+                    </Link>
                     {order.status === "delivered" && (
                       <>
                         <button 

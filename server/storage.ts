@@ -69,6 +69,36 @@ export class MemStorage implements IStorage {
     this.seedData();
   }
 
+  // Автоматическое обновление статуса заказов для демонстрации отслеживания
+  private scheduleOrderStatusUpdates(orderId: string) {
+    const order = this.orders.get(orderId);
+    if (!order) return;
+
+    // pending -> preparing (через 2 минуты)
+    setTimeout(() => {
+      const currentOrder = this.orders.get(orderId);
+      if (currentOrder && currentOrder.status === "pending") {
+        this.updateOrderStatus(orderId, "preparing");
+      }
+    }, 2 * 60 * 1000); // 2 минуты
+
+    // preparing -> delivering (через 5 минут от создания)
+    setTimeout(() => {
+      const currentOrder = this.orders.get(orderId);
+      if (currentOrder && currentOrder.status === "preparing") {
+        this.updateOrderStatus(orderId, "delivering");
+      }
+    }, 5 * 60 * 1000); // 5 минут
+
+    // delivering -> delivered (через 10 минут от создания)
+    setTimeout(() => {
+      const currentOrder = this.orders.get(orderId);
+      if (currentOrder && currentOrder.status === "delivering") {
+        this.updateOrderStatus(orderId, "delivered");
+      }
+    }, 10 * 60 * 1000); // 10 минут
+  }
+
   private seedData() {
     // Seed categories
     const categories = [
@@ -946,6 +976,10 @@ export class MemStorage implements IStorage {
       promoCode: insertOrder.promoCode || null // Обрабатываем undefined
     };
     this.orders.set(id, order);
+    
+    // Запускаем автоматическое обновление статуса заказа
+    this.scheduleOrderStatusUpdates(id);
+    
     return order;
   }
 

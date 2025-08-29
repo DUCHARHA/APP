@@ -305,11 +305,13 @@ export default function Checkout() {
           </div>
 
           <div className="space-y-3 w-full max-w-sm">
-            <Button variant="outline" className="w-full">
-              Отследить заказ
-            </Button>
+            <Link href={`/order/${orderId}`}>
+              <Button className="w-full bg-electric-green hover:bg-electric-green/90" data-testid="button-track-order">
+                Отследить заказ
+              </Button>
+            </Link>
             <Link href="/">
-              <Button className="w-full bg-agent-purple hover:bg-agent-purple/90">
+              <Button variant="outline" className="w-full" data-testid="button-home">
                 На главную
               </Button>
             </Link>
@@ -459,7 +461,7 @@ export default function Checkout() {
                       <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                         <RadioGroupItem value="card" id="card" />
                         <label htmlFor="card" className="flex-1 cursor-pointer">
-                          <div className="font-medium">Картой онлайн</div>
+                          <div className="font-medium">Переводом на карту</div>
                           <div className="text-sm text-gray-500">Visa, MasterCard, МИР</div>
                         </label>
                       </div>

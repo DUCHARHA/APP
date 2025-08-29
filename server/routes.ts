@@ -405,6 +405,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/orders/detail/:orderId", async (req, res) => {
+    try {
+      const order = await storage.getOrderById(req.params.orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      logError(error, 'GET /api/orders/detail/:orderId', req);
+      res.status(500).json({ error: "Failed to fetch order details", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/orders", requireAdminAuth, async (req, res) => {
     try {
