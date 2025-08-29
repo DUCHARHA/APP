@@ -5,8 +5,7 @@ import { type Category, type Product } from "@shared/schema";
 import CategoryButton from "@/components/category-button";
 import ProductCard from "@/components/product-card";
 import PWAInstallBanner from "@/components/pwa-install-banner";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationBell } from "@/components/NotificationBell";
+import AppHeader from "@/components/app-header";
 
 import { BannerSlider } from "@/components/BannerSlider";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -119,30 +118,10 @@ export default function Home() {
   return (
     <main className="pb-20 bg-background">
       {/* Header */}
-      <header className="bg-[#5B21B6] dark:bg-[#5B21B6] shadow-sm">
-        <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#5B21B6] dark:bg-[#5B21B6]">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img 
-                src="/icons/logo.png" 
-                alt="ДУЧАРХА" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white dark:text-gray-100">ДУЧАРХА</h1>
-              <p className="text-xs text-purple-200 dark:text-gray-400">
-                {location ? "Определяем зону доставки..." : ""}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-
-            <ThemeToggle />
-            <NotificationBell userId={getCurrentUserId()} />
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        showLogo={true} 
+        showNotifications={true}
+      />
       {/* Dynamic Banner Slider */}
       <div className="banner-section">
         <BannerSlider />

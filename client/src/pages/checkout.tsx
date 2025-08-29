@@ -9,13 +9,14 @@ import { queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { usePromo } from "@/hooks/use-promo";
 import { X } from "lucide-react";
 import { getCurrentUserId } from "@/utils/user-session";
+import AppHeader from "@/components/app-header";
 
 type CartItemWithProduct = CartItem & { product: Product };
 
@@ -222,16 +223,12 @@ export default function Checkout() {
   if (isLoading) {
     return (
       <div className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
-            <Link href="/">
-              <button className="mr-3 p-2 -ml-2">
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
-              </button>
-            </Link>
-            <h1 className="text-xl font-bold text-gray-900">Оформление заказа</h1>
-          </div>
-        </header>
+        <AppHeader 
+          title="Оформление заказа"
+          showBack={true}
+          showNotifications={false}
+          onBack={() => setLocation("/")}
+        />
         <div className="p-4">
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((i) => (
@@ -246,16 +243,12 @@ export default function Checkout() {
   if (cartItems.length === 0) {
     return (
       <div className="pb-20">
-        <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
-            <Link href="/">
-              <button className="mr-3 p-2 -ml-2">
-                <ArrowLeft className="w-6 h-6 text-white" />
-              </button>
-            </Link>
-            <h1 className="text-xl font-bold text-white">Оформление заказа</h1>
-          </div>
-        </header>
+        <AppHeader 
+          title="Оформление заказа"
+          showBack={true}
+          showNotifications={false}
+          onBack={() => setLocation("/")}
+        />
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Корзина пуста</h3>
           <p className="text-gray-500 text-center mb-6">
@@ -274,11 +267,12 @@ export default function Checkout() {
   if (isOrderPlaced) {
     return (
       <div className="pb-20">
-        <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center p-4">
-            <h1 className="text-xl font-bold text-gray-900">Заказ оформлен</h1>
-          </div>
-        </header>
+        <AppHeader 
+          title="Заказ оформлен"
+          showBack={false}
+          showNotifications={false}
+          onBack={() => {}} // No back button for order placed state
+        />
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
           <div className="w-20 h-20 bg-electric-green/10 rounded-full flex items-center justify-center mb-6">
             <CheckCircle className="w-10 h-10 text-electric-green" />
@@ -290,7 +284,7 @@ export default function Checkout() {
           <p className="text-sm text-gray-500 text-center mb-6">
             Мы доставим ваш заказ в течение 10-15 минут
           </p>
-          
+
           <div className="bg-white rounded-xl p-4 shadow-sm w-full max-w-sm mb-6">
             <div className="flex items-center justify-center space-x-2 text-electric-green">
               <Clock className="w-5 h-5" />
@@ -324,16 +318,12 @@ export default function Checkout() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center p-4">
-          <Link href="/">
-            <button className="mr-3 p-2 -ml-2">
-              <ArrowLeft className="w-6 h-6 text-white" />
-            </button>
-          </Link>
-          <h1 className="text-xl font-bold text-white">Оформление заказа</h1>
-        </div>
-      </header>
+      <AppHeader 
+        title="Оформление заказа"
+        showBack={true}
+        showNotifications={false}
+        onBack={() => setLocation("/")}
+      />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {/* Delivery Time */}
@@ -534,7 +524,7 @@ export default function Checkout() {
                     Применить
                   </Button>
                 </div>
-                
+
                 <div className="mt-3 pt-3 border-t border-gray-100">
                   <h4 className="font-medium text-gray-900 text-sm mb-2">Доступные промокоды:</h4>
                   <div className="space-y-1 text-xs text-gray-600">
@@ -550,7 +540,7 @@ export default function Checkout() {
           {/* Comments */}
           <section className="p-4 space-y-4">
             <h3 className="font-bold text-gray-900 mb-3">Комментарии к заказу</h3>
-            
+
             <FormField
               control={form.control}
               name="comment"
@@ -566,7 +556,7 @@ export default function Checkout() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="packerComment"
@@ -588,12 +578,12 @@ export default function Checkout() {
           <section className="p-4">
             <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
               <h3 className="font-bold text-gray-900 mb-3">К оплате</h3>
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Товары ({cartItems.length})</span>
                 <span className="font-medium">{subtotal.toFixed(0)} с.</span>
               </div>
-              
+
               {appliedPromo && (
                 <div className="flex justify-between text-sm">
                   <div className="flex items-center space-x-2">
@@ -608,14 +598,14 @@ export default function Checkout() {
                   <span className="font-medium text-green-600">-{promoDiscount.toFixed(0)} с.</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
                   Бесплатно
                 </span>
               </div>
-              
+
               <div className="border-t pt-3">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Итого</span>

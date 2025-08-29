@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding";
 import { FeatureTooltip } from "@/components/onboarding/feature-tooltip";
 import PWAInstallBannerProfile from "@/components/pwa-install-banner-profile";
+import AppHeader from "@/components/app-header";
 
 export default function Profile() {
   const userId = getCurrentUserId();
@@ -27,7 +28,7 @@ export default function Profile() {
       title: "Обновление сессии",
       description: "Очищаем кэш и перезагружаем приложение...",
     });
-    
+
     setTimeout(() => {
       forceRefreshApp();
     }, 1000);
@@ -38,12 +39,12 @@ export default function Profile() {
       title: "Запуск введения",
       description: "Покажем вам основные возможности приложения",
     });
-    
+
     setTimeout(() => {
       startOnboarding();
     }, 500);
   };
-  
+
 
   // Загружаем данные пользователя из localStorage
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function Profile() {
     queryKey: ["/api/orders", userId],
   });
 
-  
+
 
   const menuItems = [
     {
@@ -112,18 +113,14 @@ export default function Profile() {
   const showSessionInfo = process.env.NODE_ENV === 'development';
 
   return (
-    <main className="pb-20">
+    <main className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-[#5B21B6] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center p-4">
-          <Link href="/">
-            <button className="mr-3 -ml-2">
-              <ArrowLeft className="w-6 h-6 text-white" />
-            </button>
-          </Link>
-          <h1 className="text-xl font-bold text-white">Профиль</h1>
-        </div>
-      </header>
+      <AppHeader 
+        title="Профиль"
+        showBack={true}
+        showNotifications={false}
+        onBack={() => setLocation("/")}
+      />
       {/* User Info */}
       <section className="p-4">
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -161,14 +158,14 @@ export default function Profile() {
               </button>
             </Link>
           ))}
-          
+
           {/* App Actions Separator */}
           <div className="bg-gray-100 px-4 py-2">
             <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
               Приложение
             </p>
           </div>
-          
+
           {/* App Menu Items */}
           {appMenuItems.map((item, index) => (
             <FeatureTooltip
@@ -211,7 +208,7 @@ export default function Profile() {
           <LogOut className="w-5 h-5" />
           <span className="font-medium">Выйти</span>
         </button>
-        
+
         {/* Hidden admin link - click 5 times on version */}
         <div 
           className="text-center py-2 cursor-pointer"
@@ -231,7 +228,7 @@ export default function Profile() {
       <section className="p-4">
         <div className="bg-white dark:bg-card rounded-xl p-4 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Настройки приложения</h3>
-          
+
           <Button
             onClick={handleRefreshSession}
             variant="outline"
@@ -241,7 +238,7 @@ export default function Profile() {
             <RefreshCw className="w-4 h-4 mr-2" />
             Обновить приложение
           </Button>
-          
+
           {showSessionInfo && (
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm">
               <p className="font-medium mb-2">Информация о сессии:</p>
