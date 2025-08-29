@@ -36,7 +36,6 @@ import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
 import { statusBarManager } from "@/utils/status-bar-manager";
-import { MobileOptimizer } from "@/utils/mobile-optimizations";
 import React, { useEffect, useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 
@@ -54,45 +53,56 @@ function Router() {
   const [location] = useLocation();
   const previousLocation = useRef<string>("");
 
-  // Initialize app, status bar and mobile optimizations
   useEffect(() => {
-    try {
-      statusBarManager.init();
-    } catch (error) {
-      console.warn('Status bar initialization failed:', error);
-    }
-    
-    try {
-      MobileOptimizer.init();
-    } catch (error) {
-      console.warn('Mobile optimizer initialization failed:', error);
+    let isStale = false;
+    let rafId: number | null = null;
+
+    // Save scroll position of previous page
+    if (previousLocation.current && previousLocation.current !== location) {
+      scrollPositions.set(previousLocation.current, window.scrollY);
     }
 
-    // Performance monitoring for mobile
-    if ('performance' in window && 'navigation' in performance) {
-      const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      if (perfData.loadEventEnd - perfData.loadEventStart > 3000) {
-        console.warn('🐌 Slow loading detected, consider optimizing assets');
-      }
+    // Управление цветом status bar в зависимости от страницы
+    if (location === '/') {
+      // На главной странице используем фиолетовый цвет
+      statusBarManager.setPurple();
+    } else {
+      // На остальных страницах тоже фиолетовый (можно настроить по страницам)
+      statusBarManager.setPurple();
     }
-  }, []);
 
-  // Restore scroll position on navigation with improved mobile handling
-  useEffect(() => {
-    if (location !== "/") {
-      const savedPosition = scrollPositions.get(location);
-      if (savedPosition) {
-        // Use requestAnimationFrame for smoother scrolling on mobile
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            window.scrollTo({
-              top: savedPosition,
-              behavior: 'auto'
-            });
-          }, 100);
-        });
+    // Restore scroll position or scroll to top for new pages
+    const savedPosition = scrollPositions.get(location);
+    if (savedPosition !== undefined) {
+      // Use requestAnimationFrame to ensure DOM is ready and prevent stale state
+      rafId = requestAnimationFrame(() => {
+        if (!isStale && document.body) {
+          try {
+            window.scrollTo(0, savedPosition);
+          } catch (error) {
+            console.warn('Scroll position restore failed:', error);
+          }
+        }
+        rafId = null;
+      });
+    } else {
+      if (!isStale && document.body) {
+        try {
+          window.scrollTo(0, 0);
+        } catch (error) {
+          console.warn('Scroll to top failed:', error);
+        }
       }
     }
+
+    previousLocation.current = location;
+
+    return () => {
+      isStale = true;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+    };
   }, [location]);
 
   return (

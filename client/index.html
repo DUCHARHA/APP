@@ -1,74 +1,56 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icons/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, minimum-scale=1.0, maximum-scale=5.0" />
-
-    <!-- Mobile optimizations -->
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-touch-fullscreen" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-    <!-- SEO Meta Tags -->
-    <title>ДУЧАРХА - Доставка продуктов за 10-15 минут</title>
-    <meta name="description" content="Экспресс-доставка продуктов в Грозном за 10-15 минут. Свежие продукты, быстрая доставка, удобное приложение." />
-    <meta name="keywords" content="доставка продуктов, Грозный, быстрая доставка, продукты на дом, ДУЧАРХА" />
-    <meta name="author" content="ДУЧАРХА" />
-    <meta name="robots" content="index, follow" />
-
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="ДУЧАРХА - Доставка продуктов за 10-15 минут" />
-    <meta property="og:description" content="Экспресс-доставка продуктов в Грозном за 10-15 минут. Свежие продукты, быстрая доставка, удобное приложение." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icons/logo.png" />
-    <meta property="og:url" content="/" />
-    <meta property="og:site_name" content="ДУЧАРХА" />
-    <meta property="og:locale" content="ru_RU" />
-
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ДУЧАРХА - Доставка продуктов за 10-15 минут" />
-    <meta name="twitter:description" content="Экспресс-доставка продуктов в Грозном за 10-15 минут." />
-    <meta name="twitter:image" content="/icons/logo.png" />
-
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#5B21B6" />
-    <meta name="apple-mobile-web-app-title" content="ДУЧАРХА" />
-    <meta name="application-name" content="ДУЧАРХА" />
-
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/icons/192.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="/icons/192.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="/icons/512.png" />
-
-    <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.webmanifest" />
-
-    <!-- Additional PWA Support -->
-    <meta name="msapplication-TileColor" content="#5B21B6" />
-    <meta name="msapplication-config" content="/browserconfig.xml" />
-
-    <!-- No-translate for Google Chrome -->
+    <link rel="icon" type="image/png" href="/icons/logo.png" />
+    <link rel="apple-touch-icon" href="/icons/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ДУЧАРХА - Доставка продуктов</title>
+    <meta name="description" content="Экспресс-доставка продуктов за 10-15 минут" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Предотвращение предложений перевода -->
     <meta name="google" content="notranslate" />
+    <meta http-equiv="Content-Language" content="ru" />
 
-    <!-- Performance optimizations -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    
+    <!-- PWA Theme Colors - единый фиолетовый цвет -->
+    <meta name="theme-color" content="#5B21B6" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#5B21B6" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#5B21B6" />
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ДУЧАРХА">
+    <link rel="apple-touch-icon" href="/icons/192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/512.png">
+    
+    <!-- Android PWA Support -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ДУЧАРХА">
+    
+    <!-- Windows PWA Support -->
+    <meta name="msapplication-TileColor" content="#5B21B6">
+    <meta name="msapplication-TileImage" content="/icons/192.png">
+    <meta name="msapplication-navbutton-color" content="#5B21B6">
 
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+    <!-- Enable source maps for better Visual Editor integration -->
+    <meta name="vite:devtools" content="enabled">
 
-    <!-- Font Awesome Icons (preload) -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/icons/logo.png" as="image" type="image/png">
+
+    <!-- Fonts with display=swap for faster initial load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome with lower priority -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   </head>
   <body style="background-color: #5B21B6;">

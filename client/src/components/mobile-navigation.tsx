@@ -7,16 +7,10 @@ export default function MobileNavigation() {
   const [location, setLocation] = useLocation();
   const { totalItems } = useCart();
   
-  // Enhanced navigation handler with haptic feedback
+  // Simple navigation handler without debouncing
   const handleNavigation = useCallback((path: string) => {
-    return (e: React.MouseEvent | React.TouchEvent) => {
+    return (e: React.MouseEvent) => {
       e.preventDefault();
-      
-      // Haptic feedback for mobile devices
-      if ('vibrate' in navigator) {
-        navigator.vibrate(10);
-      }
-      
       // Only navigate if we're not already on this path
       if (location !== path) {
         setLocation(path);
@@ -53,31 +47,18 @@ export default function MobileNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50 safe-area-inset-bottom">
-      <div className="grid grid-cols-4 py-1 pb-safe">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50">
+      <div className="grid grid-cols-4 py-2 pt-[0px] pb-[0px]">
         {navigationItems.map((item) => (
           <button
             key={item.path}
             onClick={handleNavigation(item.path)}
-            onTouchStart={handleNavigation(item.path)}
-            className={`
-              flex flex-col items-center py-3 px-2 relative transition-all duration-200 
-              min-h-[60px] active:scale-95 active:bg-gray-100 dark:active:bg-gray-800
-              ${item.active 
-                ? 'text-[#5B21B6] bg-purple-50 dark:bg-purple-900/20' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-[#5B21B6] hover:bg-gray-50 dark:hover:bg-gray-800'
-              }
-            `}
-            aria-label={item.label}
-            role="tab"
-            aria-selected={item.active}
+            className="flex flex-col items-center py-2 px-1 relative transition-colors text-[#5B21B6] ml-[18px] mr-[18px] mt-[-5px] mb-[-5px] pl-[5px] pr-[5px] pt-[8px] pb-[8px]"
           >
-            <item.icon className={`w-6 h-6 mb-1 transition-transform ${item.active ? 'scale-110' : ''}`} />
-            <span className={`text-xs font-medium transition-all ${item.active ? 'font-semibold' : ''}`}>
-              {item.label}
-            </span>
+            <item.icon className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">{item.label}</span>
             {item.badge !== undefined && item.badge > 0 && (
-              <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {item.badge > 99 ? "99+" : item.badge}
               </span>
             )}
