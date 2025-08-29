@@ -671,7 +671,13 @@ export class MemStorage implements IStorage {
 
     sampleBanners.forEach((banner, index) => {
       const id = `banner-${index + 1}-${Date.now()}`;
-      this.banners.set(id, { ...banner, id });
+      this.banners.set(id, { 
+        ...banner, 
+        id,
+        createdAt: new Date().toISOString(),
+        startDate: null,
+        endDate: null
+      });
     });
 
     // Seed sample orders for demo
@@ -898,7 +904,7 @@ export class MemStorage implements IStorage {
       throw new Error("User ID is required for creating an order");
     }
 
-    const userId = insertOrder.userId!; // Проверили выше, что не null
+    const userId = insertOrder.userId; // Type assertion не нужен, проверили выше
     const userCartItems = Array.from(this.cartItems.values()).filter(item => item.userId === userId && item.userId !== null);
     let calculatedTotal = 0;
 
