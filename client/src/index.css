@@ -106,21 +106,8 @@
       background-color: var(--status-bar-color);
     }
 
-    .max-w-md, .max-w-4xl, .max-w-6xl, .max-w-7xl {
+    .max-w-md {
       background-color: var(--background);
-    }
-  }
-
-  /* Desktop responsive improvements */
-  @media (min-width: 768px) {
-    body {
-      background: var(--background);
-    }
-    
-    /* Better spacing for desktop */
-    .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
     }
   }
 }

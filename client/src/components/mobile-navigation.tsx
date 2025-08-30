@@ -6,7 +6,7 @@ import { useCallback } from "react";
 export default function MobileNavigation() {
   const [location, setLocation] = useLocation();
   const { totalItems } = useCart();
-
+  
   // Simple navigation handler without debouncing
   const handleNavigation = useCallback((path: string) => {
     return (e: React.MouseEvent) => {
@@ -47,7 +47,7 @@ export default function MobileNavigation() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 max-w-md mx-auto">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50">
       <div className="grid grid-cols-4 py-2 pt-[0px] pb-[0px]">
         {navigationItems.map((item) => (
           <button
