@@ -37,6 +37,11 @@ export class PWADetector {
       return true;
     }
     
+    // MIUI Browser - поддерживает PWA с ограничениями
+    if (browser === 'miui') {
+      return this.isPWASupported();
+    }
+    
     // Firefox - поддерживает PWA, но без beforeinstallprompt
     if (browser === 'firefox') {
       return this.isPWASupported();
@@ -64,6 +69,7 @@ export class PWADetector {
     if (ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Edg')) return 'safari';
     if (ua.includes('Edg')) return 'edge';
     if (ua.includes('OPR') || ua.includes('Opera')) return 'opera';
+    if (ua.includes('MiuiBrowser') || ua.includes('MIUI Browser') || ua.includes('XiaoMi')) return 'miui';
     if (ua.includes('Chrome')) return 'chrome';
     
     return 'unknown';
@@ -89,6 +95,9 @@ export class PWADetector {
     const browser = this.getBrowserInfo();
     
     switch (browser) {
+      case 'miui':
+        return 'Для установки в Mi Browser:\n1. Нажмите меню (⋮) в правом углу\n2. Выберите "Добавить ярлык"\n3. Или нажмите "Настройки" → "Дополнительно" → "Добавить на рабочий стол"';
+      
       case 'firefox':
         return 'Для установки:\n1. Нажмите меню Firefox (☰)\n2. Выберите "Установить приложение"\n3. Подтвердите установку';
       

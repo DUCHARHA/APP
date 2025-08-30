@@ -41,6 +41,10 @@ export function getBrowserPWACapabilities(): {
     browserName = 'safari';
     canInstall = /iPad|iPhone|iPod/.test(ua); // PWA только на iOS Safari
     hasInstallPrompt = false;
+  } else if (ua.includes('MiuiBrowser') || ua.includes('MIUI Browser') || ua.includes('XiaoMi')) {
+    browserName = 'miui';
+    canInstall = true; // MIUI Browser поддерживает PWA
+    hasInstallPrompt = false; // Без beforeinstallprompt
   } else if (ua.includes('Edg')) {
     browserName = 'edge';
     canInstall = true;
@@ -90,6 +94,9 @@ export function getBrowserSpecificInstallInstructions(): string {
   const { browserName } = getBrowserPWACapabilities();
   
   switch (browserName) {
+    case 'miui':
+      return 'Нажмите меню (⋮) → "Добавить ярлык" или "Настройки" → "Добавить на рабочий стол"';
+    
     case 'firefox':
       return 'Нажмите меню Firefox (☰) → "Установить приложение"';
     
