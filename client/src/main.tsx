@@ -12,90 +12,31 @@ if (import.meta.env.PROD) {
   // console.error and console.warn are kept for debugging critical issues
 }
 
-// Initialize IndexedDB lazily to improve initial load time
+// Initialize IndexedDB synchronously for faster access
+import { indexedDBService } from "./lib/indexeddb";
 if (typeof window !== 'undefined') {
-  import("./lib/indexeddb").then(({ indexedDBService }) => {
-    indexedDBService.init().catch(console.error);
-  });
+  indexedDBService.init().catch(console.error);
 }
 
-// Умная очистка только устаревших кэшей (версионированная)
-async function cleanupOldCaches() {
-  try {
-    const APP_CACHE_VERSION = 'v2';
-    const APP_CACHE_PREFIX = 'ducharkha-';
-    
-    // 1. Очистка только старых версий наших кэшей
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      // Удаляем только старые версии наших кэшей, не все кэши
-      const oldCaches = cacheNames.filter(name => 
-        name.startsWith(APP_CACHE_PREFIX) && 
-        !name.includes(APP_CACHE_VERSION)
-      );
-      
-      if (oldCaches.length > 0) {
-        await Promise.all(oldCaches.map(name => caches.delete(name)));
-        console.log(`✅ Очищено ${oldCaches.length} устаревших кэшей`);
-      } else {
-        console.log('✅ Нет устаревших кэшей для очистки');
-      }
-    }
-
-    // 2. В dev режиме отписываем SW для чистого тестирования
-    if (import.meta.env.DEV && 'serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map(reg => reg.unregister()));
-      console.log('🧹 Dev: Service Workers отписаны для чистого тестирования');
-    }
-  } catch (error) {
-    console.warn('Ошибка при очистке:', error);
+// Быстрая очистка кэшей
+function cleanupOldCaches() {
+  if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(reg => reg.unregister());
+    });
   }
 }
 
-// В development режиме - отключение PWA и очистка для тестирования
+// Быстрая инициализация для dev/prod
 if (import.meta.env.DEV) {
-  console.log('🚧 Режим разработки: PWA отключен');
   cleanupOldCaches();
 } else {
-  // В production - умная очистка и регистрация PWA
-  console.log('🚀 Production режим: настройка PWA');
   PWADetector.debugPWAStatus();
-  cleanupOldCaches().then(() => {
-    // Регистрируем новый service worker только после очистки старых
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', {
-          updateViaCache: 'none', // Не кэшируем сам service worker
-        })
-        .then((registration) => {
-          console.log('✅ Новый Service Worker зарегистрирован');
-          
-          // Автоматическое обновление при обнаружении новой версии
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // Активируем новую версию сразу
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                }
-              });
-            }
-          });
-
-          // Перезагружаем страницу при смене контроллера
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            console.log('🔄 Обновление активировано, перезагружаем страницу');
-            window.location.reload();
-          });
-        })
-        .catch((error) => {
-          console.error('❌ Ошибка регистрации SW:', error);
-        });
-      });
-    }
-  });
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    });
+  }
 }
 
 // Сразу устанавливаем фиолетовый цвет status bar - убираем мигание
