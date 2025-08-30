@@ -1,5 +1,6 @@
-import { X, Smartphone, Download } from "lucide-react";
+import { X, Smartphone, Download, Info } from "lucide-react";
 import { usePWA } from "@/contexts/pwa-context";
+import { supportsAutomaticInstall, getBrowserSpecificInstallInstructions } from "@/utils/pwa-utils";
 
 export default function PWAInstallBanner() {
   const { 
@@ -39,8 +40,17 @@ export default function PWAInstallBanner() {
               className="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-purple-50 transition-colors disabled:opacity-50"
               data-testid="button-install-pwa"
             >
-              <Download className="w-4 h-4" />
-              {isInstalling ? 'Установка...' : 'Установить'}
+              {supportsAutomaticInstall() ? (
+                <>
+                  <Download className="w-4 h-4" />
+                  {isInstalling ? 'Установка...' : 'Установить'}
+                </>
+              ) : (
+                <>
+                  <Info className="w-4 h-4" />
+                  Как установить
+                </>
+              )}
             </button>
 
             <button

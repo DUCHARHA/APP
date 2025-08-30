@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { PWADetector } from '@/utils/pwa-detection';
 
 interface PWAContextType {
   showInstallBanner: boolean;
@@ -38,55 +39,73 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      
-      // Check if home banner was previously dismissed
-      const homeDismissed = localStorage.getItem('pwa-home-banner-dismissed');
-      if (!homeDismissed) {
-        setShowHomeBanner(true);
-      }
-      
-      // Profile banner always shows if PWA is installable
-      setShowInstallBanner(true);
     };
 
+    // Слушаем событие beforeinstallprompt (Chrome/Edge/Opera)
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // Check if app is already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setShowInstallBanner(false);
-      setShowHomeBanner(false);
-    }
+    // Универсальная проверка возможности установки PWA
+    const checkPWAInstallability = () => {
+      // Если уже установлено - не показываем баннеры
+      if (PWADetector.isRunningAsPWA()) {
+        setShowInstallBanner(false);
+        setShowHomeBanner(false);
+        return;
+      }
+
+      // Проверяем, может ли текущий браузер установить PWA
+      if (PWADetector.canInstallPWA()) {
+        // Проверяем, был ли домашний баннер отклонен ранее
+        const homeDismissed = localStorage.getItem('pwa-home-banner-dismissed');
+        if (!homeDismissed) {
+          setShowHomeBanner(true);
+        }
+        
+        // Баннер в профиле всегда показываем, если PWA можно установить
+        setShowInstallBanner(true);
+      }
+    };
+
+    // Проверяем сразу при загрузке
+    checkPWAInstallability();
+
+    // Также проверяем через небольшую задержку для случаев, когда DOM еще не готов
+    const timeoutId = setTimeout(checkPWAInstallability, 1000);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      clearTimeout(timeoutId);
     };
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) {
-      // Fallback for browsers that don't support beforeinstallprompt
-      alert('Чтобы установить приложение:\n\n1. Нажмите меню браузера (⋮)\n2. Выберите "Добавить на главный экран"\n3. Подтвердите установку');
+    const browser = PWADetector.getBrowserInfo();
+    
+    // Если есть deferredPrompt (Chrome/Edge/Opera), используем его
+    if (deferredPrompt) {
+      setIsInstalling(true);
+      
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === "accepted") {
+          setShowInstallBanner(false);
+          setShowHomeBanner(false);
+          localStorage.setItem('pwa-home-banner-dismissed', 'true');
+        }
+      } catch (error) {
+        console.warn('Ошибка установки PWA:', error);
+      } finally {
+        setIsInstalling(false);
+        setDeferredPrompt(null);
+      }
       return;
     }
 
-    setIsInstalling(true);
-    
-    try {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === "accepted") {
-        // PWA successfully installed
-        setShowInstallBanner(false);
-        setShowHomeBanner(false);
-        localStorage.setItem('pwa-home-banner-dismissed', 'true');
-      }
-    } catch (error) {
-      console.warn('Ошибка установки PWA:', error);
-    } finally {
-      setIsInstalling(false);
-      setDeferredPrompt(null);
-    }
+    // Fallback для браузеров без beforeinstallprompt
+    const instructions = PWADetector.getInstallInstructions();
+    alert(instructions);
   };
 
   const handleDismissHome = () => {
@@ -104,8 +123,12 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
     isInstalling,
     setIsInstalling,
     handleInstall,
-    handleDismissHome,
+    handleDismissHome
   };
 
-  return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;
+  return (
+    <PWAContext.Provider value={value}>
+      {children}
+    </PWAContext.Provider>
+  );
 };
