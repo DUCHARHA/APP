@@ -45,6 +45,10 @@ export function getBrowserPWACapabilities(): {
     browserName = 'miui';
     canInstall = true; // MIUI Browser поддерживает PWA
     hasInstallPrompt = false; // Без beforeinstallprompt
+  } else if (ua.includes('YaBrowser') || ua.includes('Yandex')) {
+    browserName = 'yandex';
+    canInstall = true; // Яндекс.Браузер поддерживает PWA
+    hasInstallPrompt = true; // Поддерживает beforeinstallprompt
   } else if (ua.includes('Edg')) {
     browserName = 'edge';
     canInstall = true;
@@ -96,6 +100,9 @@ export function getBrowserSpecificInstallInstructions(): string {
   switch (browserName) {
     case 'miui':
       return 'Нажмите меню (⋮) → "Добавить ярлык" или "Настройки" → "Добавить на рабочий стол"';
+    
+    case 'yandex':
+      return 'Нажмите меню (☰) → "Установить приложение" или используйте кнопку в адресной строке';
     
     case 'firefox':
       return 'Нажмите меню Firefox (☰) → "Установить приложение"';
