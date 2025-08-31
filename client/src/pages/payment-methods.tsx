@@ -16,22 +16,7 @@ interface PaymentMethod {
 }
 
 export default function PaymentMethods() {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: "1",
-      type: "card",
-      title: "Visa •••• 4242",
-      details: "Истекает 12/28",
-      isDefault: true,
-    },
-    {
-      id: "2",
-      type: "wallet",
-      title: "SberPay",
-      details: "+7 (999) 123-45-67",
-      isDefault: false,
-    },
-  ]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   const [isAddingMethod, setIsAddingMethod] = useState(false);
   const [newMethod, setNewMethod] = useState({
