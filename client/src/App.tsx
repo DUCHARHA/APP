@@ -39,6 +39,8 @@ import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
 import { statusBarManager } from "@/utils/status-bar-manager";
 import React, { useEffect, useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
+import { PWADetector } from "./utils/pwa-detection";
+import OperaMiniFallback from "./components/opera-mini-fallback";
 
 // Loading component for lazy routes
 const PageLoader = () => (
@@ -145,6 +147,12 @@ function Router() {
 }
 
 function App() {
+  // Проверяем совместимость браузера до загрузки React приложения
+  // Opera Mini не поддерживает современные веб-технологии
+  if (PWADetector.isOperaMini() || !PWADetector.supportsModernFeatures()) {
+    return <OperaMiniFallback />;
+  }
+
   // Clean up old cached data on app startup
   React.useEffect(() => {
     // First, check and fix any demo-user sessions

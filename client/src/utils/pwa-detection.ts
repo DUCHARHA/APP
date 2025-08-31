@@ -32,6 +32,11 @@ export class PWADetector {
   static canInstallPWA(): boolean {
     const browser = this.getBrowserInfo();
     
+    // Opera Mini не поддерживает PWA из-за серверного сжатия
+    if (browser === 'opera-mini') {
+      return false;
+    }
+    
     // Chrome/Edge/Opera - поддерживают beforeinstallprompt
     if (browser === 'chrome' || browser === 'edge' || browser === 'opera') {
       return true;
@@ -70,6 +75,8 @@ export class PWADetector {
   static getBrowserInfo(): string {
     const ua = navigator.userAgent;
     
+    // Opera Mini должен быть проверен ПЕРЕД обычной Opera
+    if (ua.includes('Opera Mini')) return 'opera-mini';
     if (ua.includes('Firefox')) return 'firefox';
     if (ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Edg')) return 'safari';
     if (ua.includes('Edg')) return 'edge';
@@ -123,6 +130,9 @@ export class PWADetector {
       case 'opera':
         return 'Для установки:\n1. Нажмите меню Opera\n2. Выберите "Установить приложение"\n3. Подтвердите установку';
       
+      case 'opera-mini':
+        return 'Opera Mini не поддерживает установку PWA приложений.\nРекомендуем использовать:\n• Google Chrome\n• Firefox\n• Обычную Opera\n• Яндекс.Браузер';
+      
       default:
         return 'Для установки:\n1. Нажмите меню браузера (⋮)\n2. Выберите "Добавить на главный экран"\n3. Подтвердите установку';
     }
@@ -150,6 +160,25 @@ export class PWADetector {
     if (window.matchMedia('(display-mode: minimal-ui)').matches) return 'minimal-ui';
     if (window.matchMedia('(display-mode: fullscreen)').matches) return 'fullscreen';
     return 'browser';
+  }
+
+  // Проверяем совместимость с Opera Mini
+  static isOperaMini(): boolean {
+    return navigator.userAgent.includes('Opera Mini');
+  }
+  
+  // Проверяем, поддерживает ли браузер современные функции
+  static supportsModernFeatures(): boolean {
+    // Opera Mini не поддерживает многие современные функции
+    if (this.isOperaMini()) {
+      return false;
+    }
+    
+    // Проверяем поддержку ключевых функций
+    const hasModuleSupport = 'noModule' in HTMLScriptElement.prototype;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    
+    return hasModuleSupport && hasServiceWorker;
   }
 }
 
