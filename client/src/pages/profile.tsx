@@ -117,9 +117,8 @@ export default function Profile() {
       {/* Header */}
       <AppHeader 
         title="Профиль"
-        showBack={true}
+        showBack={false}
         showNotifications={false}
-        onBack={() => setLocation("/")}
       />
       {/* User Info */}
       <section className="p-4">
