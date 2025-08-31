@@ -2,7 +2,7 @@
   "name": "ДУЧАРХА - Доставка продуктов",
   "short_name": "ДУЧАРХА", 
   "description": "Экспресс-доставка продуктов за 10-15 минут",
-  "start_url": "/?app=ducharkha",
+  "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "scope": "/",
@@ -10,7 +10,6 @@
   "theme_color": "#5B21B6",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
-  "id": "ducharkha",
   "icons": [
     {
       "src": "/icons/192.png",
