@@ -227,6 +227,7 @@ export default function Checkout() {
           title="Оформление заказа"
           showBack={true}
           showNotifications={false}
+          showThemeToggle={false}
           onBack={() => setLocation("/")}
         />
         <div className="p-4">
@@ -247,6 +248,7 @@ export default function Checkout() {
           title="Оформление заказа"
           showBack={true}
           showNotifications={false}
+          showThemeToggle={false}
           onBack={() => setLocation("/")}
         />
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -271,6 +273,7 @@ export default function Checkout() {
           title="Заказ оформлен"
           showBack={false}
           showNotifications={false}
+          showThemeToggle={false}
           onBack={() => {}} // No back button for order placed state
         />
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -322,6 +325,7 @@ export default function Checkout() {
         title="Оформление заказа"
         showBack={true}
         showNotifications={false}
+        showThemeToggle={false}
         onBack={() => setLocation("/")}
       />
       <Form {...form}>

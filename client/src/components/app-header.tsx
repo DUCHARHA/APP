@@ -1,4 +1,3 @@
-
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -11,6 +10,7 @@ interface AppHeaderProps {
   showBack?: boolean;
   showLogo?: boolean;
   showNotifications?: boolean;
+  showThemeToggle?: boolean;
   onBack?: () => void;
 }
 
@@ -19,6 +19,7 @@ export default function AppHeader({
   showBack = false, 
   showLogo = false, 
   showNotifications = true,
+  showThemeToggle = true,
   onBack 
 }: AppHeaderProps) {
   const [, setLocation] = useLocation();
@@ -32,6 +33,8 @@ export default function AppHeader({
     }
   };
 
+  const userId = getCurrentUserId();
+
   return (
     <header className="bg-[#5B21B6] dark:bg-[#5B21B6] shadow-sm">
       <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#5B21B6] dark:bg-[#5B21B6]">
@@ -44,7 +47,7 @@ export default function AppHeader({
               <ArrowLeft className="w-6 h-6 text-white" />
             </button>
           )}
-          
+
           {showLogo && (
             <div className="w-10 h-10 rounded-lg overflow-hidden">
               <img 
@@ -54,7 +57,7 @@ export default function AppHeader({
               />
             </div>
           )}
-          
+
           <div>
             <h1 className="text-xl font-bold text-white dark:text-gray-100">
               {title || "ДУЧАРХА"}
@@ -66,12 +69,10 @@ export default function AppHeader({
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <ThemeToggle />
-          {showNotifications && (
-            <NotificationBell userId={getCurrentUserId()} />
-          )}
+          {showNotifications && <NotificationBell userId={userId} />}
+          {showThemeToggle && <ThemeToggle />}
         </div>
       </div>
     </header>
