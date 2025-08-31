@@ -13,37 +13,15 @@ export function useGeolocation() {
     loading: false,
   });
 
+  // Temporarily disabled automatic geolocation requests
+  // This prevents the browser from showing location permission popups
+  // Location functionality can be re-enabled later when needed
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setState(prev => ({
-        ...prev,
-        error: "Geolocation is not supported by this browser",
-      }));
-      return;
-    }
-
-    setState(prev => ({ ...prev, loading: true }));
-
-    const handleSuccess = (position: GeolocationPosition) => {
-      setState({
-        location: position,
-        error: null,
-        loading: false,
-      });
-    };
-
-    const handleError = (error: GeolocationPositionError) => {
-      setState({
-        location: null,
-        error: error.message,
-        loading: false,
-      });
-    };
-
-    navigator.geolocation.getCurrentPosition(handleSuccess, handleError, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 300000, // 5 minutes
+    // Auto-location detection is disabled for now
+    setState({
+      location: null,
+      error: null,
+      loading: false,
     });
   }, []);
 

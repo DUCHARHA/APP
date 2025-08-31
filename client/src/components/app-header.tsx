@@ -61,7 +61,7 @@ export default function AppHeader({
             </h1>
             {showLogo && (
               <p className="text-xs text-purple-200 dark:text-gray-400">
-                {location ? "Определяем зону доставки..." : ""}
+                Доставка по всей Москве
               </p>
             )}
           </div>
