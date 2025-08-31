@@ -61,7 +61,7 @@ export default function AppHeader({
             </h1>
             {showLogo && (
               <p className="text-xs text-purple-200 dark:text-gray-400">
-                Доставка по всей Москве
+                Доставка от 15 минут
               </p>
             )}
           </div>
