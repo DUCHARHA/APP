@@ -14,8 +14,13 @@ export class StatusBarManager {
 
   // Проверяем, запущено ли приложение в standalone режиме
   private isStandalone(): boolean {
-    return window.matchMedia('(display-mode: standalone)').matches ||
-           (window.navigator as any).standalone === true;
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             (window.navigator as any).standalone === true;
+    } catch (error) {
+      console.warn('Error checking standalone mode:', error);
+      return false;
+    }
   }
 
   // Установка черного цвета (для splash screen)

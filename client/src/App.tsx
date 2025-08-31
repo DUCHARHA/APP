@@ -66,12 +66,16 @@ function Router() {
     }
 
     // Управление цветом status bar в зависимости от страницы
-    if (location === '/') {
-      // На главной странице используем фиолетовый цвет
-      statusBarManager.setPurple();
-    } else {
-      // На остальных страницах тоже фиолетовый (можно настроить по страницам)
-      statusBarManager.setPurple();
+    try {
+      if (location === '/') {
+        // На главной странице используем фиолетовый цвет
+        statusBarManager.setPurple();
+      } else {
+        // На остальных страницах тоже фиолетовый (можно настроить по страницам)
+        statusBarManager.setPurple();
+      }
+    } catch (error) {
+      console.warn('Error setting status bar color for route:', error);
     }
 
     // Restore scroll position or scroll to top for new pages
@@ -155,9 +159,12 @@ function App() {
 
   // Clean up old cached data on app startup
   React.useEffect(() => {
-    // First, check and fix any demo-user sessions
-    autoFixDemoUser();
-
+    // First, check and fix any demo-user sessions with error handling
+    try {
+      autoFixDemoUser();
+    } catch (error) {
+      console.warn('Error during app initialization cleanup:', error);
+    }
   }, []);
 
   return (

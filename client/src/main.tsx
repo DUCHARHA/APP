@@ -99,6 +99,10 @@ if (import.meta.env.DEV) {
 }
 
 // Сразу устанавливаем фиолетовый цвет status bar - убираем мигание
-statusBarManager.setPurple();
+try {
+  statusBarManager.setPurple();
+} catch (error) {
+  console.warn('Error setting initial status bar color:', error);
+}
 
 createRoot(document.getElementById("root")!).render(<App />);

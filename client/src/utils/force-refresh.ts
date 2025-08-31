@@ -46,27 +46,36 @@ export function autoFixDemoUser(): void {
   try {
     let shouldRefresh = false;
     
-    // Check localStorage for demo-user references
-    const sessionData = localStorage.getItem('ducharkha_user_session');
-    if (sessionData && sessionData.includes('demo-user')) {
-      console.warn('Demo-user session detected in localStorage, clearing...');
-      localStorage.removeItem('ducharkha_user_session');
-      shouldRefresh = true;
+    // Check localStorage for demo-user references with additional safety
+    try {
+      const sessionData = localStorage.getItem('ducharkha_user_session');
+      if (sessionData && sessionData.includes('demo-user')) {
+        console.warn('Demo-user session detected in localStorage, clearing...');
+        localStorage.removeItem('ducharkha_user_session');
+        shouldRefresh = true;
+      }
+    } catch (error) {
+      console.warn('Failed to check session data:', error);
     }
 
-    // Clear any other demo-user related data
-    Object.keys(localStorage).forEach(key => {
-      try {
-        const value = localStorage.getItem(key);
-        if (value && value.includes('demo-user')) {
-          console.log('Clearing demo-user data (key hidden for security)');
-          localStorage.removeItem(key);
-          shouldRefresh = true;
+    // Clear any other demo-user related data with better error handling
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        try {
+          const value = localStorage.getItem(key);
+          if (value && value.includes('demo-user')) {
+            console.log('Clearing demo-user data (key hidden for security)');
+            localStorage.removeItem(key);
+            shouldRefresh = true;
+          }
+        } catch (error) {
+          console.warn(`Failed to check/clear localStorage key:`, error);
         }
-      } catch (error) {
-        console.warn(`Failed to check/clear ${key}:`, error);
-      }
-    });
+      });
+    } catch (error) {
+      console.warn('Failed to iterate localStorage:', error);
+    }
 
     // Clear service worker cache if present
     if ('caches' in window) {
@@ -96,8 +105,21 @@ export function autoFixDemoUser(): void {
 
     if (shouldRefresh) {
       console.log('Demo-user data found and cleared, refreshing page...');
-      // Use replace to avoid back button issues
-      window.location.replace(window.location.href);
+      // Add a small delay to prevent race conditions during app initialization
+      setTimeout(() => {
+        try {
+          // Use replace to avoid back button issues
+          window.location.replace(window.location.href);
+        } catch (error) {
+          console.warn('Failed to refresh page:', error);
+          // Fallback to regular reload if replace fails
+          try {
+            window.location.reload();
+          } catch (reloadError) {
+            console.warn('Failed to reload page:', reloadError);
+          }
+        }
+      }, 100);
     }
   } catch (error) {
     console.warn('Error during demo-user cleanup:', error);
