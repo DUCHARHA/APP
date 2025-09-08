@@ -45,7 +45,7 @@ export default function Checkout() {
   const form = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      deliveryAddress: "ул. Пушкина, 25, кв. 10",
+      deliveryAddress: "", // Убрали стандартный адрес
       paymentMethod: "card",
       comment: "",
       packerComment: "",

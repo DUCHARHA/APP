@@ -11,9 +11,9 @@ export default function ProfileEdit() {
   
   // В реальном приложении данные получаются из auth context
   const [formData, setFormData] = useState({
-    name: "Фируз Пулотов",
-    email: "anna@example.com", 
-    phone: "+7 (952) 270-47-18",
+    name: "Дучарха",
+    email: "Ducharha@gmail.com", 
+    phone: "+992 971 84 48 84",
   });
 
   const handleSave = () => {

@@ -17,22 +17,7 @@ interface Address {
 }
 
 export default function Addresses() {
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: "1",
-      title: "Дом",
-      address: "ул. Пушкина, 25, кв. 10",
-      type: "home",
-      isDefault: true,
-    },
-    {
-      id: "2", 
-      title: "Работа",
-      address: "ул. Ленина, 45, офис 301",
-      type: "work",
-      isDefault: false,
-    },
-  ]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
 
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({

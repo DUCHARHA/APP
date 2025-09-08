@@ -17,10 +17,10 @@ export default function Profile() {
   const { toast } = useToast();
   const { startOnboarding, isOnboardingComplete } = useOnboarding();
   const [user, setUser] = useState({
-    name: "Фируз Пулотов",
-    email: "anna@example.com",
-    phone: "+7 (952) 270-47-18",
-    address: "ул. Пушкина, 25, кв. 10",
+    name: "Дучарха",
+    email: "Ducharha@gmail.com",
+    phone: "+992 971 84 48 84",
+    address: "ул. Джами ",
   });
 
   const handleRefreshSession = () => {
@@ -219,7 +219,7 @@ export default function Profile() {
             }
           }}
         >
-          <p className="text-xs text-gray-400">ДУЧАРХА v1.0.0</p>
+          <p className="text-xs text-gray-400">ДУЧАРХА v2.0.0</p>
         </div>
       </section>
 
@@ -241,7 +241,7 @@ export default function Profile() {
           {showSessionInfo && (
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm">
               <p className="font-medium mb-2">Информация о сессии:</p>
-              <p className="text-gray-600 dark:text-gray-400 break-all">ID: {userId}</p>
+              <span className="hidden">ID: {userId}</span>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                 Если вы видите проблемы с данными, нажмите "Обновить приложение"
               </p>

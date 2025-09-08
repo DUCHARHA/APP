@@ -28,26 +28,25 @@ interface OnboardingProviderProps {
 }
 
 export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children }) => {
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(true);
-  const [isOnboardingActive, setIsOnboardingActive] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
-
   const userId = getCurrentUserId();
   const storageKey = `ducharkha_onboarding_${userId}`;
 
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = localStorage.getItem(storageKey) === 'completed';
+
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(hasCompletedOnboarding);
+  const [isOnboardingActive, setIsOnboardingActive] = useState(!hasCompletedOnboarding);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
+
   useEffect(() => {
-    // Check if user has completed onboarding
-    const hasCompletedOnboarding = localStorage.getItem(storageKey);
-    
-    if (!hasCompletedOnboarding) {
-      setIsOnboardingComplete(false);
+    if (!isOnboardingComplete) {
       // Auto-start onboarding for new users after a short delay
       setTimeout(() => {
         setIsOnboardingActive(true);
       }, 1000);
     }
-  }, [storageKey]);
+  }, [isOnboardingComplete]);
 
   const startOnboarding = () => {
     setCurrentStep(1);
