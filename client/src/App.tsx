@@ -23,6 +23,7 @@ const OrderDetail = lazy(() => import("@/pages/order-detail"));
 const Addresses = lazy(() => import("@/pages/addresses"));
 const PaymentMethods = lazy(() => import("@/pages/payment-methods"));
 const Profile = lazy(() => import("@/pages/profile"));
+const ProfileAuth = lazy(() => import("@/pages/profile-auth"));
 const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
 const Help = lazy(() => import("@/pages/help"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
@@ -123,7 +124,7 @@ function Router() {
             <Route path="/catalog/:categoryId" component={Catalog} />
             <Route path="/product/:productId" component={ProductDetail} />
             <Route path="/checkout" component={Checkout} />
-            <Route path="/profile" component={Profile} />
+            <Route path="/profile" component={ProfileAuth} />
             <Route path="/profile/edit" component={ProfileEdit} />
             <Route path="/help" component={Help} />
             <Route path="/orders" component={Orders} />
