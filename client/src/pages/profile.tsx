@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { type Order } from "@shared/schema";
 import { getCurrentUserId, clearUserSession } from "@/utils/user-session";
 import { forceRefreshApp } from "@/utils/force-refresh";
+import { getAuthState, logout, getUserDisplayName } from "@/utils/auth-state";
 import { useToast } from "@/hooks/use-toast";
 import { useOnboarding } from "@/components/onboarding";
 import { FeatureTooltip } from "@/components/onboarding/feature-tooltip";
@@ -16,10 +17,12 @@ export default function Profile() {
   const userId = getCurrentUserId();
   const { toast } = useToast();
   const { startOnboarding, isOnboardingComplete } = useOnboarding();
+  const [, setLocation] = useLocation();
+  const [authState, setAuthState] = useState(() => getAuthState());
   const [user, setUser] = useState({
-    name: "Дучарха",
-    email: "Ducharha@gmail.com",
-    phone: "+992 971 84 48 84",
+    name: authState?.name || "Пользователь",
+    email: authState?.isGuest ? "" : "Ducharha@gmail.com",
+    phone: authState?.phone || "",
     address: "ул. Джами ",
   });
 
@@ -45,12 +48,46 @@ export default function Profile() {
     }, 500);
   };
 
+  const handleLogout = () => {
+    if (authState?.isGuest) {
+      // If guest, redirect to auth to create account
+      logout();
+      setLocation("/profile");
+      toast({
+        title: "Создание аккаунта",
+        description: "Войдите или создайте профиль для получения полного доступа",
+      });
+    } else {
+      // If authenticated, logout and return to auth screen
+      logout();
+      setLocation("/profile");
+      toast({
+        title: "Выход выполнен",
+        description: "Вы успешно вышли из системы",
+      });
+    }
+  };
 
-  // Загружаем данные пользователя из localStorage
+
+  // Загружаем данные пользователя из auth state
   useEffect(() => {
+    const currentAuthState = getAuthState();
+    setAuthState(currentAuthState);
+    
+    if (currentAuthState) {
+      setUser(prev => ({
+        ...prev,
+        name: currentAuthState.name || "Пользователь",
+        phone: currentAuthState.phone || "",
+        email: currentAuthState.isGuest ? "" : prev.email,
+      }));
+    }
+    
+    // Fallback to saved profile for backward compatibility
     const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      setUser(JSON.parse(savedProfile));
+    if (savedProfile && !currentAuthState?.isAuthenticated) {
+      const parsed = JSON.parse(savedProfile);
+      setUser(prev => ({ ...prev, ...parsed }));
     }
   }, []);
 
@@ -129,8 +166,15 @@ export default function Profile() {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900">{user.name}</h3>
-              <p className="text-sm text-gray-500">{user.email}</p>
-              <p className="text-sm text-gray-500">{user.phone}</p>
+              {authState?.isGuest && (
+                <p className="text-sm text-orange-600">Гостевой режим</p>
+              )}
+              {!authState?.isGuest && user.email && (
+                <p className="text-sm text-gray-500">{user.email}</p>
+              )}
+              {user.phone && (
+                <p className="text-sm text-gray-500">{user.phone}</p>
+              )}
             </div>
             <Link href="/profile/edit">
               <button className="p-2 text-gray-400 hover:text-agent-purple">
@@ -203,9 +247,15 @@ export default function Profile() {
       </section>
       {/* Logout */}
       <section className="px-4 pb-8">
-        <button className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center justify-center space-x-2 text-red-500">
+        <button 
+          onClick={handleLogout}
+          className="w-full bg-white rounded-xl p-4 shadow-sm flex items-center justify-center space-x-2 text-red-500 hover:bg-red-50 transition-colors"
+          data-testid="button-logout"
+        >
           <LogOut className="w-5 h-5" />
-          <span className="font-medium">Выйти</span>
+          <span className="font-medium">
+            {authState?.isGuest ? "Войти в аккаунт" : "Выйти"}
+          </span>
         </button>
 
         {/* Hidden admin link - click 5 times on version */}
