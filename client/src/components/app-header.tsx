@@ -39,14 +39,6 @@ export default function AppHeader({
     <header className="bg-[#5B21B6] dark:bg-[#5B21B6] shadow-sm">
       <div className="flex items-center justify-between p-3 pt-[10px] pb-[10px] bg-[#5B21B6] dark:bg-[#5B21B6]">
         <div className="flex items-center space-x-3">
-          {showBack && (
-            <button 
-              onClick={handleBack}
-              className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 text-white" />
-            </button>
-          )}
 
           {showLogo && (
             <div className="w-10 h-10 rounded-lg overflow-hidden">
