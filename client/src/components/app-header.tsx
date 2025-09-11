@@ -37,7 +37,7 @@ export default function AppHeader({
 
   return (
     <header className="bg-[#5B21B6] dark:bg-[#5B21B6] shadow-sm">
-      <div className="flex items-center justify-between p-4 pt-[10px] pb-[10px] bg-[#5B21B6] dark:bg-[#5B21B6]">
+      <div className="flex items-center justify-between p-3 pt-[10px] pb-[10px] bg-[#5B21B6] dark:bg-[#5B21B6]">
         <div className="flex items-center space-x-3">
           {showBack && (
             <button 
