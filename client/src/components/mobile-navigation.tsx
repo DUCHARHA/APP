@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Home, Grid, ShoppingCart, User } from "lucide-react";
+import { Home, Grid, ShoppingCart, User, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useCallback } from "react";
 
@@ -39,6 +39,12 @@ export default function MobileNavigation() {
       badge: totalItems,
     },
     {
+      path: "/maps",
+      icon: MapPin,
+      label: "Карта",
+      active: location === "/maps",
+    },
+    {
       path: "/profile",
       icon: User,
       label: "Профиль",
@@ -48,7 +54,7 @@ export default function MobileNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-card border-t border-gray-200 dark:border-gray-700 z-50">
-      <div className="grid grid-cols-4 py-2 pt-[0px] pb-[0px]">
+      <div className="grid grid-cols-5 py-2 pt-[0px] pb-[0px]">
         {navigationItems.map((item) => (
           <button
             key={item.path}

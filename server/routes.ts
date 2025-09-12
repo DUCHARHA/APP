@@ -753,6 +753,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Yandex Maps API key
+  app.get("/api/config/yandex-maps", (req, res) => {
+    try {
+      const apiKey = process.env.YANDEX_MAPS_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "Yandex Maps API key not configured" });
+      }
+      res.json({ apiKey });
+    } catch (error) {
+      logError(error, 'GET /api/config/yandex-maps', req);
+      res.status(500).json({ error: "Failed to get API key" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
