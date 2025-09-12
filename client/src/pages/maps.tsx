@@ -27,8 +27,8 @@ interface SelectedAddress {
   description: string;
 }
 
-const DUSHANBE_CENTER = [38.559772, 68.787038];
-const STORE_COORDINATES = [38.559772, 68.787038]; // Пока используем центр Душанбе, пользователь укажет свои координаты
+const DUSHANBE_CENTER = [68.787038, 38.559772];
+const STORE_COORDINATES = [68.787038, 38.559772]; // Пока используем центр Душанбе, пользователь укажет свои координаты
 
 export default function Maps() {
   const mapRef = useRef<HTMLDivElement>(null);
