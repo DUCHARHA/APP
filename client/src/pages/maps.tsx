@@ -27,9 +27,8 @@ interface SelectedAddress {
   description: string;
 }
 
-// Store coordinates for the main store/office location
-const DUSHANBE_CENTER = [68.787038, 38.559772]; // [longitude, latitude] format for Yandex Maps
-const STORE_COORDINATES = [68.787038, 38.559772]; // Пока используем центр Душанбе, пользователь укажет свои координаты
+const DUSHANBE_CENTER = [38.559772, 68.787038];
+const STORE_COORDINATES = [38.559772, 68.787038]; // Пока используем центр Душанбе, пользователь укажет свои координаты
 
 export default function Maps() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -74,10 +73,10 @@ export default function Maps() {
         script.id = 'ymaps-script';
         script.src = `https://api-maps.yandex.ru/2.1/?apikey=${config.apiKey}&lang=ru_RU&load=package.full`;
         script.defer = true;
-
+        
         script.addEventListener('load', () => resolve());
         script.addEventListener('error', () => reject(new Error('Failed to load Yandex Maps')));
-
+        
         document.head.appendChild(script);
       });
     };
@@ -86,7 +85,7 @@ export default function Maps() {
     const initMap = async () => {
       try {
         await loadYandexMaps();
-
+        
         if (!window.ymaps) {
           throw new Error('Yandex Maps not available');
         }
@@ -159,7 +158,7 @@ export default function Maps() {
   // Handle map click for address selection
   const handleMapClick = async (coordinates: [number, number]) => {
     console.log('handleMapClick called with coordinates:', coordinates);
-
+    
     if (!window.ymaps || !mapDataRef.current) {
       console.error('ymaps or mapDataRef not available');
       return;
@@ -170,10 +169,10 @@ export default function Maps() {
     try {
       // Get address by coordinates (reverse geocoding)
       const geocoder = window.ymaps.geocode(coordinates, { results: 1 });
-
+      
       geocoder.then((result: any) => {
         const firstResult = result.geoObjects.get(0);
-
+        
         if (!firstResult) {
           toast({
             title: "Адрес не найден",
@@ -209,12 +208,12 @@ export default function Maps() {
           address,
           description
         });
-
+        
         // Show address confirmation dialog
         setShowAddressDialog(true);
 
         setIsLoading(false);
-
+        
         toast({
           title: "Адрес выбран",
           description: `Выбран: ${address}`,
@@ -259,7 +258,7 @@ export default function Maps() {
     // Get existing addresses from localStorage
     const existingAddresses = localStorage.getItem('user-addresses');
     const addresses = existingAddresses ? JSON.parse(existingAddresses) : [];
-
+    
     // Add new address
     addresses.push(addressData);
     localStorage.setItem('user-addresses', JSON.stringify(addresses));
@@ -277,7 +276,7 @@ export default function Maps() {
   const cancelSelection = () => {
     setShowAddressDialog(false);
     setSelectedAddress(null);
-
+    
     // Remove customer marker if exists
     if (mapDataRef.current?.customerMarker) {
       mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
@@ -306,7 +305,7 @@ export default function Maps() {
 
       geocoder.then((result: any) => {
         const firstResult = result.geoObjects.get(0);
-
+        
         if (!firstResult) {
           toast({
             title: "Адрес не найден",
@@ -410,7 +409,7 @@ export default function Maps() {
         if (activeRoute) {
           const distance = activeRoute.properties.get('distance');
           const duration = activeRoute.properties.get('duration');
-
+          
           const distanceText = distance.text;
           const durationText = duration.text;
 
@@ -483,7 +482,7 @@ export default function Maps() {
                   disabled={isLoading}
                 />
               </div>
-              <Button
+              <Button 
                 data-testid="button-search-address"
                 onClick={searchForAddress}
                 disabled={isLoading}
@@ -495,7 +494,7 @@ export default function Maps() {
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-              <Button
+              <Button 
                 data-testid="button-select-address"
                 onClick={() => toast({
                   title: "Кликните по карте",
@@ -508,7 +507,7 @@ export default function Maps() {
                 <MapPin className="h-4 w-4 mr-2" />
                 Выбрать на карте
               </Button>
-              <Button
+              <Button 
                 data-testid="button-build-route"
                 onClick={buildRoute}
                 variant="outline"
@@ -524,8 +523,8 @@ export default function Maps() {
 
       {/* Map Container */}
       <div className="flex-1">
-        <div
-          ref={mapRef}
+        <div 
+          ref={mapRef} 
           className="w-full h-full"
           data-testid="map-container"
         />
@@ -540,7 +539,7 @@ export default function Maps() {
               Проверьте правильность выбранного адреса доставки
             </DialogDescription>
           </DialogHeader>
-
+          
           {selectedAddress && (
             <div className="space-y-4">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
@@ -551,17 +550,17 @@ export default function Maps() {
                   {selectedAddress.address}
                 </p>
               </div>
-
+              
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   onClick={cancelSelection}
                   className="flex-1"
                   data-testid="button-dialog-cancel"
                 >
                   Отменить
                 </Button>
-                <Button
+                <Button 
                   onClick={confirmAddress}
                   disabled={isLoading}
                   className="flex-1"
