@@ -78,8 +78,8 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
   const initializeMap = () => {
     if (!mapRef.current || !window.ymaps) return;
 
-    // Dushanbe coordinates
-    const dushanbeCenter = [68.7791, 38.5606];
+    // Dushanbe coordinates (longitude, latitude)
+    const dushanbeCenter = [68.787038, 38.559772];
 
     const map = new window.ymaps.Map(mapRef.current, {
       center: dushanbeCenter,
@@ -405,10 +405,10 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
         <Button
           onClick={confirmAddress}
           disabled={!selectedAddress || isLoading}
-          className="w-full h-14 bg-yellow-400 hover:bg-yellow-500 text-black font-medium text-lg rounded-lg shadow-lg"
+          className="w-full h-14 bg-[#5B21B6] hover:bg-[#4C1D95] text-white font-medium text-lg rounded-lg shadow-lg"
           data-testid="button-ready"
         >
-          Готово
+          Выбрать
         </Button>
       </div>
     </div>
