@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Navigation, Search } from "lucide-react";
+import { MapPin, Navigation, Search, Check, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
 
 // Declare global ymaps type
 declare global {
@@ -19,6 +20,12 @@ interface MapData {
   route: any;
 }
 
+interface SelectedAddress {
+  coordinates: [number, number];
+  address: string;
+  description: string;
+}
+
 const DUSHANBE_CENTER = [38.559772, 68.787038];
 const STORE_COORDINATES = [38.559772, 68.787038]; // Пока используем центр Душанбе, пользователь укажет свои координаты
 
@@ -27,7 +34,10 @@ export default function Maps() {
   const mapDataRef = useRef<MapData | null>(null);
   const [searchAddress, setSearchAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
+  const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   // Get Yandex Maps API key
   const { data: config } = useQuery<{ apiKey: string }>({
@@ -98,6 +108,14 @@ export default function Maps() {
 
           map.geoObjects.add(storeMarker);
 
+          // Add click event listener for address selection
+          map.events.add('click', (e: any) => {
+            if (!isSelectingAddress) return;
+            
+            const coords = e.get('coords');
+            handleMapClick(coords);
+          });
+
           // Store map data for later use
           mapDataRef.current = {
             map,
@@ -135,7 +153,128 @@ export default function Maps() {
         mapDataRef.current = null;
       }
     };
-  }, [config?.apiKey, toast]);
+  }, [config?.apiKey, toast, isSelectingAddress]);
+
+  // Handle map click for address selection
+  const handleMapClick = async (coordinates: [number, number]) => {
+    if (!window.ymaps || !mapDataRef.current) return;
+
+    setIsLoading(true);
+
+    try {
+      // Get address by coordinates (reverse geocoding)
+      const geocoder = window.ymaps.geocode(coordinates, { results: 1 });
+      
+      geocoder.then((result: any) => {
+        const firstResult = result.geoObjects.get(0);
+        
+        if (!firstResult) {
+          toast({
+            title: "Адрес не найден",
+            description: "Не удалось определить адрес по выбранной точке",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        const address = firstResult.getAddressLine();
+        const description = firstResult.properties.get('text');
+
+        // Remove existing customer marker
+        if (mapDataRef.current?.customerMarker) {
+          mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
+        }
+
+        // Add selected address marker
+        const selectedMarker = new window.ymaps.Placemark(coordinates, {
+          balloonContent: `Выбранный адрес: ${address}`,
+          hintContent: 'Выбранный адрес доставки'
+        }, {
+          preset: 'islands#greenDotIcon'
+        });
+
+        mapDataRef.current!.map.geoObjects.add(selectedMarker);
+        mapDataRef.current!.customerMarker = selectedMarker;
+
+        // Set selected address
+        setSelectedAddress({
+          coordinates,
+          address,
+          description
+        });
+
+        setIsLoading(false);
+        
+        toast({
+          title: "Адрес выбран",
+          description: `Выбран: ${address}`,
+        });
+
+      }).catch((error: any) => {
+        console.error('Reverse geocoding error:', error);
+        toast({
+          title: "Ошибка определения адреса",
+          description: "Не удалось определить адрес по выбранной точке",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+      });
+
+    } catch (error) {
+      console.error('Map click error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при выборе адреса",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+    }
+  };
+
+  // Confirm selected address
+  const confirmAddress = () => {
+    if (!selectedAddress) return;
+
+    // Save to localStorage for now (later can be integrated with backend)
+    const addressData = {
+      id: Date.now().toString(),
+      title: "Выбранный на карте",
+      address: selectedAddress.address,
+      coordinates: selectedAddress.coordinates,
+      type: "other" as const,
+      isDefault: false,
+      timestamp: new Date().toISOString()
+    };
+
+    // Get existing addresses from localStorage
+    const existingAddresses = localStorage.getItem('user-addresses');
+    const addresses = existingAddresses ? JSON.parse(existingAddresses) : [];
+    
+    // Add new address
+    addresses.push(addressData);
+    localStorage.setItem('user-addresses', JSON.stringify(addresses));
+
+    toast({
+      title: "Адрес сохранен",
+      description: "Адрес доставки успешно добавлен",
+    });
+
+    // Navigate back or to addresses page
+    setLocation('/addresses');
+  };
+
+  // Cancel address selection
+  const cancelSelection = () => {
+    setIsSelectingAddress(false);
+    setSelectedAddress(null);
+    
+    // Remove customer marker if exists
+    if (mapDataRef.current?.customerMarker) {
+      mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
+      mapDataRef.current.customerMarker = null;
+    }
+  };
 
   // Search for address
   const searchForAddress = async () => {
