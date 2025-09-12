@@ -153,7 +153,7 @@ export default function Maps() {
         mapDataRef.current = null;
       }
     };
-  }, [config?.apiKey, toast, isSelectingAddress]);
+  }, [config?.apiKey]);
 
   // Handle map click for address selection
   const handleMapClick = async (coordinates: [number, number]) => {
@@ -444,48 +444,109 @@ export default function Maps() {
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
       <div className="p-4 border-b bg-white dark:bg-gray-900">
-        <h1 className="text-xl font-bold text-foreground mb-4 text-center">
-          🗺️ Карта доставки
-        </h1>
-        
-        {/* Search Bar */}
-        <div className="flex gap-2 mb-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              data-testid="input-address-search"
-              type="text"
-              placeholder="Введите адрес доставки..."
-              value={searchAddress}
-              onChange={(e) => setSearchAddress(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="pl-10"
-              disabled={isLoading}
-            />
-          </div>
-          <Button 
-            data-testid="button-search-address"
-            onClick={searchForAddress}
-            disabled={isLoading}
-            size="sm"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Link href="/">
+            <Button variant="ghost" size="sm" data-testid="button-back">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Назад
+            </Button>
+          </Link>
+          <h1 className="text-xl font-bold text-foreground">
+            🗺️ Карта доставки
+          </h1>
+          <div className="w-16"></div> {/* Spacer for balance */}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button 
-            data-testid="button-build-route"
-            onClick={buildRoute}
-            variant="outline"
-            size="sm"
-            className="flex-1"
-          >
-            <Navigation className="h-4 w-4 mr-2" />
-            Построить маршрут
-          </Button>
-        </div>
+        {!isSelectingAddress ? (
+          <>
+            {/* Search Bar */}
+            <div className="flex gap-2 mb-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  data-testid="input-address-search"
+                  type="text"
+                  placeholder="Введите адрес доставки..."
+                  value={searchAddress}
+                  onChange={(e) => setSearchAddress(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="pl-10"
+                  disabled={isLoading}
+                />
+              </div>
+              <Button 
+                data-testid="button-search-address"
+                onClick={searchForAddress}
+                disabled={isLoading}
+                size="sm"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button 
+                data-testid="button-select-address"
+                onClick={() => setIsSelectingAddress(true)}
+                variant="default"
+                size="sm"
+                className="flex-1"
+              >
+                <MapPin className="h-4 w-4 mr-2" />
+                Выбрать на карте
+              </Button>
+              <Button 
+                data-testid="button-build-route"
+                onClick={buildRoute}
+                variant="outline"
+                size="sm"
+                className="flex-1"
+              >
+                <Navigation className="h-4 w-4 mr-2" />
+                Маршрут
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Address Selection Mode */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                📍 Нажмите на карту, чтобы выбрать адрес доставки
+              </p>
+              {selectedAddress && (
+                <div className="bg-white dark:bg-gray-800 rounded p-2 border mt-2">
+                  <p className="text-sm font-medium">Выбранный адрес:</p>
+                  <p className="text-xs text-muted-foreground">{selectedAddress.address}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Selection Action Buttons */}
+            <div className="flex gap-2">
+              <Button 
+                data-testid="button-cancel-selection"
+                onClick={cancelSelection}
+                variant="outline"
+                size="sm"
+                className="flex-1"
+              >
+                Отменить
+              </Button>
+              <Button 
+                data-testid="button-confirm-address"
+                onClick={confirmAddress}
+                disabled={!selectedAddress || isLoading}
+                size="sm"
+                className="flex-1"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Подтвердить
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Map Container */}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, MapPin, Plus, Trash2, Home, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,21 +33,46 @@ export default function Addresses() {
         ...newAddress,
         isDefault: addresses.length === 0,
       };
-      setAddresses([...addresses, address]);
+      const updatedAddresses = [...addresses, address];
+      setAddresses(updatedAddresses);
+      
+      // Save to localStorage
+      try {
+        localStorage.setItem('user-addresses', JSON.stringify(updatedAddresses));
+      } catch (error) {
+        console.error('Error saving addresses to localStorage:', error);
+      }
+      
       setNewAddress({ title: "", address: "", type: "home" });
       setIsAddingAddress(false);
     }
   };
 
   const handleDeleteAddress = (id: string) => {
-    setAddresses(addresses.filter(addr => addr.id !== id));
+    const updatedAddresses = addresses.filter(addr => addr.id !== id);
+    setAddresses(updatedAddresses);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('user-addresses', JSON.stringify(updatedAddresses));
+    } catch (error) {
+      console.error('Error saving addresses to localStorage:', error);
+    }
   };
 
   const handleSetDefault = (id: string) => {
-    setAddresses(addresses.map(addr => ({
+    const updatedAddresses = addresses.map(addr => ({
       ...addr,
       isDefault: addr.id === id,
-    })));
+    }));
+    setAddresses(updatedAddresses);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('user-addresses', JSON.stringify(updatedAddresses));
+    } catch (error) {
+      console.error('Error saving addresses to localStorage:', error);
+    }
   };
 
   const getTypeIcon = (type: string) => {
