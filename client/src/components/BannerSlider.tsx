@@ -176,18 +176,7 @@ export function BannerSlider() {
           {currentBanner.message}
         </p>
 
-        {currentBanner.buttonText && currentBanner.buttonLink && (
-          <div className="mt-auto">
-            <Link href={currentBanner.buttonLink}>
-              <Button 
-                variant="secondary" 
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 pt-[8px] pb-[8px] pl-[20px] pr-[20px] ml-[265px] mr-[265px] mt-[0px] mb-[0px] text-center"
-              >
-                {currentBanner.buttonText}
-              </Button>
-            </Link>
-          </div>
-        )}
+        
       </div>
       {/* Pagination dots */}
       {visibleBanners.length > 1 && (
