@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useDataPreloader } from "@/hooks/use-data-preloader";
 
 // Declare global ymaps type
 declare global {
@@ -39,6 +40,9 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
   const [searchAddress, setSearchAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Preload app data in the background while user selects address
+  useDataPreloader();
 
   // Get map config
   const { data: config } = useQuery<MapConfig>({
