@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MapPin, Navigation, Search, Check, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
@@ -35,7 +36,7 @@ export default function Maps() {
   const [searchAddress, setSearchAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
-  const [isSelectingAddress, setIsSelectingAddress] = useState(false);
+  const [showAddressDialog, setShowAddressDialog] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -110,17 +111,6 @@ export default function Maps() {
 
           // Add click event listener for address selection
           map.events.add('click', (e: any) => {
-            console.log('Map clicked, isSelectingAddress:', isSelectingAddress);
-            
-            if (!isSelectingAddress) {
-              toast({
-                title: "Сначала нажмите 'Выбрать на карте'",
-                description: "Для выбора адреса доставки нажмите кнопку 'Выбрать на карте' сверху",
-                variant: "default"
-              });
-              return;
-            }
-            
             const coords = e.get('coords');
             console.log('Clicked coordinates:', coords);
             handleMapClick(coords);
@@ -218,6 +208,9 @@ export default function Maps() {
           address,
           description
         });
+        
+        // Show address confirmation dialog
+        setShowAddressDialog(true);
 
         setIsLoading(false);
         
@@ -281,7 +274,7 @@ export default function Maps() {
 
   // Cancel address selection
   const cancelSelection = () => {
-    setIsSelectingAddress(false);
+    setShowAddressDialog(false);
     setSelectedAddress(null);
     
     // Remove customer marker if exists
@@ -472,8 +465,8 @@ export default function Maps() {
           <div className="w-16"></div> {/* Spacer for balance */}
         </div>
 
-        {!isSelectingAddress ? (
-          <>
+        {/* Search and Route Controls */}
+        <>
             {/* Search Bar */}
             <div className="flex gap-2 mb-3">
               <div className="relative flex-1">
@@ -503,7 +496,10 @@ export default function Maps() {
             <div className="flex gap-2">
               <Button 
                 data-testid="button-select-address"
-                onClick={() => setIsSelectingAddress(true)}
+                onClick={() => toast({
+                  title: "Кликните по карте",
+                  description: "Нажмите на любое место на карте, чтобы выбрать адрес доставки"
+                })}
                 variant="default"
                 size="sm"
                 className="flex-1"
@@ -522,46 +518,7 @@ export default function Maps() {
                 Маршрут
               </Button>
             </div>
-          </>
-        ) : (
-          <>
-            {/* Address Selection Mode */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
-              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                📍 Нажмите на карту, чтобы выбрать адрес доставки
-              </p>
-              {selectedAddress && (
-                <div className="bg-white dark:bg-gray-800 rounded p-2 border mt-2">
-                  <p className="text-sm font-medium">Выбранный адрес:</p>
-                  <p className="text-xs text-muted-foreground">{selectedAddress.address}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Selection Action Buttons */}
-            <div className="flex gap-2">
-              <Button 
-                data-testid="button-cancel-selection"
-                onClick={cancelSelection}
-                variant="outline"
-                size="sm"
-                className="flex-1"
-              >
-                Отменить
-              </Button>
-              <Button 
-                data-testid="button-confirm-address"
-                onClick={confirmAddress}
-                disabled={!selectedAddress || isLoading}
-                size="sm"
-                className="flex-1"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Подтвердить
-              </Button>
-            </div>
-          </>
-        )}
+        </>
       </div>
 
       {/* Map Container */}
@@ -572,6 +529,51 @@ export default function Maps() {
           data-testid="map-container"
         />
       </div>
+
+      {/* Address Selection Dialog */}
+      <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Подтвердить адрес</DialogTitle>
+            <DialogDescription>
+              Проверьте правильность выбранного адреса доставки
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedAddress && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 mb-1">
+                  📍 Выбранный адрес:
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {selectedAddress.address}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={cancelSelection}
+                  className="flex-1"
+                  data-testid="button-dialog-cancel"
+                >
+                  Отменить
+                </Button>
+                <Button 
+                  onClick={confirmAddress}
+                  disabled={isLoading}
+                  className="flex-1"
+                  data-testid="button-dialog-confirm"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Сохранить адрес
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
