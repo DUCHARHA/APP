@@ -53,10 +53,21 @@ export default function Maps() {
     // Load Yandex Maps script dynamically with API key
     const loadYandexMaps = () => {
       return new Promise<void>((resolve, reject) => {
-        // Check if script already loaded
-        if (window.ymaps) {
-          resolve();
-          return;
+        // Check if script already exists and validate coordinate order
+        const existingScript = document.getElementById('ymaps-script') as HTMLScriptElement;
+        if (existingScript && window.ymaps) {
+          // Check if the existing API uses the correct coordinate order
+          const coordinatesOrder = (window.ymaps as any)?.meta?.coordinatesOrder;
+          const scriptSrc = existingScript.src || '';
+          
+          if (coordinatesOrder !== 'latlong' || !scriptSrc.includes('coordorder=latlong')) {
+            // Remove stale script and API instance with wrong coordinate order
+            existingScript.remove();
+            delete (window as any).ymaps;
+          } else {
+            resolve();
+            return;
+          }
         }
 
         // Check if script is already being loaded
@@ -71,7 +82,7 @@ export default function Maps() {
         // Create and load script
         const script = document.createElement('script');
         script.id = 'ymaps-script';
-        script.src = `https://api-maps.yandex.ru/2.1/?apikey=${config.apiKey}&lang=ru_RU&load=package.full`;
+        script.src = `https://api-maps.yandex.ru/2.1/?apikey=${config.apiKey}&lang=ru_RU&load=package.full&coordorder=latlong`;
         script.defer = true;
         
         script.addEventListener('load', () => resolve());
@@ -98,6 +109,12 @@ export default function Maps() {
             zoom: 12,
             controls: ['zoomControl', 'fullscreenControl']
           });
+          
+          // Explicitly verify and set center after initialization
+          setTimeout(() => {
+            // Force center to Dushanbe with immediate duration
+            map.setCenter(DUSHANBE_CENTER, 12, { duration: 0 });
+          }, 100);
 
           // Add store marker
           const storeMarker = new window.ymaps.Placemark(STORE_COORDINATES, {

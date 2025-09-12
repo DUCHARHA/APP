@@ -61,7 +61,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
       }
 
       const script = document.createElement('script');
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${config.apiKey}&lang=ru_RU&coordorder=lonlat`;
+      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${config.apiKey}&lang=ru_RU&coordorder=latlong`;
       script.type = 'text/javascript';
       script.onload = () => {
         window.ymaps.ready(() => {
@@ -78,8 +78,8 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
   const initializeMap = () => {
     if (!mapRef.current || !window.ymaps) return;
 
-    // Dushanbe coordinates (longitude, latitude)
-    const dushanbeCenter = [68.787038, 38.559772];
+    // Dushanbe coordinates (latitude, longitude)
+    const dushanbeCenter = [38.559772, 68.787038];
 
     const map = new window.ymaps.Map(mapRef.current, {
       center: dushanbeCenter,
