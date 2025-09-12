@@ -108,7 +108,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
             position.coords.longitude,
             position.coords.latitude
           ];
-          
+
           if (mapDataRef.current) {
             mapDataRef.current.map.setCenter(coords, 16);
           }
@@ -124,7 +124,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
   // Handle map click for address selection
   const handleMapClick = async (e: any) => {
     if (!config?.apiKey) return;
-    
+
     const coordinates = e.get('coords');
     setIsLoading(true);
 
@@ -197,7 +197,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
 
       geocoder.then((result: any) => {
         const firstResult = result.geoObjects.get(0);
-        
+
         if (!firstResult) {
           toast({
             title: "Адрес не найден",
@@ -295,18 +295,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
     <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900">
       {/* Header Controls */}
       <div className="absolute top-0 left-0 right-0 z-10 p-4">
-        <div className="flex items-center justify-between">
-          {/* Close Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onClose}
-            className="bg-white dark:bg-gray-800 shadow-md"
-            data-testid="button-close"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-
+        <div className="flex items-center justify-end">
           {/* Search Button */}
           <Button
             variant="outline"
