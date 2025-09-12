@@ -42,11 +42,6 @@ export default function AppHeader({
 
           {showLogo && (
             <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img 
-                src="/icons/logo.png" 
-                alt="ДУЧАРХА" 
-                className="w-full h-full object-cover"
-              />
             </div>
           )}
 
