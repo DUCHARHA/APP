@@ -110,9 +110,19 @@ export default function Maps() {
 
           // Add click event listener for address selection
           map.events.add('click', (e: any) => {
-            if (!isSelectingAddress) return;
+            console.log('Map clicked, isSelectingAddress:', isSelectingAddress);
+            
+            if (!isSelectingAddress) {
+              toast({
+                title: "Сначала нажмите 'Выбрать на карте'",
+                description: "Для выбора адреса доставки нажмите кнопку 'Выбрать на карте' сверху",
+                variant: "default"
+              });
+              return;
+            }
             
             const coords = e.get('coords');
+            console.log('Clicked coordinates:', coords);
             handleMapClick(coords);
           });
 
@@ -157,7 +167,12 @@ export default function Maps() {
 
   // Handle map click for address selection
   const handleMapClick = async (coordinates: [number, number]) => {
-    if (!window.ymaps || !mapDataRef.current) return;
+    console.log('handleMapClick called with coordinates:', coordinates);
+    
+    if (!window.ymaps || !mapDataRef.current) {
+      console.error('ymaps or mapDataRef not available');
+      return;
+    }
 
     setIsLoading(true);
 
