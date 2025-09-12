@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { autoFixDemoUser } from "@/utils/force-refresh";
 import {
   OnboardingProvider,
@@ -12,6 +12,7 @@ import {
   OnboardingTrigger,
   ReturningUserWelcome
 } from "@/components/onboarding";
+import AddressOnboarding from "@/components/address-onboarding";
 
 // Lazy load pages for better initial loading performance
 const Home = lazy(() => import("@/pages/home"));
@@ -39,7 +40,7 @@ import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
 import { statusBarManager } from "@/utils/status-bar-manager";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 import { PWADetector } from "./utils/pwa-detection";
 import OperaMiniFallback from "./components/opera-mini-fallback";
@@ -55,8 +56,23 @@ const PageLoader = () => (
 const scrollPositions = new Map<string, number>();
 
 function Router() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const previousLocation = useRef<string>("");
+  const [showAddressOnboarding, setShowAddressOnboarding] = useState(false);
+  const [isCheckingFirstVisit, setIsCheckingFirstVisit] = useState(true);
+
+  // Check if this is user's first visit
+  useEffect(() => {
+    const hasSelectedAddress = localStorage.getItem('user-addresses');
+    const hasCompletedAddressOnboarding = localStorage.getItem('address-onboarding-completed');
+    
+    // Show address onboarding if user hasn't selected any address and hasn't completed onboarding
+    if (!hasSelectedAddress && !hasCompletedAddressOnboarding) {
+      setShowAddressOnboarding(true);
+    }
+    
+    setIsCheckingFirstVisit(false);
+  }, []);
 
   useEffect(() => {
     let isStale = false;
@@ -113,6 +129,59 @@ function Router() {
       }
     };
   }, [location]);
+
+  // Handle address selection from onboarding
+  const handleAddressSelected = (address: any) => {
+    // Save selected address to localStorage
+    const addressData = {
+      id: Date.now().toString(),
+      title: "Адрес из онбординга",
+      address: address.address,
+      coordinates: address.coordinates,
+      type: "home" as const,
+      isDefault: true,
+      timestamp: new Date().toISOString()
+    };
+
+    const existingAddresses = localStorage.getItem('user-addresses');
+    const addresses = existingAddresses ? JSON.parse(existingAddresses) : [];
+    addresses.push(addressData);
+    localStorage.setItem('user-addresses', JSON.stringify(addresses));
+    
+    // Mark address onboarding as completed
+    localStorage.setItem('address-onboarding-completed', 'true');
+    
+    // Hide address onboarding and go to home page
+    setShowAddressOnboarding(false);
+    setLocation('/');
+  };
+
+  // Handle closing address onboarding without selection
+  const handleCloseAddressOnboarding = () => {
+    // Mark as completed even if user closed without selection
+    localStorage.setItem('address-onboarding-completed', 'true');
+    setShowAddressOnboarding(false);
+    setLocation('/');
+  };
+
+  // Show loading while checking first visit
+  if (isCheckingFirstVisit) {
+    return <PageLoader />;
+  }
+
+  // Show address onboarding if needed
+  if (showAddressOnboarding) {
+    return (
+      <OnboardingProvider>
+        <div className="max-w-md mx-auto bg-background min-h-screen relative">
+          <AddressOnboarding 
+            onAddressSelected={handleAddressSelected}
+            onClose={handleCloseAddressOnboarding}
+          />
+        </div>
+      </OnboardingProvider>
+    );
+  }
 
   return (
     <OnboardingProvider>
