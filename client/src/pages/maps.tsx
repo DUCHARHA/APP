@@ -27,8 +27,8 @@ interface SelectedAddress {
   description: string;
 }
 
-const DUSHANBE_CENTER = [68.7870, 38.5598];
-const STORE_COORDINATES = [68.7870, 38.5598]; // Центр Душанбе - правильные координаты
+const DUSHANBE_CENTER = [38.5598, 68.7870]; // Яндекс Карты: [широта, долгота]
+const STORE_COORDINATES = [38.5598, 68.7870]; // Центр Душанбе
 
 export default function Maps() {
   const mapRef = useRef<HTMLDivElement>(null);
