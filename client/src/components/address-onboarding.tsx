@@ -295,7 +295,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
     <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900">
       {/* Header Controls */}
       <div className="absolute top-0 left-0 right-0 z-10 p-4">
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
           {/* Search Button */}
           <Button
             variant="outline"
@@ -310,6 +310,17 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
             data-testid="button-search"
           >
             <Search className="h-5 w-5" />
+          </Button>
+          
+          {/* Close Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onClose}
+            className="bg-white dark:bg-gray-800 shadow-md"
+            data-testid="button-close"
+          >
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
