@@ -66,14 +66,9 @@ function Router() {
     const hasSelectedAddress = localStorage.getItem('user-addresses');
     const hasCompletedAddressOnboarding = localStorage.getItem('address-onboarding-completed');
     
-    // 🚧 ВРЕМЕННО ОТКЛЮЧЕНО: Show address onboarding if user hasn't selected any address and hasn't completed onboarding
-    // if (!hasSelectedAddress && !hasCompletedAddressOnboarding) {
-    //   setShowAddressOnboarding(true);
-    // }
-    
-    // Временно всегда помечаем онбординг как завершенный
-    if (!hasCompletedAddressOnboarding) {
-      localStorage.setItem('address-onboarding-completed', 'true');
+    // Show address onboarding if user hasn't selected any address and hasn't completed onboarding
+    if (!hasSelectedAddress && !hasCompletedAddressOnboarding) {
+      setShowAddressOnboarding(true);
     }
     
     setIsCheckingFirstVisit(false);
