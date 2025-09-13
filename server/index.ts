@@ -36,6 +36,23 @@ app.use((req, res, next) => {
   next();
 });
 
+// Специальный роут для Digital Asset Links (Android TWA)
+app.get('/.well-known/assetlinks.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json([
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.ducharkha.delivery",
+        "sha256_cert_fingerprints": [
+          "95:5A:D0:1D:AE:08:15:50:5B:7D:F0:E1:96:EC:F8:D5:DB:EA:5E:63:ED:B4:C7:2A:1F:93:E3:9B:FE:3D:EE:66"
+        ]
+      }
+    }
+  ]);
+});
+
 (async () => {
   try {
     log('Starting server initialization...');
