@@ -44,8 +44,15 @@ app.use((req, res, next) => {
     const server = await registerRoutes(app);
     log('Routes registered successfully');
 
-    // Удаляем роут - используем только статический файл
-    // Файл уже есть в dist/public/.well-known/assetlinks.json
+    // КРИТИЧЕСКИ ВАЖНО: .well-known middleware ДО Vite и serveStatic
+    // Работает в dev и prod режимах
+    app.get('/.well-known/assetlinks.json', (_req, res) => {
+      const filePath = app.get("env") === "development"
+        ? path.resolve(import.meta.dirname, "..", "client", "public", ".well-known", "assetlinks.json")
+        : path.resolve(import.meta.dirname, "public", ".well-known", "assetlinks.json");
+      
+      res.type("application/json").sendFile(filePath);
+    });
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -70,18 +77,6 @@ app.use((req, res, next) => {
       log('Vite setup completed');
     } else {
       log('Setting up static file serving for production...');
-      
-      // Специальный middleware для .well-known файлов (нужен dotfiles: 'allow')
-      const distPath = path.resolve(import.meta.dirname, "public");
-      app.use('/.well-known', express.static(path.join(distPath, '.well-known'), { 
-        dotfiles: 'allow',
-        setHeaders: (res, filepath) => {
-          if (filepath.endsWith('assetlinks.json')) {
-            res.setHeader('Content-Type', 'application/json');
-          }
-        }
-      }));
-      
       serveStatic(app);
     }
 
