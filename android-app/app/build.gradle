@@ -19,7 +19,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('ducharkha-release-key.keystore')
+            storeFile file('../ducharkha-release-key.keystore')
             storePassword 'ducharkha123'
             keyAlias 'ducharkha'
             keyPassword 'ducharkha123'
@@ -31,6 +31,11 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            crunchPngs false
+            
+            aaptOptions {
+                cruncherEnabled = false
+            }
         }
         debug {
             minifyEnabled false
