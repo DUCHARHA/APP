@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.Ducharkha" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">#5B21B6</item>
+        <item name="colorPrimaryVariant">#6D28D9</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        
+        <item name="colorAccent">#8B5CF6</item>
+        
+        <item name="android:statusBarColor">#5B21B6</item>
+        <item name="android:navigationBarColor">#5B21B6</item>
+    </style>
+
+    <!-- No ActionBar theme for TWA -->
+    <style name="Theme.App.NoActionBar" parent="Theme.Ducharkha">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

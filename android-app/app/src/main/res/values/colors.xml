@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ДУЧАРХА Brand Colors -->
+    <color name="purple_primary">#5B21B6</color>
+    <color name="purple_dark">#4C1D95</color>
+    <color name="purple_light">#8B5CF6</color>
+    
+    <!-- App Launcher Icon -->
+    <color name="ic_launcher_background">#5B21B6</color>
+    
+    <!-- Standard Material Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

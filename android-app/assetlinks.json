@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ducharkha.delivery",
+      "sha256_cert_fingerprints": [
+        "ЗАМЕНИТЕ_НА_ВАШ_SHA256_ОТПЕЧАТОК_ПОСЛЕ_СОЗДАНИЯ_KEYSTORE"
+      ]
+    }
+  }
+]
