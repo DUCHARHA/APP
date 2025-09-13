@@ -74,6 +74,16 @@ The application features a comprehensive onboarding experience for new users:
 - **Welcome back messages** for returning users with option to replay the guide
 - **Feature highlighting** with intelligent tooltip positioning and dismissal tracking
 
+## Enhanced Address Selection System (Updated September 2025)
+The application features an improved map-based address selection experience:
+- **Interactive Yandex Maps integration** with real-time address display
+- **Custom zoom controls** positioned for optimal mobile user experience
+- **Auto-updating address display** showing current location as user moves the map
+- **Performance-optimized geocoding** with 500ms debouncing to prevent excessive API calls
+- **Smart coordinate handling** ensuring accurate location detection and centering
+- **Intuitive UI controls** including close button and repositioned zoom buttons for better accessibility
+- **Real-time location feedback** providing immediate address updates during map interaction
+
 ## Progressive Web App Features
 The application implements comprehensive PWA capabilities:
 - **Service Worker** for caching and offline functionality
