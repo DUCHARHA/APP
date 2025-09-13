@@ -39,6 +39,8 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [searchAddress, setSearchAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState<string>("");
+  const geocodingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Preload app data in the background while user selects address
@@ -79,7 +81,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
     if (!mapRef.current || !window.ymaps) return;
 
     // Dushanbe coordinates (latitude, longitude)
-    const dushanbeCenter = [38.559772, 68.787038];
+    const dushanbeCenter: [number, number] = [38.559772, 68.787038];
 
     const map = new window.ymaps.Map(mapRef.current, {
       center: dushanbeCenter,
@@ -89,6 +91,12 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
 
     // Add click listener for address selection
     map.events.add('click', handleMapClick);
+    
+    // Add map movement listener to update address in real-time
+    map.events.add('boundschange', () => {
+      const center = map.getCenter();
+      updateAddressForCoordinates(center);
+    });
 
     mapDataRef.current = {
       map,
@@ -97,6 +105,38 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
 
     // Try to get user's current location
     getCurrentLocation();
+    
+    // Get initial address for map center
+    updateAddressForCoordinates(dushanbeCenter);
+  };
+
+  // Update address for given coordinates with debouncing
+  const updateAddressForCoordinates = async (coordinates: [number, number]) => {
+    if (!config?.apiKey || !window.ymaps) return;
+
+    // Clear previous timeout
+    if (geocodingTimeoutRef.current) {
+      clearTimeout(geocodingTimeoutRef.current);
+    }
+
+    // Set new timeout for debouncing
+    geocodingTimeoutRef.current = setTimeout(async () => {
+      try {
+        const geocoder = window.ymaps.geocode(coordinates, {
+          results: 1,
+          kind: 'house'
+        });
+
+        geocoder.then((result: any) => {
+          const firstResult = result.geoObjects.get(0);
+          const address = firstResult ? firstResult.getAddressLine() : 'Неизвестное место';
+          setCurrentAddress(address);
+        });
+      } catch (error) {
+        console.error('Error getting address for coordinates:', error);
+        setCurrentAddress('Неизвестное место');
+      }
+    }, 500); // 500ms debounce
   };
 
   // Get current location
@@ -105,8 +145,8 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const coords: [number, number] = [
-            position.coords.longitude,
-            position.coords.latitude
+            position.coords.latitude,
+            position.coords.longitude
           ];
 
           if (mapDataRef.current) {
@@ -324,11 +364,20 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
           </Button>
         </div>
 
-        {/* Address Display */}
-        {selectedAddress && (
+        {/* Current Address Display */}
+        {currentAddress && (
           <div className="mt-3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mx-auto max-w-sm">
             <p className="text-center font-medium text-gray-900 dark:text-gray-100">
-              {selectedAddress.address}
+              {currentAddress}
+            </p>
+          </div>
+        )}
+        
+        {/* Selected Address Display (when address is selected) */}
+        {selectedAddress && (
+          <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-md p-3 mx-auto max-w-sm border border-blue-200 dark:border-blue-700">
+            <p className="text-center font-medium text-blue-900 dark:text-blue-100 text-sm">
+              📍 Выбрано: {selectedAddress.address}
             </p>
           </div>
         )}
