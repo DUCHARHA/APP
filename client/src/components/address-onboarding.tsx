@@ -366,24 +366,24 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
       </div>
 
       {/* Zoom Controls */}
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 space-y-2">
+      <div className="absolute right-4 top-[40%] z-10 space-y-3">
         <Button
           variant="outline"
           size="icon"
           onClick={zoomIn}
-          className="bg-white dark:bg-gray-800 shadow-md"
+          className="bg-white dark:bg-gray-800 shadow-lg w-12 h-12 rounded-xl"
           data-testid="button-zoom-in"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-5 w-5" />
         </Button>
         <Button
           variant="outline"
           size="icon"
           onClick={zoomOut}
-          className="bg-white dark:bg-gray-800 shadow-md"
+          className="bg-white dark:bg-gray-800 shadow-lg w-12 h-12 rounded-xl"
           data-testid="button-zoom-out"
         >
-          <Minus className="h-4 w-4" />
+          <Minus className="h-5 w-5" />
         </Button>
       </div>
 
