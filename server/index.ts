@@ -42,17 +42,21 @@ app.use((req, res, next) => {
   try {
     log('Starting server initialization...');
     
-    // Обслуживание статических файлов из public
-    app.use(express.static(path.resolve(import.meta.dirname, "public")));
-    
-    // Явно указываем .well-known, чтобы не перехватывалось роутингом
-    app.use("/.well-known", express.static(path.resolve(import.meta.dirname, "public", ".well-known")));
-    
-    // Также для разработки добавим путь к client/public
-    if (process.env.NODE_ENV === "development") {
-      app.use(express.static(path.resolve(import.meta.dirname, "..", "client", "public")));
-      app.use("/.well-known", express.static(path.resolve(import.meta.dirname, "..", "client", "public", ".well-known")));
-    }
+    // 🔹 Явно обрабатываем асsetlinks.json ДО всех остальных роутов
+    app.get("/.well-known/assetlinks.json", (req, res) => {
+      const isDev = process.env.NODE_ENV === "development";
+      const filePath = isDev
+        ? path.resolve(import.meta.dirname, "..", "client", "public", ".well-known", "assetlinks.json")
+        : path.resolve(import.meta.dirname, "public", ".well-known", "assetlinks.json");
+      
+      console.log(`[ASSETLINKS] Serving from: ${filePath}`);
+      res.sendFile(filePath, (err) => {
+        if (err) {
+          console.error(`[ASSETLINKS ERROR] ${err.message}`);
+          res.status(404).json({ error: "assetlinks.json not found" });
+        }
+      });
+    });
     
     const server = await registerRoutes(app);
     log('Routes registered successfully');
