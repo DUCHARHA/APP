@@ -41,11 +41,8 @@ app.use((req, res, next) => {
   try {
     log('Starting server initialization...');
     
-    const server = await registerRoutes(app);
-    log('Routes registered successfully');
-
-    // КРИТИЧЕСКИ ВАЖНО: .well-known middleware ДО Vite и serveStatic
-    // Работает в dev и prod режимах
+    // КРИТИЧЕСКИ ВАЖНО: .well-known middleware ДО всех остальных роутов
+    // Должен быть ПЕРВЫМ чтобы иметь высший приоритет
     app.get('/.well-known/assetlinks.json', (_req, res) => {
       const filePath = app.get("env") === "development"
         ? path.resolve(import.meta.dirname, "..", "client", "public", ".well-known", "assetlinks.json")
@@ -53,6 +50,9 @@ app.use((req, res, next) => {
       
       res.type("application/json").sendFile(filePath);
     });
+    
+    const server = await registerRoutes(app);
+    log('Routes registered successfully');
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
