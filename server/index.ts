@@ -42,20 +42,22 @@ app.use((req, res, next) => {
   try {
     log('Starting server initialization...');
     
-    // 🔹 Явно обрабатываем асsetlinks.json ДО всех остальных роутов
+    // 📌 ASSETLINKS.JSON - простой хардкодированный ответ
     app.get("/.well-known/assetlinks.json", (req, res) => {
-      const isDev = process.env.NODE_ENV === "development";
-      const filePath = isDev
-        ? path.resolve(import.meta.dirname, "..", "client", "public", ".well-known", "assetlinks.json")
-        : path.resolve(import.meta.dirname, "public", ".well-known", "assetlinks.json");
-      
-      console.log(`[ASSETLINKS] Serving from: ${filePath}`);
-      res.sendFile(filePath, (err) => {
-        if (err) {
-          console.error(`[ASSETLINKS ERROR] ${err.message}`);
-          res.status(404).json({ error: "assetlinks.json not found" });
+      console.log("[ASSETLINKS] Request received");
+      res.setHeader('Content-Type', 'application/json');
+      res.json([
+        {
+          "relation": ["delegate_permission/common.handle_all_urls"],
+          "target": {
+            "namespace": "android_app",
+            "package_name": "com.ducharkha.delivery",
+            "sha256_cert_fingerprints": [
+              "95:5A:D0:1D:AE:08:15:50:5B:7D:F0:E1:96:EC:F8:D5:DB:EA:5E:63:ED:B4:C7:2A:1F:93:E3:9B:FE:3D:EE:66"
+            ]
+          }
         }
-      });
+      ]);
     });
     
     const server = await registerRoutes(app);
