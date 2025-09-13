@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -69,6 +70,18 @@ app.use((req, res, next) => {
       log('Vite setup completed');
     } else {
       log('Setting up static file serving for production...');
+      
+      // Специальный middleware для .well-known файлов (нужен dotfiles: 'allow')
+      const distPath = path.resolve(import.meta.dirname, "public");
+      app.use('/.well-known', express.static(path.join(distPath, '.well-known'), { 
+        dotfiles: 'allow',
+        setHeaders: (res, filepath) => {
+          if (filepath.endsWith('assetlinks.json')) {
+            res.setHeader('Content-Type', 'application/json');
+          }
+        }
+      }));
+      
       serveStatic(app);
     }
 
