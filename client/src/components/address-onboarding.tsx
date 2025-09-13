@@ -92,11 +92,14 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
     // Add click listener for address selection
     map.events.add('click', handleMapClick);
     
-    // Add map movement listener to update address in real-time
-    map.events.add('boundschange', () => {
+    // Add map movement listeners to update address in real-time
+    const updateAddress = () => {
       const center = map.getCenter();
       updateAddressForCoordinates(center);
-    });
+    };
+    
+    map.events.add('boundschange', updateAddress); // During movement
+    map.events.add('actionend', updateAddress); // When user stops dragging/zooming
 
     mapDataRef.current = {
       map,
@@ -326,8 +329,17 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
 
   // Confirm address selection
   const confirmAddress = () => {
+    // Use selectedAddress (from click) or create from currentAddress (from map movement)
     if (selectedAddress) {
       onAddressSelected(selectedAddress);
+    } else if (currentAddress && mapDataRef.current) {
+      // Create address object from current map center and address
+      const center = mapDataRef.current.map.getCenter();
+      const addressData = {
+        address: currentAddress,
+        coordinates: [center[0], center[1]] as [number, number]
+      };
+      onAddressSelected(addressData);
     }
   };
 
@@ -453,7 +465,7 @@ export default function AddressOnboarding({ onAddressSelected, onClose }: Addres
       <div className="absolute bottom-0 left-0 right-0 z-10 p-4">
         <Button
           onClick={confirmAddress}
-          disabled={!selectedAddress || isLoading}
+          disabled={(!selectedAddress && !currentAddress) || isLoading}
           className="w-full h-14 bg-[#5B21B6] hover:bg-[#4C1D95] text-white font-medium text-lg rounded-lg shadow-lg"
           data-testid="button-ready"
         >
