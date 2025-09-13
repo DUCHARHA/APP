@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Navigation, Search, Check, ArrowLeft } from "lucide-react";
+import { MapPin, Navigation, Search, Check, ArrowLeft, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 
@@ -479,7 +479,11 @@ export default function Maps() {
           <h1 className="text-xl font-bold text-foreground">
             🗺️ Карта доставки
           </h1>
-          <div className="w-16"></div> {/* Spacer for balance */}
+          <Link href="/">
+            <Button variant="ghost" size="sm" data-testid="button-close">
+              <X className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         {/* Search and Route Controls */}
