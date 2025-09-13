@@ -36,14 +36,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- ЗАМЕНИТЕ на ваш production домен при деплое -->
-                <data android:scheme="https" android:host="your-production-domain.com" />
+                <!-- Production домен обновлен -->
+                <data android:scheme="https" android:host="ducharha.onrender.com" />
             </intent-filter>
             
             <!-- TWA метаданные -->
             <meta-data 
                 android:name="android.support.customtabs.trusted.DEFAULT_URL" 
-                android:value="https://your-production-domain.com/" />
+                android:value="https://ducharha.onrender.com/" />
             
             <meta-data 
                 android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR" 

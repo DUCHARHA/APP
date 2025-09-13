@@ -19,11 +19,11 @@ android {
 
     signingConfigs {
         release {
-            // Конфигурация подписи будет добавлена при создании keystore
+            // Раскомментируйте и заполните после создания keystore:
             // storeFile file('ducharkha-release-key.keystore')
-            // storePassword 'your-keystore-password'
+            // storePassword 'ваш-keystore-пароль'
             // keyAlias 'ducharkha'
-            // keyPassword 'your-key-password'
+            // keyPassword 'ваш-key-пароль'
         }
     }
 
@@ -31,7 +31,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // signingConfig signingConfigs.release // Раскомментировать после создания keystore
+            // signingConfig signingConfigs.release // Раскомментируйте после создания keystore
         }
         debug {
             minifyEnabled false
