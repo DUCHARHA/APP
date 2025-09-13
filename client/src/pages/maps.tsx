@@ -476,11 +476,16 @@ export default function Maps() {
               Назад
             </Button>
           </Link>
-          <h1 className="text-xl font-bold text-foreground">
+          <h1 className="text-xl font-bold text-foreground flex-1 text-center">
             🗺️ Карта доставки
           </h1>
           <Link href="/">
-            <Button variant="ghost" size="sm" data-testid="button-close">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              data-testid="button-close"
+              className="border border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+            >
               <X className="h-4 w-4" />
             </Button>
           </Link>
