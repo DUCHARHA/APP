@@ -42,11 +42,19 @@ app.use((req, res, next) => {
   try {
     log('Starting server initialization...');
     
-    // 📌 ASSETLINKS.JSON - простой хардкодированный ответ
+    // 📌 ASSETLINKS.JSON - serve with proper cache control headers
     app.get("/.well-known/assetlinks.json", (req, res) => {
-      console.log("[ASSETLINKS] Request received");
+      console.log("[ASSETLINKS] Request received from:", req.ip, "User-Agent:", req.get('User-Agent'));
+      
+      // Set proper headers to prevent caching issues
       res.setHeader('Content-Type', 'application/json');
-      res.json([
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('X-Assetlinks-Source', 'express-route');
+      res.setHeader('X-Certificate-Count', '2');
+      
+      const assetLinksData = [
         {
           "relation": ["delegate_permission/common.handle_all_urls"],
           "target": {
@@ -58,7 +66,10 @@ app.use((req, res, next) => {
             ]
           }
         }
-      ]);
+      ];
+      
+      console.log("[ASSETLINKS] Returning", assetLinksData[0].target.sha256_cert_fingerprints.length, "certificates");
+      res.json(assetLinksData);
     });
     
     const server = await registerRoutes(app);
