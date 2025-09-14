@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ДУЧАРХА</string>
+    <string name="app_name">ДУЧАРХА test</string>
     <string name="app_description">Экспресс-доставка продуктов за 10-15 минут</string>
     <string name="twa_error_title">Ошибка подключения</string>
     <string name="twa_error_message">Не удалось подключиться к сервису доставки. Проверьте интернет-соединение.</string>
