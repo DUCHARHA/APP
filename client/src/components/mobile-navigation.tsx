@@ -55,8 +55,7 @@ export default function MobileNavigation() {
             onClick={handleNavigation(item.path)}
             className="flex flex-col items-center py-2 px-1 relative transition-colors text-[#5B21B6] ml-[18px] mr-[18px] mt-[-5px] mb-[-5px] pl-[5px] pr-[5px] pt-[8px] pb-[8px]"
           >
-            <item.icon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">{item.label}</span>
+            <item.icon className="w-6 h-6" />
             {item.badge !== undefined && item.badge > 0 && (
               <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {item.badge > 99 ? "99+" : item.badge}
