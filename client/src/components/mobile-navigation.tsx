@@ -53,9 +53,9 @@ export default function MobileNavigation() {
           <button
             key={item.path}
             onClick={handleNavigation(item.path)}
-            className="flex flex-col items-center py-2 px-1 relative transition-colors text-[#5B21B6] ml-[18px] mr-[18px] mt-[-5px] mb-[-5px] pl-[5px] pr-[5px] pt-[8px] pb-[8px]"
+            className="flex flex-col items-center py-3 px-2 relative transition-colors text-[#5B21B6] ml-[12px] mr-[12px] mt-[2px] mb-[2px] pl-[8px] pr-[8px] pt-[12px] pb-[12px]"
           >
-            <item.icon className="w-6 h-6" />
+            <item.icon className="w-7 h-7" />
             {item.badge !== undefined && item.badge > 0 && (
               <span className="absolute -top-1 -right-1 bg-bright-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {item.badge > 99 ? "99+" : item.badge}
