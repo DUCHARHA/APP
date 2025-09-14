@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create PNG Icons</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192" style="display:none;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="display:none;"></canvas>
+    
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Purple background
+            ctx.fillStyle = '#5B21B6';
+            ctx.fillRect(0, 0, size, size);
+            
+            // White rounded rect background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.roundRect(size * 0.1, size * 0.1, size * 0.8, size * 0.8, size * 0.1);
+            ctx.fill();
+            
+            // White circle
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size * 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Purple text "Д"
+            ctx.fillStyle = '#5B21B6';
+            ctx.font = `bold ${size * 0.25}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Д', size / 2, size / 2);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Create icons
+        const icon192 = createIcon('canvas192', 192);
+        const icon512 = createIcon('canvas512', 512);
+        
+        console.log('Icon 192x192 created');
+        console.log('Icon 512x512 created');
+        
+        // You would save these data URLs as PNG files
+    </script>
+</body>
+</html>

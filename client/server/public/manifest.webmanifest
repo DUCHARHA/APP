@@ -1,0 +1,47 @@
+{
+  "name": "ДУЧАРХА - Доставка продуктов",
+  "short_name": "ДУЧАРХА", 
+  "description": "Экспресс-доставка продуктов за 10-15 минут",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "scope": "/",
+  "background_color": "#5B21B6",
+  "theme_color": "#5B21B6",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "id": "ducharha-delivery-app",
+  "icons": [
+    {
+      "src": "/icons/192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/512.png",
+      "sizes": "512x512", 
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["food", "shopping", "lifestyle"],
+  "lang": "ru",
+  "dir": "ltr",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "protocol_handlers": [],
+  "edge_side_panel": {},
+  "screenshots": [],
+  "shortcuts": [],
+  "file_handlers": [],
+  "handle_links": "preferred",
+  "capture_links": "existing-client-navigate"
+}
