@@ -22,14 +22,17 @@ else
 fi
 
 # Copy APK to public directory
-if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-    echo "✅ Copying real APK..."
+# First check if we have a pre-built APK in the repo (from GitHub Actions)
+if [ -f "../server/public/app-debug.apk" ] && [ "$(stat -c%s ../server/public/app-debug.apk)" -gt 100 ]; then
+    echo "✅ Using pre-built APK from repository..."
+elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+    echo "✅ Copying freshly built APK..."
     cp app/build/outputs/apk/debug/app-debug.apk ../server/public/
 elif [ -f "app-debug.apk" ]; then
     echo "✅ Copying existing APK..."
     cp app-debug.apk ../server/public/
 else
-    echo "⚠️ Creating placeholder APK (will need proper build later)"
+    echo "⚠️ Creating placeholder APK (GitHub Actions will build real one)"
     echo "PK" > ../server/public/app-debug.apk
 fi
 
