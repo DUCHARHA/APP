@@ -65,8 +65,8 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        # Add and commit the new APK
-        git add server/public/app-debug.apk
+        # Add and commit the new APK (force add to override gitignore)
+        git add -f server/public/app-debug.apk
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
