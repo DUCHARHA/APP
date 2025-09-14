@@ -1,0 +1,28 @@
+java.lang.RuntimeException: Unable to start activity ComponentInfo{com.ducharkha.delivery/com.google.androidbrowserhelper.trusted.LauncherActivity}: android.content.res.Resources$NotFoundException: Drawable com.ducharkha.delivery:drawable/splash_screen with resource ID #0x7f0700e2
+	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4431)
+	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4652)
+	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:112)
+	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:186)
+	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:112)
+	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:84)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2894)
+	at android.os.Handler.dispatchMessage(Handler.java:107)
+	at android.os.Looper.loopOnce(Looper.java:249)
+	at android.os.Looper.loop(Looper.java:337)
+	at android.app.ActivityThread.main(ActivityThread.java:9500)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:636)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1005)
+Caused by: android.content.res.Resources$NotFoundException: Drawable com.ducharkha.delivery:drawable/splash_screen with resource ID #0x7f0700e2
+Caused by: android.content.res.Resources$NotFoundException: File res/drawable/splash_screen.xml from drawable resource ID #0x7f0700e2
+	at android.content.res.ResourcesImpl.loadDrawableForCookie(ResourcesImpl.java:1129)
+	at android.content.res.ResourcesImpl.loadDrawable(ResourcesImpl.java:871)
+	at android.content.res.MiuiResourcesImpl.loadDrawable(MiuiResourcesImpl.java:334)
+	at android.content.res.Resources.loadDrawable(Resources.java:1117)
+	at android.content.res.Resources.getDrawableForDensity(Resources.java:1105)
+	at android.content.res.Resources.getDrawable(Resources.java:1044)
+	at android.content.Context.getDrawable(Context.java:1008)
+	at androidx.core.content.ContextCompat$Api21Impl.getDrawable(ContextCompat.java:1110)
+	at androidx.core.content.ContextCompat.getDrawable(ContextCompat.java:526)
+	at com.google.androidbrowserhelper.trusted.Utils.convertDrawableToBitmap(Utils.java:89)
+	at 
