@@ -213,4 +213,4 @@ cd android-app
 **Версия:** 1.0  
 **Создано:** $(date)  
 **Технология:** TWA (Trusted Web Activity)  
-**Пакет:** com.ducharkha.delivery  
+**Пакет:** com.ducharkha.delivery  # Trigger build Sun Sep 14 09:47:32 PM UTC 2025
