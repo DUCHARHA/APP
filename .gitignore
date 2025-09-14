@@ -1,6 +1,7 @@
 node_modules
 dist
 .DS_Store
-server/public
+server/public/*
+!server/public/*.apk
 vite.config.ts.*
 *.tar.gz
