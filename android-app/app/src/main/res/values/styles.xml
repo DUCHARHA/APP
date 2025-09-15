@@ -19,16 +19,4 @@
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
-    
-    <!-- Splash Theme для скрытия браузерных элементов -->
-    <style name="Theme.App.SplashScreen" parent="Theme.App.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_screen_enhanced</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:statusBarColor">@color/purple_primary</item>
-        <item name="android:navigationBarColor">@color/purple_primary</item>
-    </style>
 </resources>
