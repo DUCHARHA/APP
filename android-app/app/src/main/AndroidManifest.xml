@@ -24,7 +24,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.App.NoActionBar">
+            android:theme="@style/Theme.App.SplashScreen">
             
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.MAIN" />
@@ -55,7 +55,7 @@
                 
             <meta-data 
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE" 
-                android:resource="@drawable/splash_screen" />
+                android:resource="@drawable/splash_screen_enhanced" />
                 
             <meta-data 
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR" 
@@ -63,7 +63,29 @@
                 
             <meta-data 
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION" 
-                android:value="300" />
+                android:value="2000" />
+            
+            <!-- Дополнительные настройки для скрытия браузерных элементов -->
+            <meta-data 
+                android:name="android.support.customtabs.trusted.DISPLAY_MODE" 
+                android:value="standalone" />
+                
+            <meta-data 
+                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION" 
+                android:value="portrait" />
+                
+            <!-- Дополнительные настройки для профессионального вида -->
+            <meta-data 
+                android:name="android.support.customtabs.trusted.SHARE_TARGET" 
+                android:value="false" />
+                
+            <meta-data 
+                android:name="android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS" 
+                android:resource="@array/trusted_origins" />
+                
+            <meta-data 
+                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_IN_DURATION" 
+                android:value="500" />
             
         </activity>
 

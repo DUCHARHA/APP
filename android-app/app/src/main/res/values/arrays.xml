@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trusted origins для TWA -->
+    <string-array name="trusted_origins">
+        <item>https://ducharha.onrender.com</item>
+        <item>https://www.ducharha.onrender.com</item>
+    </string-array>
+</resources>

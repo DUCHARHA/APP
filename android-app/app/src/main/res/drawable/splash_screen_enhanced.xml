@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Фоновый цвет -->
+    <item android:drawable="@color/purple_primary" />
+    
+    <!-- Логотип по центру -->
+    <item>
+        <bitmap
+            android:src="@mipmap/ic_launcher"
+            android:gravity="center" 
+            android:tileMode="disabled" />
+    </item>
+    
+    <!-- Название приложения под логотипом -->
+    <item android:top="120dp">
+        <shape>
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</layer-list>
