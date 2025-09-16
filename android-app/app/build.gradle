@@ -17,13 +17,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Signing configuration - enabled for release builds
+    // Signing configuration - uses environment variables for security
     signingConfigs {
         release {
             storeFile file('../ducharkha-release-key.keystore')
-            storePassword 'ducharkha123'
-            keyAlias 'ducharkha'
-            keyPassword 'ducharkha123'
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
 
