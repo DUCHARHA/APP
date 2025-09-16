@@ -54,10 +54,6 @@
                 android:resource="@color/purple_primary" />
                 
             <meta-data 
-                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE" 
-                android:resource="@drawable/splash_screen" />
-                
-            <meta-data 
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR" 
                 android:resource="@color/purple_primary" />
                 
