@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TWA Trusted Origins - Critical for android.support.customtabs.trusted -->
+    <string-array name="trusted_origins">
+        <item>https://ducharha.onrender.com</item>
+    </string-array>
+    
+    <!-- Additional trusted hosts for web manifest validation -->
+    <string-array name="trusted_hosts">
+        <item>ducharha.onrender.com</item>
+    </string-array>
+    
+    <!-- Fallback URLs for TWA -->
+    <string-array name="fallback_urls">
+        <item>https://ducharha.onrender.com/</item>
+    </string-array>
+    
+    <!-- Supported URL schemes -->
+    <string-array name="supported_schemes">
+        <item>https</item>
+    </string-array>
+    
+    <!-- Quality validation - important for TWA verification -->
+    <string-array name="origin_verification_policy">
+        <item>use_credentials</item>
+    </string-array>
+</resources>

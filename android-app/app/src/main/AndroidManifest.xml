@@ -80,7 +80,12 @@
                 
             <meta-data 
                 android:name="android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS" 
-                android:value="https://ducharha.onrender.com" />
+                android:resource="@array/trusted_origins" />
+                
+            <!-- Fallback strategy for TWA -->
+            <meta-data 
+                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY" 
+                android:value="TRUSTED_WEB_ACTIVITY_THEN_CUSTOM_TAB" />
             
         </activity>
 
