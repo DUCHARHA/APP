@@ -52,7 +52,7 @@ app.use((req, res, next) => {
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       res.setHeader('X-Assetlinks-Source', 'express-route');
-      res.setHeader('X-Certificate-Count', '2');
+      res.setHeader('X-Certificate-Count', '3');
       
       const assetLinksData = [
         {
@@ -62,7 +62,8 @@ app.use((req, res, next) => {
             "package_name": "com.ducharkha.delivery",
             "sha256_cert_fingerprints": [
               "95:5A:D0:1D:AE:08:15:50:5B:7D:F0:E1:96:EC:F8:D5:DB:EA:5E:63:ED:B4:C7:2A:1F:93:E3:9B:FE:3D:EE:66",
-              "66:5E:D4:72:6B:02:74:52:F2:E5:B4:43:D6:A4:A0:25:78:24:15:26:F7:F5:79:92:2C:C7:9B:D9:A5:AA:AA:CF"
+              "66:5E:D4:72:6B:02:74:52:F2:E5:B4:43:D6:A4:A0:25:78:24:15:26:F7:F5:79:92:2C:C7:9B:D9:A5:AA:AA:CF",
+              "A4:0D:A8:0A:59:D1:70:CA:A9:50:CF:15:C1:8C:45:4D:47:A3:9B:26:98:9D:8B:64:0E:CD:74:5B:A7:31:76:78"
             ]
           }
         }
