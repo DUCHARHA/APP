@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["freetype", "go", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "openjdk17", "gradle", "jdk17", "unzip"]
+packages = ["freetype", "go", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "openjdk17", "gradle", "jdk17", "unzip", "android-tools", "curl"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -26,6 +26,10 @@ externalPort = 80
 [[ports]]
 localPort = 33129
 externalPort = 5173
+
+[[ports]]
+localPort = 37065
+externalPort = 8000
 
 [[ports]]
 localPort = 38191
