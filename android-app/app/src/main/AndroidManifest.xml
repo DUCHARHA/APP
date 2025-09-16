@@ -86,6 +86,7 @@
             <meta-data 
                 android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY" 
                 android:value="TRUSTED_WEB_ACTIVITY_THEN_CUSTOM_TAB" />
+                
             
         </activity>
 
