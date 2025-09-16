@@ -17,20 +17,27 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Signing configuration - only applies if keystore file exists
+    // To enable signing for release builds:
+    // 1. Create a keystore file: keytool -genkey -v -keystore ducharkha-release-key.keystore -alias ducharkha -keyalg RSA -keysize 2048 -validity 10000
+    // 2. Place the keystore file in the android-app directory
+    // 3. Uncomment the signingConfigs block below and update paths/credentials as needed
+    /*
     signingConfigs {
         release {
             storeFile file('../ducharkha-release-key.keystore')
-            storePassword 'ducharkha123'
+            storePassword 'your_store_password'
             keyAlias 'ducharkha'
-            keyPassword 'ducharkha123'
+            keyPassword 'your_key_password'
         }
     }
+    */
 
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            // signingConfig signingConfigs.release  // Uncomment when keystore is available
             crunchPngs false
             
             aaptOptions {
@@ -40,7 +47,7 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-            signingConfig signingConfigs.release
+            // Debug builds use default Android debug signing
         }
     }
     

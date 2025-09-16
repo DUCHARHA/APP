@@ -34,8 +34,12 @@
 - [ ] Убедиться что JSON валидный
 
 ### 5. Настройка сборки
+**Для debug сборок (тестирование):**
+- [ ] Сборка готова без дополнительной настройки: `./gradlew assembleDebug`
+
+**Для release сборок (Google Play Store):**
 - [ ] Раскомментировать и заполнить `signingConfigs.release` в `app/build.gradle`
-- [ ] Указать путь к keystore файлу
+- [ ] Указать путь к keystore файлу (`../ducharkha-release-key.keystore`)
 - [ ] Раскомментировать `signingConfig signingConfigs.release` в release buildType
 
 ### 6. Сборка приложения

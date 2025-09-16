@@ -109,7 +109,6 @@
   "handle_links": "preferred",
   "capture_links": "existing-client-navigate",
   "related_applications": [],
-  "iarc_rating_id": "",
   "share_target": {
     "action": "/",
     "method": "GET",
