@@ -1,22 +1,28 @@
 name: Build Android Release AAB
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
   push:
     branches: [ main ]
-    paths: 
+    paths:
       - 'android-app/**'
       - 'client/**'
   pull_request:
     branches: [ main ]
-    paths: 
+    paths:
       - 'android-app/**'
       - 'client/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
+    env:
+      ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -42,16 +48,14 @@ jobs:
     - name: Create keystore from secrets
       working-directory: android-app
       run: |
-        echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > ducharkha-release-key.keystore
+        echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ducharkha-release-key.keystore
         ls -la ducharkha-release-key.keystore
-      env:
-        ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
 
     - name: Build client assets
       run: |
         npm ci
         npm run build
-        
+
     - name: Setup Android local.properties
       working-directory: android-app
       run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
@@ -65,10 +69,6 @@ jobs:
       run: |
         ./gradlew clean
         ./gradlew bundleRelease --no-daemon --stacktrace
-      env:
-        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     - name: List build outputs
       working-directory: android-app
@@ -90,15 +90,18 @@ jobs:
         if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
           echo "AAB file created successfully:"
           ls -la app/build/outputs/bundle/release/app-release.aab
-          
-          echo "Verifying keystore signature:"
-          keytool -list -v -keystore ducharkha-release-key.keystore -alias $ANDROID_KEY_ALIAS -storepass $ANDROID_KEYSTORE_PASSWORD
+          echo "Verifying keystore signature (using variables):"
+          echo " - alias: ${ANDROID_KEY_ALIAS}"
+          # Actual verification
+          keytool -list -v \
+            -keystore ducharkha-release-key.keystore \
+            -alias "$ANDROID_KEY_ALIAS" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD"
         else
           echo "AAB file not found!"
           exit 1
         fi
-      env:
-        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
 
     - name: Clean up keystore
       working-directory: android-app
