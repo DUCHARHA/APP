@@ -49,10 +49,13 @@ jobs:
 
     - name: Build client assets
       run: |
-        cd client
         npm ci
         npm run build
         
+    - name: Setup Android local.properties
+      working-directory: android-app
+      run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
     - name: Make gradlew executable
       working-directory: android-app
       run: chmod +x gradlew
@@ -89,7 +92,7 @@ jobs:
           ls -la app/build/outputs/bundle/release/app-release.aab
           
           echo "Verifying keystore signature:"
-          keytool -list -v -keystore ducharkha-release-key.keystore -alias ducharkha -storepass $ANDROID_KEYSTORE_PASSWORD
+          keytool -list -v -keystore ducharkha-release-key.keystore -alias $ANDROID_KEY_ALIAS -storepass $ANDROID_KEYSTORE_PASSWORD
         else
           echo "AAB file not found!"
           exit 1

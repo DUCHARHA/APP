@@ -7,9 +7,9 @@
 ### 🔑 Требуемые секреты:
 
 1. **ANDROID_KEYSTORE_B64** - Base64 закодированный keystore файл
-2. **ANDROID_KEYSTORE_PASSWORD** - пароль keystore (ducharkha123)  
-3. **ANDROID_KEY_ALIAS** - alias ключа (ducharkha)
-4. **ANDROID_KEY_PASSWORD** - пароль ключа (ducharkha123)
+2. **ANDROID_KEYSTORE_PASSWORD** - пароль keystore  
+3. **ANDROID_KEY_ALIAS** - alias ключа
+4. **ANDROID_KEY_PASSWORD** - пароль ключа
 
 ### 📋 Инструкция по настройке:
 
@@ -31,9 +31,9 @@ base64 -i ducharkha-release-key.keystore
 | Имя секрета | Значение |
 |-------------|----------|
 | `ANDROID_KEYSTORE_B64` | Base64 строка из Шага 1 |
-| `ANDROID_KEYSTORE_PASSWORD` | `ducharkha123` |
-| `ANDROID_KEY_ALIAS` | `ducharkha` |
-| `ANDROID_KEY_PASSWORD` | `ducharkha123` |
+| `ANDROID_KEYSTORE_PASSWORD` | `[ваш пароль keystore]` |
+| `ANDROID_KEY_ALIAS` | `[ваш alias ключа]` |
+| `ANDROID_KEY_PASSWORD` | `[ваш пароль ключа]` |
 
 ### 🔨 Запуск сборки
 
