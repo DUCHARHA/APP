@@ -30,20 +30,16 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: 34
-        target: android-34
-        arch: x86_64
-        profile: Nexus 6
+        cmdline-tools-version: latest
+        accept-android-sdk-licenses: true
+        packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
       
-    - name: Install SDK components
+    - name: Verify SDK installation
       run: |
         echo "ANDROID_HOME: $ANDROID_HOME"
-        ls -la $ANDROID_HOME/
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
+        ls -la $ANDROID_HOME/ || echo "ANDROID_HOME not found"
         echo "Installed SDK packages:"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed || echo "Could not list packages"
       
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -55,28 +51,17 @@ jobs:
       run: npm ci
       
     - name: Build web client
-      run: npm run build:client || vite build --outDir server/public
+      run: npm run build
       
     - name: Build Android APK
-      env:
-        ANDROID_HOME: ${{ env.ANDROID_HOME }}
-        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
       run: |
         cd android-app
         echo "Current directory: $(pwd)"
         echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
         ls -la
-        chmod +x gradlew || echo "gradlew not found"
-        if [ -f "gradlew" ]; then
-          echo "Running Gradle clean..."
-          ./gradlew clean --no-daemon --info
-          echo "Running Gradle assembleDebug..."
-          ./gradlew assembleDebug --no-daemon --stacktrace --info
-        else
-          echo "Gradle wrapper not found, exiting"
-          exit 1
-        fi
+        chmod +x gradlew
+        ./gradlew clean --no-daemon
+        ./gradlew assembleDebug --no-daemon --stacktrace
         
     - name: Upload APK to repository
       run: |
