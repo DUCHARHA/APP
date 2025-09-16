@@ -30,12 +30,20 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: 35
-        build-tools: 35.0.0
-        cmake-version: 3.22.1
+        api-level: 34
+        target: android-34
+        arch: x86_64
+        profile: Nexus 6
       
-    - name: Accept Android SDK licenses
-      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
+    - name: Install SDK components
+      run: |
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        ls -la $ANDROID_HOME/
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
+        echo "Installed SDK packages:"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed
       
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -47,16 +55,27 @@ jobs:
       run: npm ci
       
     - name: Build web client
-      run: npm run build
+      run: npm run build:client || vite build --outDir server/public
       
     - name: Build Android APK
+      env:
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
       run: |
         cd android-app
-        chmod +x gradlew || echo "gradlew not found, using gradle"
+        echo "Current directory: $(pwd)"
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        ls -la
+        chmod +x gradlew || echo "gradlew not found"
         if [ -f "gradlew" ]; then
-          ./gradlew assembleDebug --no-daemon --no-build-cache --warning-mode=none
+          echo "Running Gradle clean..."
+          ./gradlew clean --no-daemon --info
+          echo "Running Gradle assembleDebug..."
+          ./gradlew assembleDebug --no-daemon --stacktrace --info
         else
-          gradle assembleDebug --no-daemon --no-build-cache --warning-mode=none
+          echo "Gradle wrapper not found, exiting"
+          exit 1
         fi
         
     - name: Upload APK to repository
