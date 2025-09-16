@@ -1,14 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ДУЧАРХА Brand Colors -->
+    <!-- ДУЧАРХА Brand Colors - Primary Palette -->
     <color name="purple_primary">#5B21B6</color>
     <color name="purple_dark">#4C1D95</color>
+    <color name="purple_darker">#3B0764</color>
     <color name="purple_light">#8B5CF6</color>
+    <color name="purple_lighter">#A78BFA</color>
+    <color name="purple_pale">#C4B5FD</color>
+    
+    <!-- Material Design 3 System Colors -->
+    <color name="md_theme_light_primary">#5B21B6</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#E9D5FF</color>
+    <color name="md_theme_light_onPrimaryContainer">#1E0836</color>
+    <color name="md_theme_light_secondary">#665A6F</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#EDDCF6</color>
+    <color name="md_theme_light_onSecondaryContainer">#211829</color>
+    <color name="md_theme_light_tertiary">#81525E</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#FFD9E2</color>
+    <color name="md_theme_light_onTertiaryContainer">#33101B</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    <color name="md_theme_light_background">#FEFBFF</color>
+    <color name="md_theme_light_onBackground">#1D1B20</color>
+    <color name="md_theme_light_surface">#FEFBFF</color>
+    <color name="md_theme_light_onSurface">#1D1B20</color>
+    <color name="md_theme_light_surfaceVariant">#E7E0EC</color>
+    <color name="md_theme_light_onSurfaceVariant">#49454E</color>
+    <color name="md_theme_light_outline">#7A757F</color>
+    <color name="md_theme_light_inverseOnSurface">#F5EFF7</color>
+    <color name="md_theme_light_inverseSurface">#322F35</color>
+    <color name="md_theme_light_inversePrimary">#D0BCFF</color>
+    <color name="md_theme_light_shadow">#000000</color>
+    <color name="md_theme_light_surfaceTint">#5B21B6</color>
+    <color name="md_theme_light_outlineVariant">#CAC4D0</color>
+    <color name="md_theme_light_scrim">#000000</color>
+    
+    <!-- Dark theme colors (for night mode support) -->
+    <color name="md_theme_dark_primary">#D0BCFF</color>
+    <color name="md_theme_dark_onPrimary">#381E72</color>
+    <color name="md_theme_dark_primaryContainer">#4F378A</color>
+    <color name="md_theme_dark_onPrimaryContainer">#E9D5FF</color>
+    <color name="md_theme_dark_secondary">#D1C4DA</color>
+    <color name="md_theme_dark_onSecondary">#372E40</color>
+    <color name="md_theme_dark_secondaryContainer">#4E4456</color>
+    <color name="md_theme_dark_onSecondaryContainer">#EDDCF6</color>
+    <color name="md_theme_dark_tertiary">#F4B1C4</color>
+    <color name="md_theme_dark_onTertiary">#4A2530</color>
+    <color name="md_theme_dark_tertiaryContainer">#633B47</color>
+    <color name="md_theme_dark_onTertiaryContainer">#FFD9E2</color>
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    <color name="md_theme_dark_background">#141218</color>
+    <color name="md_theme_dark_onBackground">#E6E0E9</color>
+    <color name="md_theme_dark_surface">#141218</color>
+    <color name="md_theme_dark_onSurface">#E6E0E9</color>
+    <color name="md_theme_dark_surfaceVariant">#49454E</color>
+    <color name="md_theme_dark_onSurfaceVariant">#CAC4D0</color>
+    <color name="md_theme_dark_outline">#948F99</color>
+    <color name="md_theme_dark_inverseOnSurface">#141218</color>
+    <color name="md_theme_dark_inverseSurface">#E6E0E9</color>
+    <color name="md_theme_dark_inversePrimary">#5B21B6</color>
+    <color name="md_theme_dark_shadow">#000000</color>
+    <color name="md_theme_dark_surfaceTint">#D0BCFF</color>
+    <color name="md_theme_dark_outlineVariant">#49454E</color>
+    <color name="md_theme_dark_scrim">#000000</color>
     
     <!-- App Launcher Icon -->
     <color name="ic_launcher_background">#5B21B6</color>
     
+    <!-- Window and System Bar Colors -->
+    <color name="window_background_light">#FEFBFF</color>
+    <color name="window_background_dark">#141218</color>
+    <color name="status_bar_light">#5B21B6</color>
+    <color name="status_bar_dark">#4F378A</color>
+    <color name="navigation_bar_light">#FEFBFF</color>
+    <color name="navigation_bar_dark">#141218</color>
+    
+    <!-- Splash Screen Colors -->
+    <color name="splash_background">#5B21B6</color>
+    <color name="splash_icon_background">#5B21B6</color>
+    
     <!-- Standard Material Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- Legacy support colors -->
+    <color name="colorPrimary">#5B21B6</color>
+    <color name="colorPrimaryDark">#4C1D95</color>
+    <color name="colorAccent">#8B5CF6</color>
 </resources>
