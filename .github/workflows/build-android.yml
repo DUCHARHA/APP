@@ -29,9 +29,13 @@ jobs:
         
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        api-level: 35
+        build-tools: 35.0.0
+        cmake-version: 3.22.1
       
     - name: Accept Android SDK licenses
-      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
       
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -50,9 +54,9 @@ jobs:
         cd android-app
         chmod +x gradlew || echo "gradlew not found, using gradle"
         if [ -f "gradlew" ]; then
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --no-build-cache --warning-mode=none
         else
-          gradle assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon --no-build-cache --warning-mode=none
         fi
         
     - name: Upload APK to repository
