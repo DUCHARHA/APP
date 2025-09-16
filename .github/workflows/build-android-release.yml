@@ -1,0 +1,105 @@
+name: Build Android Release AAB
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main ]
+    paths: 
+      - 'android-app/**'
+      - 'client/**'
+  pull_request:
+    branches: [ main ]
+    paths: 
+      - 'android-app/**'
+      - 'client/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Accept Android SDK licenses
+      run: yes | sdkmanager --licenses
+
+    - name: Install Android SDK components
+      run: |
+        sdkmanager "platform-tools"
+        sdkmanager "platforms;android-34"
+        sdkmanager "build-tools;34.0.0"
+
+    - name: Create keystore from secrets
+      working-directory: android-app
+      run: |
+        echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > ducharkha-release-key.keystore
+        ls -la ducharkha-release-key.keystore
+      env:
+        ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+
+    - name: Build client assets
+      run: |
+        cd client
+        npm ci
+        npm run build
+        
+    - name: Make gradlew executable
+      working-directory: android-app
+      run: chmod +x gradlew
+
+    - name: Clean and build release AAB
+      working-directory: android-app
+      run: |
+        ./gradlew clean
+        ./gradlew bundleRelease --no-daemon --stacktrace
+      env:
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+    - name: List build outputs
+      working-directory: android-app
+      run: |
+        echo "Build outputs:"
+        find app/build/outputs -name "*.aab" -type f
+        ls -la app/build/outputs/bundle/release/ || echo "Release directory not found"
+
+    - name: Upload AAB artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-aab
+        path: android-app/app/build/outputs/bundle/release/app-release.aab
+        retention-days: 30
+
+    - name: Verify AAB signature
+      working-directory: android-app
+      run: |
+        if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
+          echo "AAB file created successfully:"
+          ls -la app/build/outputs/bundle/release/app-release.aab
+          
+          echo "Verifying keystore signature:"
+          keytool -list -v -keystore ducharkha-release-key.keystore -alias ducharkha -storepass $ANDROID_KEYSTORE_PASSWORD
+        else
+          echo "AAB file not found!"
+          exit 1
+        fi
+      env:
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
+    - name: Clean up keystore
+      working-directory: android-app
+      if: always()
+      run: |
+        rm -f ducharkha-release-key.keystore
+        echo "Keystore cleaned up"
