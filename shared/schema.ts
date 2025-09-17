@@ -159,3 +159,122 @@ export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+
+// Enhanced profile and statistics types
+export interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  avatar?: string;
+  preferences: UserPreferences;
+  statistics: UserStatistics;
+  metadata: UserMetadata;
+}
+
+export interface UserStatistics {
+  totalOrders: number;
+  totalSpent: number;
+  averageOrderValue: number;
+  favoriteCategories: string[];
+  lastOrderDate?: string;
+  loyaltyLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
+  deliveryAddresses: number;
+  completedOrders: number;
+  cancelledOrders: number;
+}
+
+export interface UserMetadata {
+  createdAt: string;
+  lastLoginAt?: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  onboardingCompleted: boolean;
+  hasProfilePhoto: boolean;
+}
+
+// Enhanced user preferences with detailed settings
+export interface ExtendedUserPreferences extends UserPreferences {
+  // Notification preferences
+  notifications: {
+    orderUpdates: boolean;
+    promotions: boolean;
+    recommendations: boolean;
+    newsletters: boolean;
+    pushEnabled: boolean;
+    emailEnabled: boolean;
+  };
+  // Delivery preferences
+  delivery: {
+    defaultAddress?: string;
+    preferredTimeSlots: string[];
+    contactlessDelivery: boolean;
+    leaveAtDoor: boolean;
+    callOnArrival: boolean;
+  };
+  // App preferences
+  app: {
+    language: 'ru' | 'en' | 'tj';
+    currency: 'TJS' | 'USD' | 'RUB';
+    measurementUnit: 'metric' | 'imperial';
+    compactView: boolean;
+    showPrices: boolean;
+    autoRefresh: boolean;
+  };
+  // Privacy preferences
+  privacy: {
+    shareStatistics: boolean;
+    allowAnalytics: boolean;
+    showOnlineStatus: boolean;
+    dataCollection: boolean;
+  };
+}
+
+// Form validation schemas
+export const updateProfileSchema = z.object({
+  username: z.string().min(2, 'Имя должно содержать минимум 2 символа').max(50, 'Имя слишком длинное'),
+  email: z.string().email('Некорректный email').optional(),
+  phone: z.string().min(10, 'Некорректный номер телефона').optional(),
+  address: z.string().max(200, 'Адрес слишком длинный').optional(),
+  avatar: z.string().url('Некорректная ссылка на изображение').optional(),
+});
+
+export const updatePreferencesSchema = z.object({
+  theme: z.enum(['light', 'dark', 'system']).optional(),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Некорректный цвет').optional(),
+  accentColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Некорректный цвет').optional(),
+  backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Некорректный цвет').optional(),
+  notifications: z.object({
+    orderUpdates: z.boolean().optional(),
+    promotions: z.boolean().optional(),
+    recommendations: z.boolean().optional(),
+    newsletters: z.boolean().optional(),
+    pushEnabled: z.boolean().optional(),
+    emailEnabled: z.boolean().optional(),
+  }).optional(),
+  delivery: z.object({
+    defaultAddress: z.string().optional(),
+    preferredTimeSlots: z.array(z.string()).optional(),
+    contactlessDelivery: z.boolean().optional(),
+    leaveAtDoor: z.boolean().optional(),
+    callOnArrival: z.boolean().optional(),
+  }).optional(),
+  app: z.object({
+    language: z.enum(['ru', 'en', 'tj']).optional(),
+    currency: z.enum(['TJS', 'USD', 'RUB']).optional(),
+    measurementUnit: z.enum(['metric', 'imperial']).optional(),
+    compactView: z.boolean().optional(),
+    showPrices: z.boolean().optional(),
+    autoRefresh: z.boolean().optional(),
+  }).optional(),
+  privacy: z.object({
+    shareStatistics: z.boolean().optional(),
+    allowAnalytics: z.boolean().optional(),
+    showOnlineStatus: z.boolean().optional(),
+    dataCollection: z.boolean().optional(),
+  }).optional(),
+});
+
+export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+export type UpdatePreferencesData = z.infer<typeof updatePreferencesSchema>;
