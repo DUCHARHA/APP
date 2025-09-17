@@ -113,13 +113,20 @@ export class StatusBarManager {
   }
 
   private isLightColor(color: string): boolean {
-    // Простая проверка яркости цвета
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 155;
+    try {
+      // Определяем цвет как светлый или темный
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      // Используем формулу luminance для определения светлости
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.5;
+    } catch (error) {
+      console.warn('Ошибка определения светлости цвета:', error);
+      return false;
+    }
   }
 
   // Получение текущего цвета
@@ -128,5 +135,5 @@ export class StatusBarManager {
   }
 }
 
-// Экспорт синглтона
+// Экспортируем экземпляр для совместимости
 export const statusBarManager = StatusBarManager.getInstance();

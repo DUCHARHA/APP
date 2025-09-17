@@ -39,7 +39,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
-import { statusBarManager } from "@/utils/status-bar-manager";
+import { StatusBarManager } from "@/utils/status-bar-manager";
 import React, { useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 import { PWADetector } from "./utils/pwa-detection";
@@ -87,10 +87,10 @@ function Router() {
     try {
       if (location === '/') {
         // На главной странице используем фиолетовый цвет
-        statusBarManager.setPurple();
+        StatusBarManager.getInstance().setPurple();
       } else {
         // На остальных страницах тоже фиолетовый (можно настроить по страницам)
-        statusBarManager.setPurple();
+        StatusBarManager.getInstance().setPurple();
       }
     } catch (error) {
       console.warn('Error setting status bar color for route:', error);
@@ -241,7 +241,7 @@ function App() {
 
   // Инициализируем status bar с фиолетовым цветом
   React.useEffect(() => {
-    statusBarManager.init();
+    StatusBarManager.getInstance().init();
   }, []);
 
   return (
