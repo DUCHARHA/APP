@@ -44,7 +44,39 @@ export class StatusBarManager {
 
     this.currentColor = color;
 
-    // Обновляем мета-тег theme-color
+    // Обновляем meta теги для status bar
+    this.updateMetaTags(color);
+  }
+
+  private updateMetaTags(color: string): void {
+    // Основной theme-color
+    let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement('meta');
+      themeColorMeta.setAttribute('name', 'theme-color');
+      document.head.appendChild(themeColorMeta);
+    }
+    themeColorMeta.setAttribute('content', color);
+
+    // Apple specific
+    let appleMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (!appleMeta) {
+      appleMeta = document.createElement('meta');
+      appleMeta.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
+      document.head.appendChild(appleMeta);
+    }
+    
+    // Для PWA используем light-content чтобы убрать чёрную полосу
+    if (this.isStandalone()) {
+      appleMeta.setAttribute('content', 'black-translucent');
+    } else {
+      appleMeta.setAttribute('content', 'default');
+    }
+  }
+}
+
+// Создаём и экспортируем глобальный экземпляр
+export const statusBarManager = StatusBarManager.getInstance();ем мета-тег theme-color
     this.updateThemeColorMeta(color);
 
     // Для Android Chrome

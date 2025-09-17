@@ -39,7 +39,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 import { PWAStatus } from "@/components/pwa-status";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DOMProtectionWrapper } from "@/components/dom-protection-wrapper";
-import { statusBarManager } from "@/utils/status-bar-manager";
+import { StatusBarManager } from "@/utils/status-bar-manager";
 import React, { useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 import { PWADetector } from "./utils/pwa-detection";
@@ -241,7 +241,7 @@ function App() {
 
   // Инициализируем status bar с фиолетовым цветом
   React.useEffect(() => {
-    statusBarManager.init();
+    StatusBarManager.getInstance().init();
   }, []);
 
   return (
