@@ -9,13 +9,33 @@ export function useCart() {
 
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart", userId],
-    staleTime: 600000, // 10 минут кэша - увеличиваем время
-    gcTime: 1200000, // 20 минут в памяти
+    queryFn: async ({ queryKey }) => {
+      const [, userId] = queryKey;
+      if (!userId) throw new Error("User ID is required");
+      
+      const response = await fetch(`/api/cart/${userId}`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch cart: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: 60000, // 1 minute cache for cart data
+    gcTime: 300000, // 5 minutes in memory
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false, // Убираем ретраи для избежания конфликтов
+    retry: (failureCount, error: any) => {
+      // Don't retry 4xx errors
+      if (error?.message?.includes('4')) return false;
+      return failureCount < 2;
+    },
+    enabled: !!userId, // Only run query if we have a userId
   });
 
   const totalItems = (cartItems ?? [])

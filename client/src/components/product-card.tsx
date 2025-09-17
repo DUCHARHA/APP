@@ -46,10 +46,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
-        const existingItem = old.find((item: any) => item?.product?.id === product.id);
+        const existingItem = old.find((item: any) => item?.productId === product.id);
         if (existingItem) {
           return old.map((item: any) => 
-            item?.product?.id === product.id 
+            item?.productId === product.id 
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
@@ -70,14 +70,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       // Обновляем кэш реальными данными с сервера
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
-        const hasTemp = old.find((item: any) => item?.id?.startsWith('temp-'));
-        if (hasTemp) {
-          // Заменяем временную запись на реальную
-          return old.map((item: any) => 
-            item?.id?.startsWith('temp-') && item.productId === product.id
-              ? { ...item, id: data.id }
-              : item
-          );
+        // Replace temp item with actual data from server
+        const tempItemIndex = old.findIndex((item: any) => 
+          item?.id?.startsWith('temp-') && item.productId === product.id
+        );
+        if (tempItemIndex >= 0) {
+          const updated = [...old];
+          // Ensure we preserve the product data when replacing temp item
+          updated[tempItemIndex] = { ...data, product };
+          return updated;
         }
         return old;
       });
