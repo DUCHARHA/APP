@@ -62,7 +62,7 @@
                 
             <meta-data 
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION" 
-                android:value="300" />
+                android:value="2000" />
             
             <!-- Дополнительные настройки для скрытия браузерных элементов -->
             <meta-data 
