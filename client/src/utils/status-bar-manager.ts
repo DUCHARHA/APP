@@ -33,6 +33,11 @@ export class StatusBarManager {
     this.setColor('#5B21B6');
   }
 
+  // Инициализация с фиолетовым цветом
+  init(): void {
+    this.setPurple();
+  }
+
   // Универсальная установка цвета
   setColor(color: string): void {
     if (this.currentColor === color) return;

@@ -65,12 +65,12 @@ function Router() {
   useEffect(() => {
     const hasSelectedAddress = localStorage.getItem('user-addresses');
     const hasCompletedAddressOnboarding = localStorage.getItem('address-onboarding-completed');
-    
+
     // Show address onboarding if user hasn't selected any address and hasn't completed onboarding
     if (!hasSelectedAddress && !hasCompletedAddressOnboarding) {
       setShowAddressOnboarding(true);
     }
-    
+
     setIsCheckingFirstVisit(false);
   }, []);
 
@@ -147,10 +147,10 @@ function Router() {
     const addresses = existingAddresses ? JSON.parse(existingAddresses) : [];
     addresses.push(addressData);
     localStorage.setItem('user-addresses', JSON.stringify(addresses));
-    
+
     // Mark address onboarding as completed
     localStorage.setItem('address-onboarding-completed', 'true');
-    
+
     // Hide address onboarding and go to home page
     setShowAddressOnboarding(false);
     setLocation('/');
@@ -174,7 +174,7 @@ function Router() {
     return (
       <OnboardingProvider>
         <div className="max-w-md mx-auto bg-background min-h-screen relative">
-          <AddressOnboarding 
+          <AddressOnboarding
             onAddressSelected={handleAddressSelected}
             onClose={handleCloseAddressOnboarding}
           />
@@ -237,6 +237,11 @@ function App() {
     } catch (error) {
       console.warn('Error during app initialization cleanup:', error);
     }
+  }, []);
+
+  // Инициализируем status bar с фиолетовым цветом
+  React.useEffect(() => {
+    StatusBarManager.getInstance().init();
   }, []);
 
   return (
