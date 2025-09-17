@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles, Settings, Palette, Globe, Shield } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -151,24 +151,6 @@ export default function Profile() {
       label: "Уведомления",
       description: "Настройки push",
       href: "/notifications",
-    },
-    {
-      icon: Palette,
-      label: "Тема и стиль",
-      description: "Персонализация",
-      href: "/profile/preferences",
-    },
-    {
-      icon: Globe,
-      label: "Язык и регион",
-      description: "Локализация",
-      href: "/profile/language",
-    },
-    {
-      icon: Shield,
-      label: "Конфиденциальность",
-      description: "Безопасность данных",
-      href: "/profile/privacy",
     },
     {
       icon: HelpCircle,
