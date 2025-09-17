@@ -28,6 +28,7 @@ const Profile = lazy(() => import("@/pages/profile"));
 const ProfileAuth = lazy(() => import("@/pages/profile-auth"));
 const ProfileEdit = lazy(() => import("@/pages/profile-edit"));
 const ProfilePreferences = lazy(() => import("@/pages/profile-preferences"));
+const Notifications = lazy(() => import("@/pages/notifications"));
 const Help = lazy(() => import("@/pages/help"));
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const AdminOrders = lazy(() => import("@/pages/admin-orders"));
@@ -219,6 +220,7 @@ function Router() {
             <Route path="/profile" component={ProfileAuth} />
             <Route path="/profile/edit" component={ProfileEdit} />
         <Route path="/profile/preferences" component={ProfilePreferences} />
+            <Route path="/notifications" component={Notifications} />
             <Route path="/help" component={Help} />
             <Route path="/orders" component={Orders} />
             <Route path="/order/:orderId" component={OrderDetail} />
