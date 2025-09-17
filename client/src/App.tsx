@@ -44,11 +44,24 @@ import React, { useRef } from "react";
 import { PWAProvider } from "./contexts/pwa-context";
 import { PWADetector } from "./utils/pwa-detection";
 import OperaMiniFallback from "./components/opera-mini-fallback";
+import { SplashScreenProvider } from "@/components/splash-screen-provider";
 
-// Loading component for lazy routes
+// Enhanced loading component for lazy routes
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5B21B6]"></div>
+  <div className="flex flex-col items-center justify-center min-h-screen bg-background page-transition">
+    <div className="relative">
+      {/* Spinning border */}
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-muted"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent absolute top-0 left-0"></div>
+      
+      {/* Pulsing center */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full animate-pulse"></div>
+    </div>
+    
+    {/* Loading text */}
+    <p className="text-muted-foreground text-sm mt-4 animate-fade-in">
+      Загрузка...
+    </p>
   </div>
 );
 
@@ -251,8 +264,13 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <PWAProvider>
               <TooltipProvider>
-                <Toaster />
-                <Router />
+                <SplashScreenProvider 
+                  minLoadingTime={2500}
+                  skipInDevelopment={false}
+                >
+                  <Toaster />
+                  <Router />
+                </SplashScreenProvider>
               </TooltipProvider>
             </PWAProvider>
           </QueryClientProvider>
