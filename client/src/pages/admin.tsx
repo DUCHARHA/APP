@@ -19,6 +19,7 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
+  AlertCircle,
   Zap,
   Target,
   Globe,
@@ -344,6 +345,15 @@ export default function Admin() {
               >
                 <Bell className="w-4 h-4 mr-2" />
                 Отправить уведомление
+              </Button>
+              
+              <Button
+                onClick={() => setLocation("/admin/errors")}
+                className="w-full bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                data-testid="button-view-errors"
+              >
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Просмотр ошибок
               </Button>
             </CardContent>
           </Card>

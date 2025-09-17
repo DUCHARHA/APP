@@ -3,6 +3,7 @@ import App from "./App";
 import "./index.css";
 import { statusBarManager } from "./utils/status-bar-manager";
 import { PWADetector } from "./utils/pwa-detection";
+import { initializeGlobalErrorHandler } from "./utils/global-error-handler";
 
 // Security: Disable console logs in production to prevent data leaks
 if (import.meta.env.PROD) {
@@ -11,6 +12,9 @@ if (import.meta.env.PROD) {
   console.debug = () => {};
   // console.error and console.warn are kept for debugging critical issues
 }
+
+// Initialize global error handler for catching unhandled errors
+initializeGlobalErrorHandler();
 
 // Initialize IndexedDB lazily to improve initial load time
 if (typeof window !== 'undefined') {

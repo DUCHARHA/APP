@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema, updateUserRoleSchema, updateUserStatusSchema, adminUpdateUserSchema } from "@shared/schema";
+import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema, insertErrorSchema, updateUserRoleSchema, updateUserStatusSchema, adminUpdateUserSchema } from "@shared/schema";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -30,9 +30,11 @@ function invalidateProductCache(): void {
   }
 }
 
-// Enhanced error logging
-function logError(error: any, context: string, req: any) {
+// Enhanced error logging with database storage
+async function logError(error: any, context: string, req: any) {
   const timestamp = new Date().toISOString();
+  
+  // Console logging for immediate debugging
   console.error(`[${timestamp}] ERROR in ${context}:`, {
     message: error.message,
     stack: error.stack,
@@ -41,6 +43,75 @@ function logError(error: any, context: string, req: any) {
     params: req.params,
     query: req.query,
     userAgent: req.get('User-Agent')
+  });
+
+  // Save to database for persistent logging
+  try {
+    const errorData = {
+      message: error.message || 'Unknown server error',
+      stack: error.stack || null,
+      type: 'api_error',
+      source: 'backend' as const,
+      url: `${req.method} ${req.url}`,
+      userAgent: req.get('User-Agent') || null,
+      level: error.status >= 500 || !error.status ? 'error' as const : 'warning' as const,
+      metadata: JSON.stringify({
+        context,
+        method: req.method,
+        originalUrl: req.originalUrl,
+        params: req.params,
+        query: req.query,
+        ip: req.ip || req.connection.remoteAddress,
+        timestamp,
+        statusCode: error.status || 500,
+        headers: {
+          'user-agent': req.get('User-Agent'),
+          'referer': req.get('Referer'),
+          'origin': req.get('Origin')
+        }
+      })
+    };
+
+    await storage.createError(errorData);
+  } catch (dbError) {
+    // If database error logging fails, only log to console
+    console.error('Failed to save error to database:', dbError);
+  }
+}
+
+// Middleware for automatic API error logging
+function errorLoggingMiddleware(error: any, req: Request, res: Response, next: NextFunction) {
+  // Skip logging for certain non-critical errors
+  const skipPatterns = [
+    'favicon.ico',
+    'robots.txt',
+    '.map',
+    'webpack',
+    'hot-update'
+  ];
+
+  const shouldSkip = skipPatterns.some(pattern => 
+    req.url.includes(pattern) || req.originalUrl.includes(pattern)
+  );
+
+  if (!shouldSkip) {
+    logError(error, 'API_REQUEST', req).catch(console.error);
+  }
+
+  // Continue with normal error handling
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  const status = error.status || error.statusCode || 500;
+  const message = error.message || 'Internal Server Error';
+
+  // Don't leak sensitive error details in production
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  res.status(status).json({
+    error: isDevelopment ? message : 'Internal Server Error',
+    ...(isDevelopment && { details: error.stack })
   });
 }
 
@@ -1150,6 +1221,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to get API key" });
     }
   });
+
+  // Error Management Endpoints
+  
+  // Public endpoint for logging errors from frontend (no auth required)
+  app.post("/api/errors", async (req, res) => {
+    try {
+      const errorData = insertErrorSchema.parse(req.body);
+      
+      // Add additional context from request
+      const enhancedErrorData = {
+        ...errorData,
+        userAgent: req.get('User-Agent') || null,
+        url: errorData.url || req.get('Referer') || null,
+      };
+      
+      const newError = await storage.createError(enhancedErrorData);
+      res.status(201).json({ id: newError.id, message: "Error logged successfully" });
+    } catch (error: any) {
+      logError(error, 'POST /api/errors', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid error data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to log error" });
+      }
+    }
+  });
+
+  // Admin endpoint to get all errors with filtering
+  app.get("/api/admin/errors", requireAdminAuth, async (req, res) => {
+    try {
+      const { type, level, resolved, limit, offset } = req.query;
+      
+      const filters = {
+        type: type as string,
+        level: level as string,
+        resolved: resolved ? resolved === 'true' : undefined,
+        limit: limit ? parseInt(limit as string) : 50,
+        offset: offset ? parseInt(offset as string) : 0,
+      };
+      
+      const errors = await storage.getErrors(filters);
+      
+      // Add cache headers
+      res.set('Cache-Control', 'private, max-age=30'); // 30 seconds cache
+      res.json(errors);
+    } catch (error) {
+      logError(error, 'GET /api/admin/errors', req);
+      res.status(500).json({ error: "Failed to fetch errors", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  // Admin endpoint to get specific error by ID
+  app.get("/api/admin/errors/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const error = await storage.getErrorById(req.params.id);
+      if (!error) {
+        return res.status(404).json({ error: "Error not found" });
+      }
+      res.json(error);
+    } catch (error) {
+      logError(error, 'GET /api/admin/errors/:id', req);
+      res.status(500).json({ error: "Failed to fetch error" });
+    }
+  });
+
+  // Admin endpoint to mark error as resolved
+  app.put("/api/admin/errors/:id/resolve", requireAdminAuth, async (req, res) => {
+    try {
+      // Get admin user ID from token (in a real app, extract from JWT)
+      // For now, we'll use a default admin ID
+      const adminId = "admin"; // This should be extracted from JWT token in production
+      
+      const error = await storage.markErrorResolved(req.params.id, adminId);
+      if (!error) {
+        return res.status(404).json({ error: "Error not found" });
+      }
+      res.json(error);
+    } catch (error) {
+      logError(error, 'PUT /api/admin/errors/:id/resolve', req);
+      res.status(500).json({ error: "Failed to resolve error" });
+    }
+  });
+
+  // Admin endpoint to delete specific error
+  app.delete("/api/admin/errors/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deleteError(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Error not found" });
+      }
+      res.json({ message: "Error deleted successfully" });
+    } catch (error) {
+      logError(error, 'DELETE /api/admin/errors/:id', req);
+      res.status(500).json({ error: "Failed to delete error" });
+    }
+  });
+
+  // Admin endpoint to delete old errors
+  app.delete("/api/admin/errors/old/:days", requireAdminAuth, async (req, res) => {
+    try {
+      const days = parseInt(req.params.days);
+      if (isNaN(days) || days < 1) {
+        return res.status(400).json({ error: "Invalid days parameter" });
+      }
+      
+      const deletedCount = await storage.deleteOldErrors(days);
+      res.json({ 
+        message: `Deleted ${deletedCount} old errors`,
+        deletedCount,
+        daysOld: days
+      });
+    } catch (error) {
+      logError(error, 'DELETE /api/admin/errors/old/:days', req);
+      res.status(500).json({ error: "Failed to delete old errors" });
+    }
+  });
+
+  // Admin endpoint to get error statistics
+  app.get("/api/admin/errors/stats", requireAdminAuth, async (req, res) => {
+    try {
+      const stats = await storage.getErrorStats();
+      
+      // Add cache headers - stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/errors/stats', req);
+      res.status(500).json({ error: "Failed to fetch error statistics", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  // Add global error logging middleware (must be last)
+  app.use(errorLoggingMiddleware);
 
   const httpServer = createServer(app);
   return httpServer;

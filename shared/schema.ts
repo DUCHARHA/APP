@@ -106,6 +106,23 @@ export const userPreferences = pgTable("user_preferences", {
   createdAt: text("created_at").default(sql`now()`),
 });
 
+export const errors = pgTable("errors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  message: text("message").notNull(),
+  stack: text("stack"), // Error stack trace
+  type: text("type").notNull().default("js_error"), // js_error, api_error, boundary_error, network_error, etc.
+  source: text("source").notNull().default("frontend"), // frontend, backend
+  url: text("url"), // Page/endpoint where error occurred
+  userAgent: text("user_agent"), // Browser information
+  userId: varchar("user_id").references(() => users.id), // Optional: user who experienced the error
+  level: text("level").notNull().default("error"), // error, warning, info
+  metadata: text("metadata"), // JSON string with additional context
+  resolved: boolean("resolved").default(false), // Whether error has been addressed
+  resolvedAt: text("resolved_at"), // When error was marked as resolved
+  resolvedBy: varchar("resolved_by").references(() => users.id), // Admin who resolved the error
+  createdAt: text("created_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   role: true, // Server controls role assignment
@@ -147,6 +164,13 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).o
   updatedAt: true,
 });
 
+export const insertErrorSchema = createInsertSchema(errors).omit({
+  id: true,
+  resolvedAt: true, // Server controls resolution timing
+  resolvedBy: true, // Server controls who resolved it
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
@@ -163,6 +187,8 @@ export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type Error = typeof errors.$inferSelect;
+export type InsertError = z.infer<typeof insertErrorSchema>;
 
 // Enhanced profile and statistics types
 export interface UserProfile {

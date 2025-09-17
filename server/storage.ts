@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats, type UserFilterOptions, type PaginatedUsersResponse, type UserStats, type ProductStats, type CategoryStats, type PromoCodeStats, type AnalyticsOverview } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type Error, type InsertError, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats, type UserFilterOptions, type PaginatedUsersResponse, type UserStats, type ProductStats, type CategoryStats, type PromoCodeStats, type AnalyticsOverview } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -72,6 +72,16 @@ export interface IStorage {
   getCategoryStats(dateFrom?: string, dateTo?: string): Promise<CategoryStats>;
   getPromoCodeStats(dateFrom?: string, dateTo?: string): Promise<PromoCodeStats>;
   getAnalyticsOverview(dateFrom?: string, dateTo?: string): Promise<AnalyticsOverview>;
+
+  // Errors
+  createError(error: InsertError): Promise<Error>;
+  getErrors(filters?: { type?: string; level?: string; resolved?: boolean; limit?: number; offset?: number }): Promise<Error[]>;
+  getErrorById(id: string): Promise<Error | undefined>;
+  updateError(id: string, updates: Partial<InsertError>): Promise<Error | undefined>;
+  deleteError(id: string): Promise<boolean>;
+  deleteOldErrors(daysOld: number): Promise<number>;
+  markErrorResolved(id: string, resolvedBy: string): Promise<Error | undefined>;
+  getErrorStats(): Promise<{ total: number; unresolved: number; byType: Record<string, number>; byLevel: Record<string, number> }>;
 }
 
 export class MemStorage implements IStorage {
@@ -83,6 +93,7 @@ export class MemStorage implements IStorage {
   private notifications: Map<string, Notification> = new Map();
   private banners: Map<string, Banner> = new Map();
   private userPreferences: Map<string, UserPreferences> = new Map();
+  private errors: Map<string, Error> = new Map();
 
   constructor() {
     this.seedData();
@@ -2084,6 +2095,148 @@ export class MemStorage implements IStorage {
         userGrowth
       }
     };
+  }
+
+  // Error Management Methods
+  async createError(error: InsertError): Promise<Error> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    
+    const newError: Error = {
+      id,
+      message: error.message,
+      stack: error.stack || null,
+      type: error.type || "js_error",
+      source: error.source || "frontend",
+      url: error.url || null,
+      userAgent: error.userAgent || null,
+      userId: error.userId || null,
+      level: error.level || "error",
+      metadata: error.metadata || null,
+      resolved: error.resolved || false,
+      resolvedAt: null,
+      resolvedBy: null,
+      createdAt: now,
+    };
+    
+    this.errors.set(id, newError);
+    return newError;
+  }
+
+  async getErrors(filters?: { 
+    type?: string; 
+    level?: string; 
+    resolved?: boolean; 
+    limit?: number; 
+    offset?: number 
+  }): Promise<Error[]> {
+    let errors = Array.from(this.errors.values());
+    
+    // Apply filters
+    if (filters?.type) {
+      errors = errors.filter(error => error.type === filters.type);
+    }
+    
+    if (filters?.level) {
+      errors = errors.filter(error => error.level === filters.level);
+    }
+    
+    if (filters?.resolved !== undefined) {
+      errors = errors.filter(error => error.resolved === filters.resolved);
+    }
+    
+    // Sort by creation date (newest first)
+    errors.sort((a, b) => 
+      new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
+    );
+    
+    // Apply pagination
+    const offset = filters?.offset || 0;
+    const limit = filters?.limit || 100;
+    
+    return errors.slice(offset, offset + limit);
+  }
+
+  async getErrorById(id: string): Promise<Error | undefined> {
+    return this.errors.get(id);
+  }
+
+  async updateError(id: string, updates: Partial<InsertError>): Promise<Error | undefined> {
+    const existingError = this.errors.get(id);
+    if (!existingError) return undefined;
+    
+    const updatedError: Error = {
+      ...existingError,
+      ...updates,
+    };
+    
+    this.errors.set(id, updatedError);
+    return updatedError;
+  }
+
+  async deleteError(id: string): Promise<boolean> {
+    return this.errors.delete(id);
+  }
+
+  async deleteOldErrors(daysOld: number): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+    
+    const errors = Array.from(this.errors.values());
+    let deletedCount = 0;
+    
+    for (const error of errors) {
+      const errorDate = new Date(error.createdAt!);
+      if (errorDate < cutoffDate) {
+        this.errors.delete(error.id);
+        deletedCount++;
+      }
+    }
+    
+    return deletedCount;
+  }
+
+  async markErrorResolved(id: string, resolvedBy: string): Promise<Error | undefined> {
+    const error = this.errors.get(id);
+    if (!error) return undefined;
+    
+    const updatedError: Error = {
+      ...error,
+      resolved: true,
+      resolvedAt: new Date().toISOString(),
+      resolvedBy,
+    };
+    
+    this.errors.set(id, updatedError);
+    return updatedError;
+  }
+
+  async getErrorStats(): Promise<{ 
+    total: number; 
+    unresolved: number; 
+    byType: Record<string, number>; 
+    byLevel: Record<string, number> 
+  }> {
+    const errors = Array.from(this.errors.values());
+    
+    const stats = {
+      total: errors.length,
+      unresolved: errors.filter(error => !error.resolved).length,
+      byType: {} as Record<string, number>,
+      byLevel: {} as Record<string, number>,
+    };
+    
+    // Count by type
+    errors.forEach(error => {
+      stats.byType[error.type] = (stats.byType[error.type] || 0) + 1;
+    });
+    
+    // Count by level
+    errors.forEach(error => {
+      stats.byLevel[error.level] = (stats.byLevel[error.level] || 0) + 1;
+    });
+    
+    return stats;
   }
 }
 
