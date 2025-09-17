@@ -70,7 +70,8 @@ export default function ProductCard({ product }: ProductCardProps) {
       // Обновляем кэш реальными данными с сервера
       queryClient.setQueryData(["/api/cart", userId], (old: any) => {
         if (!old) return [];
-        // Replace temp item with actual data from server
+        
+        // First try to replace temp item with actual data from server
         const tempItemIndex = old.findIndex((item: any) => 
           item?.id?.startsWith('temp-') && item.productId === product.id
         );
@@ -80,7 +81,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           updated[tempItemIndex] = { ...data, product };
           return updated;
         }
-        return old;
+        
+        // If no temp item found, update existing item with server data
+        const existingItemIndex = old.findIndex((item: any) => item?.productId === product.id);
+        if (existingItemIndex >= 0) {
+          const updated = [...old];
+          updated[existingItemIndex] = { ...data, product };
+          return updated;
+        }
+        
+        // If no existing item found, add the new item
+        return [...old, { ...data, product }];
       });
       setTimeout(() => setIsAdded(false), 2000);
     },
