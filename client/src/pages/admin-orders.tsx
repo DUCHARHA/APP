@@ -27,17 +27,23 @@ import {
   Users,
   Activity,
   Star,
-  ShoppingBag
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Settings2
 } from "lucide-react";
-import { type Order } from "@shared/schema";
+import { type Order, type PaginatedOrdersResponse, type OrderStats } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
 import { queryClient } from "@/lib/queryClient";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const statusConfig = {
   pending: {
@@ -86,8 +92,15 @@ export default function AdminOrders() {
   const [, setLocation] = useLocation();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState<'createdAt' | 'totalAmount' | 'status'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const { toast } = useToast();
+  
+  // Debounced search to prevent excessive API calls
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
   useEffect(() => {
     // Проверка авторизации
@@ -98,15 +111,33 @@ export default function AdminOrders() {
     }
   }, [setLocation]);
 
-  const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
-    queryKey: ["/api/admin/orders"],
+  // Server-side filtered orders with pagination
+  const { data: ordersData, isLoading, refetch, isFetching } = useQuery<PaginatedOrdersResponse>({
+    queryKey: ["/api/admin/orders", {
+      status: statusFilter,
+      search: debouncedSearch,
+      sortBy,
+      sortOrder,
+      page: currentPage,
+      limit: pageSize
+    }],
     queryFn: async () => {
       const token = localStorage.getItem("adminToken");
-      const res = await fetch("/api/admin/orders", {
+      const params = new URLSearchParams();
+      
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      params.set('sortBy', sortBy);
+      params.set('sortOrder', sortOrder);
+      params.set('page', currentPage.toString());
+      params.set('limit', pageSize.toString());
+      
+      const res = await fetch(`/api/admin/orders?${params.toString()}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
+      
       if (!res.ok) {
         if (res.status === 401) {
           setLocation("/admin/login");
@@ -117,6 +148,25 @@ export default function AdminOrders() {
       return res.json();
     },
   });
+  
+  // Order statistics
+  const { data: stats } = useQuery<OrderStats>({
+    queryKey: ["/api/admin/orders/stats"],
+    queryFn: async () => {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch('/api/admin/orders/stats', {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  
+  const orders = ordersData?.orders || [];
+  const meta = ordersData?.meta;
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
@@ -148,55 +198,143 @@ export default function AdminOrders() {
     },
   });
 
-  // Фильтрация и сортировка заказов
-  const filteredAndSortedOrders = useMemo(() => {
-    let filtered = orders;
-
-    // Фильтрация по статусу
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(order => order.status === statusFilter);
+  // Bulk status update mutation
+  const bulkUpdateStatusMutation = useMutation({
+    mutationFn: async ({ orderIds, status }: { orderIds: string[]; status: string }) => {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch('/api/admin/orders/bulk-status', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderIds, status })
+      });
+      if (!res.ok) throw new Error('Failed to bulk update orders');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/orders/stats"] });
+      setSelectedOrders([]);
+      toast({
+        title: "Заказы обновлены",
+        description: data.message,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить заказы",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle filter changes
+  const handleStatusFilterChange = useCallback((value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  }, []);
+  
+  const handleSortChange = useCallback((value: string) => {
+    const [newSortBy, newSortOrder] = value.split('_');
+    setSortBy(newSortBy as 'createdAt' | 'totalAmount' | 'status');
+    setSortOrder(newSortOrder as 'asc' | 'desc');
+    setCurrentPage(1);
+  }, []);
+  
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+  
+  const handleSelectOrder = useCallback((orderId: string) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  }, []);
+  
+  const handleSelectAll = useCallback(() => {
+    if (selectedOrders.length === orders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(orders.map(order => order.id));
     }
-
-    // Поиск
-    if (searchQuery) {
-      filtered = filtered.filter(order => 
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.deliveryAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
-order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  }, [selectedOrders.length, orders]);
+  
+  const handleBulkStatusUpdate = useCallback((status: string) => {
+    if (selectedOrders.length > 0) {
+      bulkUpdateStatusMutation.mutate({ orderIds: selectedOrders, status });
     }
+  }, [selectedOrders, bulkUpdateStatusMutation]);
 
-    // Сортировка
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime();
-        case "oldest":
-          return new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
-        case "amount_high":
-          return parseFloat(b.totalAmount) - parseFloat(a.totalAmount);
-        case "amount_low":
-          return parseFloat(a.totalAmount) - parseFloat(b.totalAmount);
-        default:
-          return 0;
-      }
-    });
-  }, [orders, statusFilter, searchQuery, sortBy]);
-
-  // Статистика
-  const stats = useMemo(() => {
-    const total = orders.length;
-    const pending = orders.filter(o => o.status === 'pending').length;
-    const processing = orders.filter(o => o.status === 'processing').length;
-    const delivering = orders.filter(o => o.status === 'delivering').length;
-    const completed = orders.filter(o => o.status === 'completed').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
-    
-    return { total, pending, processing, delivering, completed, totalRevenue };
-  }, [orders]);
-
-  const updateOrderStatus = (orderId: string, status: string) => {
+  const updateOrderStatus = useCallback((orderId: string, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
+  }, [updateOrderStatusMutation]);
+  
+  // Pagination helper functions
+  const totalPages = meta?.totalPages || 1;
+  const hasNext = meta?.hasNext || false;
+  const hasPrev = meta?.hasPrev || false;
+  
+  const renderPaginationControls = () => {
+    if (totalPages <= 1) return null;
+    
+    return (
+      <div className="flex items-center justify-between mt-6">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Показано {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, meta?.total || 0)} из {meta?.total || 0} заказов
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(1)}
+            disabled={!hasPrev}
+            data-testid="button-first-page"
+          >
+            <ChevronsLeft className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={!hasPrev}
+            data-testid="button-prev-page"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <span className="px-3 py-1 text-sm font-medium bg-gray-100 dark:bg-gray-800 rounded">
+            {currentPage} / {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={!hasNext}
+            data-testid="button-next-page"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={!hasNext}
+            data-testid="button-last-page"
+          >
+            <ChevronsRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -271,7 +409,7 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
                     Управление заказами
                   </h1>
                   <p className="text-sm lg:text-base text-slate-500 dark:text-slate-400">
-                    {filteredAndSortedOrders.length} из {orders.length} заказов
+                    {meta?.total || 0} заказов • Страница {currentPage} из {totalPages}
                   </p>
                 </div>
               </div>
@@ -365,7 +503,7 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
                   />
                 </div>
                 
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                   <SelectTrigger className="w-full sm:w-48 bg-white/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700" data-testid="select-status-filter">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Все статусы" />
@@ -380,15 +518,16 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
                   </SelectContent>
                 </Select>
                 
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={`${sortBy}_${sortOrder}`} onValueChange={handleSortChange}>
                   <SelectTrigger className="w-full sm:w-48 bg-white/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700" data-testid="select-sort">
                     <SelectValue placeholder="Сортировка" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="newest">Сначала новые</SelectItem>
-                    <SelectItem value="oldest">Сначала старые</SelectItem>
-                    <SelectItem value="amount_high">По сумме (убыв.)</SelectItem>
-                    <SelectItem value="amount_low">По сумме (возр.)</SelectItem>
+                    <SelectItem value="createdAt_desc">Сначала новые</SelectItem>
+                    <SelectItem value="createdAt_asc">Сначала старые</SelectItem>
+                    <SelectItem value="totalAmount_desc">По сумме (убыв.)</SelectItem>
+                    <SelectItem value="totalAmount_asc">По сумме (возр.)</SelectItem>
+                    <SelectItem value="status_asc">По статусу</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -396,9 +535,43 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
           </CardContent>
         </Card>
 
+        {/* Bulk Operations */}
+        {selectedOrders.length > 0 && (
+          <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border-white/20 dark:border-slate-700/50 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium">Выбрано: {selectedOrders.length}</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSelectAll}
+                    data-testid="button-select-all"
+                  >
+                    {selectedOrders.length === orders.length ? "Снять всё" : "Выбрать все"}
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Select onValueChange={(value) => handleBulkStatusUpdate(value)}>
+                    <SelectTrigger className="w-48" data-testid="select-bulk-status">
+                      <SelectValue placeholder="Изменить статус" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="processing">В обработке</SelectItem>
+                      <SelectItem value="delivering">Доставляется</SelectItem>
+                      <SelectItem value="completed">Выполнен</SelectItem>
+                      <SelectItem value="cancelled">Отменен</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Orders List */}
         <div className="space-y-4 lg:space-y-6">
-          {filteredAndSortedOrders.length === 0 ? (
+          {orders.length === 0 ? (
             <Card className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border-white/20 dark:border-slate-700/50 shadow-lg">
               <CardContent className="p-8 lg:p-12 text-center">
                 <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -414,7 +587,7 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
               </CardContent>
             </Card>
           ) : (
-            filteredAndSortedOrders.map((order) => {
+            orders.map((order) => {
               const status = statusConfig[order.status as keyof typeof statusConfig];
               const StatusIcon = status.icon;
               
@@ -429,6 +602,13 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
                       <div className="flex-1 p-4 lg:p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedOrders.includes(order.id)}
+                              onChange={() => handleSelectOrder(order.id)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                              data-testid={`checkbox-order-${order.id}`}
+                            />
                             <div className={`p-2 rounded-lg ${status.color} shadow-lg`}>
                               <StatusIcon className="w-5 h-5 text-white" />
                             </div>
@@ -569,6 +749,9 @@ order.userId?.toLowerCase().includes(searchQuery.toLowerCase())
             })
           )}
         </div>
+        
+        {/* Pagination Controls */}
+        {renderPaginationControls()}
       </div>
     </div>
   );

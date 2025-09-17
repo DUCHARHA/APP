@@ -278,3 +278,68 @@ export const updatePreferencesSchema = z.object({
 
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type UpdatePreferencesData = z.infer<typeof updatePreferencesSchema>;
+
+// Order filtering and pagination types
+export interface OrderFilterOptions {
+  status?: string;
+  search?: string;
+  sortBy?: 'createdAt' | 'totalAmount' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface PaginatedOrdersResponse {
+  orders: Order[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export interface OrderWithDetails extends Order {
+  items: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    productPrice: string;
+    quantity: number;
+    totalPrice: string;
+  }>;
+  user?: {
+    id: string;
+    username: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+export interface OrderStats {
+  totalOrders: number;
+  totalRevenue: number;
+  statusCounts: {
+    pending: number;
+    processing: number;
+    delivering: number;
+    completed: number;
+    cancelled: number;
+  };
+  averageOrderValue: number;
+  revenueByDay: Array<{
+    date: string;
+    revenue: number;
+    orders: number;
+  }>;
+  topProducts: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    revenue: number;
+  }>;
+}

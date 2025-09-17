@@ -436,13 +436,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes
+  // Admin routes - Enhanced orders endpoint with server-side filtering
   app.get("/api/admin/orders", requireAdminAuth, async (req, res) => {
     try {
-      const orders = await storage.getAllOrders();
-      res.json(orders);
+      const { status, search, sortBy, sortOrder, page, limit, dateFrom, dateTo } = req.query;
+      
+      const filters = {
+        status: status as string,
+        search: search as string,
+        sortBy: sortBy as 'createdAt' | 'totalAmount' | 'status',
+        sortOrder: sortOrder as 'asc' | 'desc',
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 20,
+        dateFrom: dateFrom as string,
+        dateTo: dateTo as string
+      };
+
+      const result = await storage.getAllOrdersWithFiltering(filters);
+      
+      // Add cache headers for better performance
+      res.set('Cache-Control', 'private, max-age=0');
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch all orders" });
+      logError(error, 'GET /api/admin/orders', req);
+      res.status(500).json({ error: "Failed to fetch orders", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  // Order details endpoint
+  app.get("/api/admin/orders/:id/details", requireAdminAuth, async (req, res) => {
+    try {
+      const orderDetails = await storage.getOrderDetails(req.params.id);
+      if (!orderDetails) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(orderDetails);
+    } catch (error) {
+      logError(error, 'GET /api/admin/orders/:id/details', req);
+      res.status(500).json({ error: "Failed to fetch order details", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  // Bulk status update endpoint
+  app.patch("/api/admin/orders/bulk-status", requireAdminAuth, async (req, res) => {
+    try {
+      const { orderIds, status } = req.body;
+      
+      if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ error: "orderIds array is required" });
+      }
+      
+      if (!status || typeof status !== 'string') {
+        return res.status(400).json({ error: "status is required" });
+      }
+
+      const updatedOrders = await storage.updateOrdersStatus(orderIds, status);
+      res.json({ 
+        message: `Successfully updated ${updatedOrders.length} orders`,
+        updatedOrders 
+      });
+    } catch (error) {
+      logError(error, 'PATCH /api/admin/orders/bulk-status', req);
+      res.status(500).json({ error: "Failed to update orders", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  // Order statistics endpoint
+  app.get("/api/admin/orders/stats", requireAdminAuth, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      const stats = await storage.getOrderStats(
+        dateFrom as string,
+        dateTo as string
+      );
+      
+      // Add cache headers - stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/orders/stats', req);
+      res.status(500).json({ error: "Failed to fetch order statistics", requestId: crypto.randomUUID().slice(0, 8) });
     }
   });
 

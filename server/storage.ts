@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -40,9 +40,13 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   getUserOrders(userId: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
+  getAllOrdersWithFiltering(filters: OrderFilterOptions): Promise<PaginatedOrdersResponse>;
   getOrderById(orderId: string): Promise<Order | undefined>;
+  getOrderDetails(orderId: string): Promise<OrderWithDetails | undefined>;
   updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
+  updateOrdersStatus(orderIds: string[], status: string): Promise<Order[]>;
   deleteOrder(orderId: string): Promise<boolean>;
+  getOrderStats(dateFrom?: string, dateTo?: string): Promise<OrderStats>;
 
   // Notifications
   getUserNotifications(userId: string): Promise<Notification[]>;
@@ -1054,8 +1058,192 @@ export class MemStorage implements IStorage {
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
   }
 
+  async getAllOrdersWithFiltering(filters: OrderFilterOptions): Promise<PaginatedOrdersResponse> {
+    let orders = Array.from(this.orders.values());
+
+    // Apply filters
+    if (filters.status && filters.status !== 'all') {
+      orders = orders.filter(order => order.status === filters.status);
+    }
+
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      orders = orders.filter(order => 
+        order.id.toLowerCase().includes(searchTerm) ||
+        order.deliveryAddress.toLowerCase().includes(searchTerm) ||
+        (order.userId && order.userId.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      orders = orders.filter(order => new Date(order.createdAt!) >= fromDate);
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999); // End of day
+      orders = orders.filter(order => new Date(order.createdAt!) <= toDate);
+    }
+
+    // Sort orders
+    const sortBy = filters.sortBy || 'createdAt';
+    const sortOrder = filters.sortOrder || 'desc';
+    
+    orders.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'createdAt':
+          comparison = new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
+          break;
+        case 'totalAmount':
+          comparison = parseFloat(a.totalAmount) - parseFloat(b.totalAmount);
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
+        default:
+          comparison = new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    // Pagination
+    const page = filters.page || 1;
+    const limit = filters.limit || 20;
+    const total = orders.length;
+    const totalPages = Math.ceil(total / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    const paginatedOrders = orders.slice(startIndex, endIndex);
+
+    return {
+      orders: paginatedOrders,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    };
+  }
+
   async getOrderById(orderId: string): Promise<Order | undefined> {
     return this.orders.get(orderId);
+  }
+
+  async getOrderDetails(orderId: string): Promise<OrderWithDetails | undefined> {
+    const order = this.orders.get(orderId);
+    if (!order) return undefined;
+
+    // Get order items from the order's items array (assuming it exists)
+    const items = order.items || [];
+    
+    // Get user details
+    let user = undefined;
+    if (order.userId) {
+      const userData = this.users.get(order.userId);
+      if (userData) {
+        user = {
+          id: userData.id,
+          username: userData.username,
+          email: userData.email,
+          phone: userData.phone || undefined
+        };
+      }
+    }
+
+    return {
+      ...order,
+      items,
+      user
+    };
+  }
+
+  async updateOrdersStatus(orderIds: string[], status: string): Promise<Order[]> {
+    const updatedOrders: Order[] = [];
+    
+    for (const orderId of orderIds) {
+      const updatedOrder = await this.updateOrderStatus(orderId, status);
+      if (updatedOrder) {
+        updatedOrders.push(updatedOrder);
+      }
+    }
+    
+    return updatedOrders;
+  }
+
+  async getOrderStats(dateFrom?: string, dateTo?: string): Promise<OrderStats> {
+    let orders = Array.from(this.orders.values());
+
+    // Filter by date range if provided
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      orders = orders.filter(order => new Date(order.createdAt!) >= fromDate);
+    }
+
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      orders = orders.filter(order => new Date(order.createdAt!) <= toDate);
+    }
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
+    
+    const statusCounts = {
+      pending: orders.filter(o => o.status === 'pending').length,
+      processing: orders.filter(o => o.status === 'processing').length,
+      delivering: orders.filter(o => o.status === 'delivering').length,
+      completed: orders.filter(o => o.status === 'completed').length,
+      cancelled: orders.filter(o => o.status === 'cancelled').length,
+    };
+
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Revenue by day (last 7 days)
+    const revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayOrders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt!).toISOString().split('T')[0];
+        return orderDate === dateStr;
+      });
+      
+      const dayRevenue = dayOrders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
+      
+      revenueByDay.push({
+        date: dateStr,
+        revenue: dayRevenue,
+        orders: dayOrders.length
+      });
+    }
+
+    // Top products (mock data for now since we don't have detailed order items)
+    const topProducts = [
+      { productId: 'prod-1', productName: 'Хлеб Бородинский', quantity: 50, revenue: 4450 },
+      { productId: 'prod-2', productName: 'Молоко Простоквашино', quantity: 35, revenue: 2625 },
+      { productId: 'prod-3', productName: 'Гречка Мистраль', quantity: 25, revenue: 3000 },
+    ];
+
+    return {
+      totalOrders,
+      totalRevenue,
+      statusCounts,
+      averageOrderValue,
+      revenueByDay,
+      topProducts
+    };
   }
 
   async updateOrderStatus(orderId: string, status: string): Promise<Order | undefined> {
