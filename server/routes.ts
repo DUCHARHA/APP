@@ -947,6 +947,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics endpoints
+  app.get("/api/admin/analytics/overview", requireAdminAuth, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      const overview = await storage.getAnalyticsOverview(
+        dateFrom as string,
+        dateTo as string
+      );
+      
+      // Add cache headers - analytics can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(overview);
+    } catch (error) {
+      logError(error, 'GET /api/admin/analytics/overview', req);
+      res.status(500).json({ error: "Failed to fetch analytics overview", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  app.get("/api/admin/analytics/products", requireAdminAuth, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      const stats = await storage.getProductStats(
+        dateFrom as string,
+        dateTo as string
+      );
+      
+      // Add cache headers - product stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/analytics/products', req);
+      res.status(500).json({ error: "Failed to fetch product statistics", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  app.get("/api/admin/analytics/categories", requireAdminAuth, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      const stats = await storage.getCategoryStats(
+        dateFrom as string,
+        dateTo as string
+      );
+      
+      // Add cache headers - category stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/analytics/categories', req);
+      res.status(500).json({ error: "Failed to fetch category statistics", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  app.get("/api/admin/analytics/promo-codes", requireAdminAuth, async (req, res) => {
+    try {
+      const { dateFrom, dateTo } = req.query;
+      
+      const stats = await storage.getPromoCodeStats(
+        dateFrom as string,
+        dateTo as string
+      );
+      
+      // Add cache headers - promo stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/analytics/promo-codes', req);
+      res.status(500).json({ error: "Failed to fetch promo code statistics", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
   // User Preferences
   // APK download endpoint with cache prevention
   app.get("/app-debug.apk", (req, res) => {

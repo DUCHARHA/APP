@@ -434,3 +434,99 @@ export interface UserStats {
     totalSpent: number;
   }>;
 }
+
+export interface ProductStats {
+  totalProducts: number;
+  outOfStockProducts: number;
+  popularProducts: number;
+  averagePrice: number;
+  totalInventoryValue: number;
+  productsByCategory: Array<{
+    categoryId: string;
+    categoryName: string;
+    count: number;
+    averagePrice: number;
+  }>;
+  topSellingProducts: Array<{
+    productId: string;
+    productName: string;
+    totalSold: number;
+    revenue: number;
+    averageRating?: number;
+  }>;
+  priceDistribution: Array<{
+    range: string;
+    count: number;
+  }>;
+  salesByDay: Array<{
+    date: string;
+    productsSold: number;
+    revenue: number;
+  }>;
+}
+
+export interface CategoryStats {
+  totalCategories: number;
+  categoriesWithProducts: number;
+  averageProductsPerCategory: number;
+  categoryPerformance: Array<{
+    categoryId: string;
+    categoryName: string;
+    totalProducts: number;
+    totalSales: number;
+    revenue: number;
+    averageProductPrice: number;
+    popularityScore: number;
+  }>;
+  salesByCategory: Array<{
+    categoryId: string;
+    categoryName: string;
+    salesByDay: Array<{
+      date: string;
+      sales: number;
+      revenue: number;
+    }>;
+  }>;
+}
+
+export interface PromoCodeStats {
+  totalPromoCodes: number;
+  activePromoCodes: number;
+  usageStats: Array<{
+    code: string;
+    description: string;
+    discount: number;
+    timesUsed: number;
+    totalDiscount: number;
+    isActive: boolean;
+  }>;
+  discountsByDay: Array<{
+    date: string;
+    totalDiscounts: number;
+    ordersWithPromo: number;
+  }>;
+  mostPopularPromos: Array<{
+    code: string;
+    discount: number;
+    usageCount: number;
+    revenue: number;
+  }>;
+}
+
+export interface AnalyticsOverview {
+  orderStats: OrderStats;
+  userStats: UserStats;
+  productStats: ProductStats;
+  categoryStats: CategoryStats;
+  promoCodeStats: PromoCodeStats;
+  peakHoursStats: Array<{
+    hour: number;
+    orderCount: number;
+    revenue: number;
+  }>;
+  growthMetrics: {
+    orderGrowth: number; // percentage
+    revenueGrowth: number; // percentage
+    userGrowth: number; // percentage
+  };
+}

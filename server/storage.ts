@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats, type UserFilterOptions, type PaginatedUsersResponse, type UserStats } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats, type UserFilterOptions, type PaginatedUsersResponse, type UserStats, type ProductStats, type CategoryStats, type PromoCodeStats, type AnalyticsOverview } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -66,6 +66,12 @@ export interface IStorage {
   createBanner(banner: InsertBanner): Promise<Banner>;
   updateBanner(id: string, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
   deleteBanner(id: string): Promise<boolean>;
+
+  // Analytics
+  getProductStats(dateFrom?: string, dateTo?: string): Promise<ProductStats>;
+  getCategoryStats(dateFrom?: string, dateTo?: string): Promise<CategoryStats>;
+  getPromoCodeStats(dateFrom?: string, dateTo?: string): Promise<PromoCodeStats>;
+  getAnalyticsOverview(dateFrom?: string, dateTo?: string): Promise<AnalyticsOverview>;
 }
 
 export class MemStorage implements IStorage {
@@ -1670,6 +1676,413 @@ export class MemStorage implements IStorage {
       activeUsersWithOrders,
       registrationsByDay,
       topCustomers
+    };
+  }
+
+  async getProductStats(dateFrom?: string, dateTo?: string): Promise<ProductStats> {
+    const products = Array.from(this.products.values());
+    const orders = Array.from(this.orders.values());
+    const categories = Array.from(this.categories.values());
+
+    // Filter orders by date if provided
+    const filteredOrders = dateFrom || dateTo ? orders.filter(order => {
+      const orderDate = new Date(order.createdAt!);
+      const fromDate = dateFrom ? new Date(dateFrom) : new Date(0);
+      const toDate = dateTo ? new Date(dateTo) : new Date();
+      return orderDate >= fromDate && orderDate <= toDate;
+    }) : orders;
+
+    const totalProducts = products.length;
+    const outOfStockProducts = products.filter(p => p.stock === 0).length;
+    const popularProducts = products.filter(p => p.isPopular).length;
+    const averagePrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0) / totalProducts;
+    const totalInventoryValue = products.reduce((sum, p) => sum + (parseFloat(p.price) * p.stock), 0);
+
+    // Products by category
+    const productsByCategory = categories.map(category => {
+      const categoryProducts = products.filter(p => p.categoryId === category.id);
+      const avgPrice = categoryProducts.length > 0 
+        ? categoryProducts.reduce((sum, p) => sum + parseFloat(p.price), 0) / categoryProducts.length 
+        : 0;
+      
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        count: categoryProducts.length,
+        averagePrice: avgPrice
+      };
+    });
+
+    // Calculate product sales from orders
+    const productSales = new Map<string, { quantity: number; revenue: number }>();
+    filteredOrders.forEach(order => {
+      try {
+        const items = JSON.parse(order.items);
+        items.forEach((item: any) => {
+          const existing = productSales.get(item.productId) || { quantity: 0, revenue: 0 };
+          productSales.set(item.productId, {
+            quantity: existing.quantity + item.quantity,
+            revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
+          });
+        });
+      } catch (e) {
+        // Handle malformed order items
+        console.warn('Failed to parse order items for order:', order.id);
+      }
+    });
+
+    // Top selling products
+    const topSellingProducts = Array.from(productSales.entries())
+      .sort(([, a], [, b]) => b.quantity - a.quantity)
+      .slice(0, 10)
+      .map(([productId, data]) => {
+        const product = products.find(p => p.id === productId);
+        return {
+          productId,
+          productName: product?.name || 'Unknown Product',
+          totalSold: data.quantity,
+          revenue: data.revenue
+        };
+      });
+
+    // Price distribution
+    const priceRanges = [
+      { min: 0, max: 50, label: '0-50₽' },
+      { min: 50, max: 100, label: '50-100₽' },
+      { min: 100, max: 200, label: '100-200₽' },
+      { min: 200, max: 500, label: '200-500₽' },
+      { min: 500, max: Infinity, label: '500₽+' }
+    ];
+
+    const priceDistribution = priceRanges.map(range => ({
+      range: range.label,
+      count: products.filter(p => {
+        const price = parseFloat(p.price);
+        return price >= range.min && price < range.max;
+      }).length
+    }));
+
+    // Sales by day for the last 7 days
+    const salesByDay: Array<{ date: string; productsSold: number; revenue: number }> = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayOrders = filteredOrders.filter(order => {
+        const orderDate = new Date(order.createdAt!).toISOString().split('T')[0];
+        return orderDate === dateStr;
+      });
+      
+      let productsSold = 0;
+      let revenue = 0;
+      
+      dayOrders.forEach(order => {
+        try {
+          const items = JSON.parse(order.items);
+          items.forEach((item: any) => {
+            productsSold += item.quantity;
+            revenue += parseFloat(item.price) * item.quantity;
+          });
+        } catch (e) {
+          // Handle malformed order items
+        }
+      });
+      
+      salesByDay.push({
+        date: dateStr,
+        productsSold,
+        revenue
+      });
+    }
+
+    return {
+      totalProducts,
+      outOfStockProducts,
+      popularProducts,
+      averagePrice,
+      totalInventoryValue,
+      productsByCategory,
+      topSellingProducts,
+      priceDistribution,
+      salesByDay
+    };
+  }
+
+  async getCategoryStats(dateFrom?: string, dateTo?: string): Promise<CategoryStats> {
+    const categories = Array.from(this.categories.values());
+    const products = Array.from(this.products.values());
+    const orders = Array.from(this.orders.values());
+
+    // Filter orders by date if provided
+    const filteredOrders = dateFrom || dateTo ? orders.filter(order => {
+      const orderDate = new Date(order.createdAt!);
+      const fromDate = dateFrom ? new Date(dateFrom) : new Date(0);
+      const toDate = dateTo ? new Date(dateTo) : new Date();
+      return orderDate >= fromDate && orderDate <= toDate;
+    }) : orders;
+
+    const totalCategories = categories.length;
+    const categoriesWithProducts = categories.filter(cat => 
+      products.some(p => p.categoryId === cat.id)
+    ).length;
+    const averageProductsPerCategory = totalCategories > 0 
+      ? products.length / totalCategories 
+      : 0;
+
+    // Calculate category sales
+    const categorySales = new Map<string, { sales: number; revenue: number }>();
+    filteredOrders.forEach(order => {
+      try {
+        const items = JSON.parse(order.items);
+        items.forEach((item: any) => {
+          const product = products.find(p => p.id === item.productId);
+          if (product?.categoryId) {
+            const existing = categorySales.get(product.categoryId) || { sales: 0, revenue: 0 };
+            categorySales.set(product.categoryId, {
+              sales: existing.sales + item.quantity,
+              revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
+            });
+          }
+        });
+      } catch (e) {
+        // Handle malformed order items
+      }
+    });
+
+    // Category performance
+    const categoryPerformance = categories.map(category => {
+      const categoryProducts = products.filter(p => p.categoryId === category.id);
+      const sales = categorySales.get(category.id) || { sales: 0, revenue: 0 };
+      const avgPrice = categoryProducts.length > 0
+        ? categoryProducts.reduce((sum, p) => sum + parseFloat(p.price), 0) / categoryProducts.length
+        : 0;
+      
+      // Popularity score based on sales and revenue
+      const popularityScore = sales.sales * 0.7 + (sales.revenue / 100) * 0.3;
+
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        totalProducts: categoryProducts.length,
+        totalSales: sales.sales,
+        revenue: sales.revenue,
+        averageProductPrice: avgPrice,
+        popularityScore
+      };
+    }).sort((a, b) => b.popularityScore - a.popularityScore);
+
+    // Sales by category over time (last 7 days)
+    const salesByCategory = categories.map(category => {
+      const salesByDay: Array<{ date: string; sales: number; revenue: number }> = [];
+      const today = new Date();
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const dayOrders = filteredOrders.filter(order => {
+          const orderDate = new Date(order.createdAt!).toISOString().split('T')[0];
+          return orderDate === dateStr;
+        });
+        
+        let sales = 0;
+        let revenue = 0;
+        
+        dayOrders.forEach(order => {
+          try {
+            const items = JSON.parse(order.items);
+            items.forEach((item: any) => {
+              const product = products.find(p => p.id === item.productId);
+              if (product?.categoryId === category.id) {
+                sales += item.quantity;
+                revenue += parseFloat(item.price) * item.quantity;
+              }
+            });
+          } catch (e) {
+            // Handle malformed order items
+          }
+        });
+        
+        salesByDay.push({
+          date: dateStr,
+          sales,
+          revenue
+        });
+      }
+
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        salesByDay
+      };
+    });
+
+    return {
+      totalCategories,
+      categoriesWithProducts,
+      averageProductsPerCategory,
+      categoryPerformance,
+      salesByCategory
+    };
+  }
+
+  async getPromoCodeStats(dateFrom?: string, dateTo?: string): Promise<PromoCodeStats> {
+    // Mock promo codes data since they're not stored in database
+    const promoCodes = [
+      { code: "ПЕРВЫЙ", discount: 20, description: "Скидка 20% на первый заказ", isActive: true },
+      { code: "ДРУЗЬЯМ", discount: 15, description: "Скидка 15% для друзей", isActive: true },
+      { code: "ЛЕТОМ", discount: 10, description: "Летняя скидка 10%", isActive: true },
+      { code: "ЗИМА2024", discount: 25, description: "Зимняя распродажа", isActive: false },
+      { code: "НОВЫЙ2025", discount: 30, description: "Новогодняя скидка", isActive: true },
+    ];
+
+    const orders = Array.from(this.orders.values());
+    
+    // Filter orders by date if provided
+    const filteredOrders = dateFrom || dateTo ? orders.filter(order => {
+      const orderDate = new Date(order.createdAt!);
+      const fromDate = dateFrom ? new Date(dateFrom) : new Date(0);
+      const toDate = dateTo ? new Date(dateTo) : new Date();
+      return orderDate >= fromDate && orderDate <= toDate;
+    }) : orders;
+
+    // Mock usage stats - in real app this would come from order data
+    const usageStats = promoCodes.map(promo => {
+      // Simulate promo usage based on discount percentage
+      const baseUsage = Math.floor(Math.random() * 50) + 10;
+      const timesUsed = promo.isActive ? baseUsage : Math.floor(baseUsage * 0.3);
+      const avgOrderValue = 1500; // Mock average order value
+      const totalDiscount = timesUsed * avgOrderValue * (promo.discount / 100);
+
+      return {
+        code: promo.code,
+        description: promo.description,
+        discount: promo.discount,
+        timesUsed,
+        totalDiscount,
+        isActive: promo.isActive
+      };
+    });
+
+    // Discounts by day for the last 7 days
+    const discountsByDay: Array<{ date: string; totalDiscounts: number; ordersWithPromo: number }> = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Mock data for discounts by day
+      const ordersWithPromo = Math.floor(Math.random() * 10) + 2;
+      const totalDiscounts = ordersWithPromo * 200 + Math.random() * 500;
+      
+      discountsByDay.push({
+        date: dateStr,
+        totalDiscounts,
+        ordersWithPromo
+      });
+    }
+
+    // Most popular promos
+    const mostPopularPromos = usageStats
+      .filter(stat => stat.timesUsed > 0)
+      .sort((a, b) => b.timesUsed - a.timesUsed)
+      .slice(0, 5)
+      .map(stat => ({
+        code: stat.code,
+        discount: stat.discount,
+        usageCount: stat.timesUsed,
+        revenue: stat.totalDiscount
+      }));
+
+    return {
+      totalPromoCodes: promoCodes.length,
+      activePromoCodes: promoCodes.filter(p => p.isActive).length,
+      usageStats,
+      discountsByDay,
+      mostPopularPromos
+    };
+  }
+
+  async getAnalyticsOverview(dateFrom?: string, dateTo?: string): Promise<AnalyticsOverview> {
+    const [orderStats, userStats, productStats, categoryStats, promoCodeStats] = await Promise.all([
+      this.getOrderStats(dateFrom, dateTo),
+      this.getUserStats(),
+      this.getProductStats(dateFrom, dateTo),
+      this.getCategoryStats(dateFrom, dateTo),
+      this.getPromoCodeStats(dateFrom, dateTo)
+    ]);
+
+    const orders = Array.from(this.orders.values());
+    
+    // Filter orders by date if provided
+    const filteredOrders = dateFrom || dateTo ? orders.filter(order => {
+      const orderDate = new Date(order.createdAt!);
+      const fromDate = dateFrom ? new Date(dateFrom) : new Date(0);
+      const toDate = dateTo ? new Date(dateTo) : new Date();
+      return orderDate >= fromDate && orderDate <= toDate;
+    }) : orders;
+
+    // Peak hours analysis
+    const hourlyStats = Array.from({ length: 24 }, (_, hour) => ({ hour, orderCount: 0, revenue: 0 }));
+    
+    filteredOrders.forEach(order => {
+      const orderHour = new Date(order.createdAt!).getHours();
+      hourlyStats[orderHour].orderCount++;
+      hourlyStats[orderHour].revenue += parseFloat(order.totalAmount);
+    });
+
+    const peakHoursStats = hourlyStats.sort((a, b) => b.orderCount - a.orderCount);
+
+    // Growth metrics (compare with previous period)
+    const periodLength = dateFrom && dateTo 
+      ? Math.ceil((new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / (1000 * 60 * 60 * 24))
+      : 30; // Default 30 days
+
+    const previousPeriodStart = new Date();
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - (periodLength * 2));
+    const previousPeriodEnd = new Date();
+    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - periodLength);
+
+    const previousOrders = orders.filter(order => {
+      const orderDate = new Date(order.createdAt!);
+      return orderDate >= previousPeriodStart && orderDate <= previousPeriodEnd;
+    });
+
+    const currentOrderCount = filteredOrders.length;
+    const previousOrderCount = previousOrders.length;
+    const orderGrowth = previousOrderCount > 0 
+      ? ((currentOrderCount - previousOrderCount) / previousOrderCount) * 100 
+      : 0;
+
+    const currentRevenue = filteredOrders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
+    const previousRevenue = previousOrders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
+    const revenueGrowth = previousRevenue > 0 
+      ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 
+      : 0;
+
+    // User growth is calculated differently as it's cumulative
+    const userGrowth = userStats.registrationsByDay.length > 0 
+      ? userStats.registrationsByDay.reduce((sum, day) => sum + day.count, 0) * 10 // Mock calculation
+      : 0;
+
+    return {
+      orderStats,
+      userStats,
+      productStats,
+      categoryStats,
+      promoCodeStats,
+      peakHoursStats,
+      growthMetrics: {
+        orderGrowth,
+        revenueGrowth,
+        userGrowth
+      }
     };
   }
 }
