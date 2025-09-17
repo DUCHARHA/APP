@@ -9,6 +9,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phone: text("phone"),
   address: text("address"),
+  role: text("role").notNull().default("user"), // Values: "admin", "user"
+  status: text("status").notNull().default("active"), // Values: "active", "blocked"
   createdAt: text("created_at").default(sql`now()`),
 });
 
@@ -106,6 +108,8 @@ export const userPreferences = pgTable("user_preferences", {
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
+  role: true, // Server controls role assignment
+  status: true, // Server controls status changes
   createdAt: true,
 });
 
@@ -342,4 +346,71 @@ export interface OrderStats {
     quantity: number;
     revenue: number;
   }>;
+}
+
+// Admin user management schemas and types
+export const updateUserRoleSchema = z.object({
+  role: z.enum(['admin', 'user']).refine(
+    (role) => role === 'admin' || role === 'user',
+    { message: 'Role must be either "admin" or "user"' }
+  )
+});
+
+export const updateUserStatusSchema = z.object({
+  status: z.enum(['active', 'blocked']).refine(
+    (status) => status === 'active' || status === 'blocked',
+    { message: 'Status must be either "active" or "blocked"' }
+  )
+});
+
+export const adminUpdateUserSchema = z.object({
+  username: z.string().min(2, 'Username must be at least 2 characters').max(50).optional(),
+  email: z.string().email('Invalid email format').optional(),
+  phone: z.string().min(10, 'Phone must be at least 10 characters').optional(),
+  address: z.string().max(200, 'Address is too long').optional(),
+  role: z.enum(['admin', 'user']).optional(),
+  status: z.enum(['active', 'blocked']).optional()
+});
+
+export type UpdateUserRole = z.infer<typeof updateUserRoleSchema>;
+export type UpdateUserStatus = z.infer<typeof updateUserStatusSchema>;
+export type AdminUpdateUser = z.infer<typeof adminUpdateUserSchema>;
+
+// User filtering and pagination types for admin
+export interface UserFilterOptions {
+  role?: 'admin' | 'user' | 'all';
+  status?: 'active' | 'blocked' | 'all';
+  search?: string;
+  sortBy?: 'createdAt' | 'username' | 'email' | 'role' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface PaginatedUsersResponse {
+  users: User[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  stats: {
+    totalUsers: number;
+    activeUsers: number;
+    blockedUsers: number;
+    adminUsers: number;
+    regularUsers: number;
+  };
+}
+
+export interface UserWithStats extends User {
+  totalOrders: number;
+  totalSpent: number;
+  lastLoginAt?: string;
+  lastOrderAt?: string;
 }
