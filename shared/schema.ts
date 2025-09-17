@@ -414,3 +414,23 @@ export interface UserWithStats extends User {
   lastLoginAt?: string;
   lastOrderAt?: string;
 }
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  blockedUsers: number;
+  adminUsers: number;
+  regularUsers: number;
+  activeUsersWithOrders: number;
+  registrationsByDay: Array<{
+    date: string;
+    count: number;
+  }>;
+  topCustomers: Array<{
+    userId: string;
+    username: string;
+    email: string;
+    orderCount: number;
+    totalSpent: number;
+  }>;
+}

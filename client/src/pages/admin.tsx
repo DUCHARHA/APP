@@ -385,6 +385,14 @@ export default function Admin() {
                 urgent: pendingOrders.length > 0
               },
               {
+                title: "Управление пользователями",
+                description: "Роли и статусы",
+                icon: Users,
+                gradient: "from-emerald-500 to-teal-500",
+                path: "/admin/users",
+                stats: "Админы и клиенты"
+              },
+              {
                 title: "Баннеры и реклама",
                 description: "Управление промо",
                 icon: Globe,

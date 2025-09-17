@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema } from "@shared/schema";
+import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema, updateUserRoleSchema, updateUserStatusSchema, adminUpdateUserSchema } from "@shared/schema";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -613,6 +613,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       logError(error, 'DELETE /api/admin/products/:id', req);
       res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  // Admin user management endpoints
+  app.get("/api/admin/users", requireAdminAuth, async (req, res) => {
+    try {
+      const { role, status, search, sortBy, sortOrder, page, limit, dateFrom, dateTo } = req.query;
+      
+      const filters = {
+        role: role as 'admin' | 'user' | 'all',
+        status: status as 'active' | 'blocked' | 'all',
+        search: search as string,
+        sortBy: sortBy as 'createdAt' | 'username' | 'email' | 'role' | 'status',
+        sortOrder: sortOrder as 'asc' | 'desc',
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 20,
+        dateFrom: dateFrom as string,
+        dateTo: dateTo as string
+      };
+
+      const result = await storage.getAllUsersWithFiltering(filters);
+      
+      // Add cache headers for better performance
+      res.set('Cache-Control', 'private, max-age=0');
+      res.json(result);
+    } catch (error) {
+      logError(error, 'GET /api/admin/users', req);
+      res.status(500).json({ error: "Failed to fetch users", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  app.get("/api/admin/users/stats", requireAdminAuth, async (req, res) => {
+    try {
+      const stats = await storage.getUserStats();
+      
+      // Add cache headers - stats can be cached for a short time
+      res.set('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.json(stats);
+    } catch (error) {
+      logError(error, 'GET /api/admin/users/stats', req);
+      res.status(500).json({ error: "Failed to fetch user statistics", requestId: crypto.randomUUID().slice(0, 8) });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/role", requireAdminAuth, async (req, res) => {
+    try {
+      const { role } = updateUserRoleSchema.parse(req.body);
+      const user = await storage.updateUserRole(req.params.id, role);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      logError(error, 'PATCH /api/admin/users/:id/role', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid role data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to update user role" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/users/:id/status", requireAdminAuth, async (req, res) => {
+    try {
+      const { status } = updateUserStatusSchema.parse(req.body);
+      const user = await storage.updateUserStatus(req.params.id, status);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      logError(error, 'PATCH /api/admin/users/:id/status', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid status data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to update user status" });
+      }
+    }
+  });
+
+  app.put("/api/admin/users/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const userData = adminUpdateUserSchema.parse(req.body);
+      const user = await storage.updateUser(req.params.id, userData);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      logError(error, 'PUT /api/admin/users/:id', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid user data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to update user" });
+      }
     }
   });
 

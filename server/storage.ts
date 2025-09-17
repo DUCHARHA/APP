@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats } from "@shared/schema";
+import { type User, type InsertUser, type Category, type InsertCategory, type Product, type InsertProduct, type CartItem, type InsertCartItem, type Order, type InsertOrder, type Notification, type InsertNotification, type Banner, type InsertBanner, type UserPreferences, type InsertUserPreferences, type OrderFilterOptions, type PaginatedOrdersResponse, type OrderWithDetails, type OrderStats, type UserFilterOptions, type PaginatedUsersResponse, type UserStats } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -7,6 +7,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
+  getAllUsersWithFiltering(filters: UserFilterOptions): Promise<PaginatedUsersResponse>;
+  updateUserRole(id: string, role: string): Promise<User | undefined>;
+  updateUserStatus(id: string, status: string): Promise<User | undefined>;
+  getUserStats(): Promise<UserStats>;
 
   // User Preferences
   getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
@@ -618,6 +623,54 @@ export class MemStorage implements IStorage {
       });
     });
 
+    // Seed demo users
+    const demoUsers = [
+      {
+        id: "demo-user",
+        username: "demo",
+        email: "demo@ducharkha.com",
+        phone: "+992123456789",
+        address: "г. Душанбе, ул. Рудаки 1",
+        role: "user",
+        status: "active",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "admin-user",
+        username: "admin",
+        email: "admin@ducharkha.com",
+        phone: "+992987654321",
+        address: "г. Душанбе, офис",
+        role: "admin",
+        status: "active",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "test-user-1",
+        username: "testuser1",
+        email: "test1@ducharkha.com",
+        phone: "+992555123456",
+        address: "г. Худжанд, ул. Ленина 15",
+        role: "user",
+        status: "active",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "test-user-2",
+        username: "testuser2",
+        email: "test2@ducharkha.com",
+        phone: "+992555654321",
+        address: "г. Курган-Тюбе, ул. Айни 8",
+        role: "user",
+        status: "blocked",
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    demoUsers.forEach(user => {
+      this.users.set(user.id, user as User);
+    });
+
     // Seed some sample notifications for demo-user
     const sampleNotifications = [
       {
@@ -789,7 +842,9 @@ export class MemStorage implements IStorage {
       id, 
       createdAt: new Date().toISOString(),
       phone: insertUser.phone || null,
-      address: insertUser.address || null
+      address: insertUser.address || null,
+      role: insertUser.role || "user",
+      status: insertUser.status || "active"
     };
     this.users.set(id, user);
     return user;
@@ -1418,6 +1473,204 @@ export class MemStorage implements IStorage {
     };
     this.userPreferences.set(id, updated);
     return updated;
+  }
+
+  // Admin User Management Methods
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values())
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async getAllUsersWithFiltering(filters: UserFilterOptions): Promise<PaginatedUsersResponse> {
+    let users = Array.from(this.users.values());
+
+    // Apply filters
+    if (filters.role && filters.role !== 'all') {
+      users = users.filter(user => user.role === filters.role);
+    }
+
+    if (filters.status && filters.status !== 'all') {
+      users = users.filter(user => user.status === filters.status);
+    }
+
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      users = users.filter(user => 
+        user.username.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm) ||
+        (user.phone && user.phone.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      users = users.filter(user => new Date(user.createdAt!) >= fromDate);
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      users = users.filter(user => new Date(user.createdAt!) <= toDate);
+    }
+
+    // Sort users
+    const sortBy = filters.sortBy || 'createdAt';
+    const sortOrder = filters.sortOrder || 'desc';
+    
+    users.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'createdAt':
+          comparison = new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
+          break;
+        case 'username':
+          comparison = a.username.localeCompare(b.username);
+          break;
+        case 'email':
+          comparison = a.email.localeCompare(b.email);
+          break;
+        case 'role':
+          comparison = a.role.localeCompare(b.role);
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
+        default:
+          comparison = new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    // Pagination
+    const page = filters.page || 1;
+    const limit = filters.limit || 20;
+    const total = users.length;
+    const totalPages = Math.ceil(total / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    const paginatedUsers = users.slice(startIndex, endIndex);
+
+    return {
+      users: paginatedUsers,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    };
+  }
+
+  async updateUserRole(id: string, role: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, role };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserStatus(id: string, status: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, status };
+    this.users.set(id, updatedUser);
+
+    // Create notification for status change
+    if (status === 'blocked') {
+      await this.createNotification({
+        userId: id,
+        title: 'Аккаунт заблокирован',
+        message: 'Ваш аккаунт был заблокирован администратором. Обратитесь в службу поддержки для получения дополнительной информации.',
+        type: 'warning',
+        isRead: false
+      });
+    } else if (status === 'active') {
+      await this.createNotification({
+        userId: id,
+        title: 'Аккаунт разблокирован',
+        message: 'Ваш аккаунт был разблокирован. Вы снова можете пользоваться всеми функциями приложения.',
+        type: 'success',
+        isRead: false
+      });
+    }
+
+    return updatedUser;
+  }
+
+  async getUserStats(): Promise<UserStats> {
+    const users = Array.from(this.users.values());
+    const totalUsers = users.length;
+    const activeUsers = users.filter(user => user.status === 'active').length;
+    const blockedUsers = users.filter(user => user.status === 'blocked').length;
+    const adminUsers = users.filter(user => user.role === 'admin').length;
+    const regularUsers = users.filter(user => user.role === 'user').length;
+
+    // Registration stats for last 7 days
+    const registrationsByDay: Array<{ date: string; count: number }> = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayRegistrations = users.filter(user => {
+        const userDate = new Date(user.createdAt!).toISOString().split('T')[0];
+        return userDate === dateStr;
+      });
+      
+      registrationsByDay.push({
+        date: dateStr,
+        count: dayRegistrations.length
+      });
+    }
+
+    // Get user order statistics
+    const orders = Array.from(this.orders.values());
+    const usersWithOrders = new Set(orders.map(order => order.userId).filter(Boolean));
+    const activeUsersWithOrders = usersWithOrders.size;
+    
+    // Top customers by order count
+    const userOrderCounts = new Map<string, number>();
+    orders.forEach(order => {
+      if (order.userId) {
+        userOrderCounts.set(order.userId, (userOrderCounts.get(order.userId) || 0) + 1);
+      }
+    });
+    
+    const topCustomers = Array.from(userOrderCounts.entries())
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([userId, orderCount]) => {
+        const user = users.find(u => u.id === userId);
+        return {
+          userId,
+          username: user?.username || 'Unknown',
+          email: user?.email || 'Unknown',
+          orderCount,
+          totalSpent: orders
+            .filter(order => order.userId === userId)
+            .reduce((sum, order) => sum + parseFloat(order.totalAmount), 0)
+        };
+      });
+
+    return {
+      totalUsers,
+      activeUsers,
+      blockedUsers,
+      adminUsers,
+      regularUsers,
+      activeUsersWithOrders,
+      registrationsByDay,
+      topCustomers
+    };
   }
 }
 
