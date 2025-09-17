@@ -241,7 +241,7 @@ function App() {
 
   // Инициализируем status bar с фиолетовым цветом
   React.useEffect(() => {
-    StatusBarManager.getInstance().init();
+    statusBarManager.init();
   }, []);
 
   return (
