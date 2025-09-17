@@ -19,11 +19,15 @@ export interface IStorage {
 
   // Products
   getProducts(): Promise<Product[]>;
+  getAllProducts(): Promise<Product[]>; // Admin only - includes out-of-stock
   getProductsByCategory(categoryId: string): Promise<Product[]>;
   getPopularProducts(): Promise<Product[]>;
   getProduct(id: string): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: string): Promise<boolean>;
   searchProducts(query: string): Promise<Product[]>;
+  searchAllProducts(query: string): Promise<Product[]>; // Admin only - includes out-of-stock
 
   // Cart
   getCartItems(userId: string): Promise<(CartItem & { product: Product })[]>;
@@ -816,6 +820,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.products.values()).filter(p => p.inStock);
   }
 
+  async getAllProducts(): Promise<Product[]> {
+    return Array.from(this.products.values());
+  }
+
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
     return Array.from(this.products.values()).filter(p => p.categoryId === categoryId && p.inStock);
   }
@@ -855,6 +863,50 @@ export class MemStorage implements IStorage {
     return product;
   }
 
+  async updateProduct(id: string, updateData: Partial<InsertProduct>): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+
+    const updatedProduct: Product = {
+      ...product,
+      ...updateData,
+      id, // Keep the original ID
+      // Handle optional fields properly
+      categoryId: updateData.categoryId !== undefined ? updateData.categoryId : product.categoryId,
+      imageUrl: updateData.imageUrl !== undefined ? updateData.imageUrl : product.imageUrl,
+      description: updateData.description !== undefined ? updateData.description : product.description,
+      weight: updateData.weight !== undefined ? updateData.weight : product.weight,
+      ingredients: updateData.ingredients !== undefined ? updateData.ingredients : product.ingredients,
+      manufacturer: updateData.manufacturer !== undefined ? updateData.manufacturer : product.manufacturer,
+      countryOfOrigin: updateData.countryOfOrigin !== undefined ? updateData.countryOfOrigin : product.countryOfOrigin,
+      storageConditions: updateData.storageConditions !== undefined ? updateData.storageConditions : product.storageConditions,
+      shelfLife: updateData.shelfLife !== undefined ? updateData.shelfLife : product.shelfLife,
+      calories: updateData.calories !== undefined ? updateData.calories : product.calories,
+      proteins: updateData.proteins !== undefined ? updateData.proteins : product.proteins,
+      fats: updateData.fats !== undefined ? updateData.fats : product.fats,
+      carbs: updateData.carbs !== undefined ? updateData.carbs : product.carbs,
+      fiber: updateData.fiber !== undefined ? updateData.fiber : product.fiber,
+      sugar: updateData.sugar !== undefined ? updateData.sugar : product.sugar
+    };
+
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    const productExists = this.products.has(id);
+    if (productExists) {
+      // Remove from all cart items first
+      const cartItemsToRemove = Array.from(this.cartItems.entries())
+        .filter(([_, item]) => item.productId === id);
+      cartItemsToRemove.forEach(([cartItemId]) => this.cartItems.delete(cartItemId));
+      
+      // Delete the product
+      this.products.delete(id);
+    }
+    return productExists;
+  }
+
   async searchProducts(query: string): Promise<Product[]> {
     const lowercaseQuery = query.toLowerCase();
     return Array.from(this.products.values()).filter(p => 
@@ -862,6 +914,14 @@ export class MemStorage implements IStorage {
         p.name.toLowerCase().includes(lowercaseQuery) ||
         p.description?.toLowerCase().includes(lowercaseQuery)
       )
+    );
+  }
+
+  async searchAllProducts(query: string): Promise<Product[]> {
+    const lowercaseQuery = query.toLowerCase();
+    return Array.from(this.products.values()).filter(p => 
+      p.name.toLowerCase().includes(lowercaseQuery) ||
+      p.description?.toLowerCase().includes(lowercaseQuery)
     );
   }
 

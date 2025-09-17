@@ -20,6 +20,16 @@ function isCacheValid(cacheKey: string, maxAge: number = 300000): boolean { // 5
   return cached ? (Date.now() - cached.timestamp) < maxAge : false;
 }
 
+// Helper function to invalidate all product cache keys
+function invalidateProductCache(): void {
+  // Clear all cache keys that start with 'products_' to handle all variants
+  for (const [key] of dataCache) {
+    if (key.startsWith('products_')) {
+      dataCache.delete(key);
+    }
+  }
+}
+
 // Enhanced error logging
 function logError(error: any, context: string, req: any) {
   const timestamp = new Date().toISOString();
@@ -44,8 +54,14 @@ function generateSecureToken(): string {
 
 // Helper function to verify admin credentials
 function verifyAdminCredentials(username: string, password: string): boolean {
-  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  // Require environment variables - fail securely if not provided
+  if (!adminUsername || !adminPassword) {
+    console.error('[SECURITY] Admin credentials not configured in environment variables');
+    return false;
+  }
   
   return username === adminUsername && password === adminPassword;
 }
@@ -440,6 +456,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(order);
     } catch (error) {
       res.status(500).json({ error: "Failed to update order status" });
+    }
+  });
+
+  // Admin products endpoints
+  app.get("/api/admin/products", requireAdminAuth, async (req, res) => {
+    try {
+      const { search, category } = req.query;
+      let products;
+      
+      if (search) {
+        // For admin, search all products including out-of-stock
+        products = await storage.searchAllProducts(search as string);
+      } else if (category) {
+        // Get all products in category, including out-of-stock
+        const allProducts = await storage.getAllProducts();
+        products = allProducts.filter(p => p.categoryId === category);
+      } else {
+        // Get all products including out-of-stock
+        products = await storage.getAllProducts();
+      }
+      
+      res.json(products);
+    } catch (error) {
+      logError(error, 'GET /api/admin/products', req);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  app.post("/api/admin/products", requireAdminAuth, async (req, res) => {
+    try {
+      const productData = insertProductSchema.parse(req.body);
+      const product = await storage.createProduct(productData);
+      
+      // Invalidate all product cache variants
+      invalidateProductCache();
+      
+      res.status(201).json(product);
+    } catch (error: any) {
+      logError(error, 'POST /api/admin/products', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid product data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to create product" });
+      }
+    }
+  });
+
+  app.put("/api/admin/products/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const productData = insertProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(req.params.id, productData);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      // Invalidate all product cache variants
+      invalidateProductCache();
+      
+      res.json(product);
+    } catch (error: any) {
+      logError(error, 'PUT /api/admin/products/:id', req);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: "Invalid product data", details: error.issues });
+      } else {
+        res.status(500).json({ error: "Failed to update product" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/products/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteProduct(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      // Invalidate all product cache variants
+      invalidateProductCache();
+      
+      res.status(204).send();
+    } catch (error) {
+      logError(error, 'DELETE /api/admin/products/:id', req);
+      res.status(500).json({ error: "Failed to delete product" });
     }
   });
 

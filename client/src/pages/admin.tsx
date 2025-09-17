@@ -401,6 +401,14 @@ export default function Admin() {
                 stats: "Отправить всем"
               },
               {
+                title: "Управление товарами",
+                description: "Каталог продуктов",
+                icon: Package,
+                gradient: "from-amber-500 to-yellow-500",
+                path: "/admin/products",
+                stats: "CRUD операции"
+              },
+              {
                 title: "Промокоды",
                 description: "Управление скидками",
                 icon: CreditCard,
