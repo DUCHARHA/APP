@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Navigation, Search, ArrowLeft, X } from "lucide-react";
+import { MapPin, Navigation, Search, ArrowLeft, X, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import LocationPermissionDialog from "@/components/LocationPermissionDialog";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { useDebounce } from "@/hooks/use-debounce";
 
 // Declare global ymaps type
 declare global {
@@ -22,6 +23,14 @@ interface MapData {
   route: any;
 }
 
+interface HoverTooltipData {
+  visible: boolean;
+  coordinates: [number, number] | null;
+  address: string;
+  loading: boolean;
+  error: boolean;
+}
+
 
 const DUSHANBE_CENTER = [38.5598, 68.7870]; // Яндекс Карты: [широта, долгота]
 const STORE_COORDINATES = [38.5598, 68.7870]; // Центр Душанбе
@@ -34,8 +43,63 @@ export default function Maps() {
   const [showLocationDialog, setShowLocationDialog] = useState(true);
   const [isMapReady, setIsMapReady] = useState(false);
   const [pendingUserLocation, setPendingUserLocation] = useState<GeolocationPosition | null>(null);
+  const [hoverData, setHoverData] = useState<HoverTooltipData>({
+    visible: false,
+    coordinates: null,
+    address: '',
+    loading: false,
+    error: false
+  });
+  
+  // Debounce coordinates for geocoding to avoid too many API calls
+  const debouncedCoordinates = useDebounce(hoverData.coordinates, 750);
   const { toast } = useToast();
   const { requestLocation, loading: locationLoading, error: locationError } = useGeolocation();
+
+  // Geocode coordinates to get address on hover
+  const geocodeCoordinates = useCallback(async (coordinates: [number, number]) => {
+    if (!window.ymaps || !coordinates) return;
+
+    try {
+      setHoverData(prev => ({ ...prev, loading: true, error: false }));
+      
+      const geocoder = window.ymaps.geocode(coordinates, { results: 1 });
+      const result = await geocoder;
+      
+      const firstResult = result.geoObjects.get(0);
+      if (firstResult) {
+        const address = firstResult.getAddressLine();
+        setHoverData(prev => ({ 
+          ...prev, 
+          address: address || 'Адрес не найден',
+          loading: false,
+          error: false
+        }));
+      } else {
+        setHoverData(prev => ({ 
+          ...prev, 
+          address: 'Адрес не найден',
+          loading: false,
+          error: true
+        }));
+      }
+    } catch (error) {
+      console.warn('Geocoding error on hover:', error);
+      setHoverData(prev => ({ 
+        ...prev, 
+        address: 'Ошибка загрузки адреса',
+        loading: false,
+        error: true
+      }));
+    }
+  }, []);
+
+  // Effect to geocode coordinates when they change (debounced)
+  useEffect(() => {
+    if (debouncedCoordinates && hoverData.visible) {
+      geocodeCoordinates(debouncedCoordinates);
+    }
+  }, [debouncedCoordinates, hoverData.visible, geocodeCoordinates]);
 
   // Helper function to apply user location to map
   const applyUserLocationToMap = (position: GeolocationPosition) => {
@@ -220,6 +284,27 @@ export default function Maps() {
 
           map.geoObjects.add(storeMarker);
 
+
+          // Add hover event listeners to the map
+          map.events.add('mousemove', (e: any) => {
+            const coordinates = e.get('coords') as [number, number];
+            setHoverData(prev => ({
+              ...prev,
+              visible: true,
+              coordinates: coordinates
+            }));
+          });
+
+          map.events.add('mouseleave', () => {
+            setHoverData(prev => ({
+              ...prev,
+              visible: false,
+              coordinates: null,
+              address: '',
+              loading: false,
+              error: false
+            }));
+          });
 
           // Store map data for later use
           mapDataRef.current = {
@@ -530,12 +615,53 @@ export default function Maps() {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1">
+      <div className="flex-1 relative">
         <div 
           ref={mapRef} 
           className="w-full h-full"
           data-testid="map-container"
         />
+        
+        {/* Hover Address Display - positioned at top of map */}
+        {hoverData.visible && (
+          <div 
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] 
+                       bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm 
+                       border border-gray-200 dark:border-gray-700 
+                       rounded-lg shadow-lg px-4 py-3 min-w-[280px] max-w-[90%]"
+            data-testid="hover-address-tooltip"
+          >
+            <div className="flex items-center gap-3">
+              <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                {hoverData.loading ? (
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span className="text-sm">Загрузка адреса...</span>
+                  </div>
+                ) : hoverData.error ? (
+                  <div className="text-sm text-amber-600 dark:text-amber-400">
+                    {hoverData.address}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">
+                    {hoverData.address}
+                  </div>
+                )}
+                
+                {/* Show coordinates as secondary info */}
+                {hoverData.coordinates && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {hoverData.coordinates[0].toFixed(6)}, {hoverData.coordinates[1].toFixed(6)}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Small arrow pointing down to map */}
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-700 rotate-45"></div>
+          </div>
+        )}
       </div>
 
       
