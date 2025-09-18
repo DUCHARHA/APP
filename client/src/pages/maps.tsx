@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Navigation, Search, Check, ArrowLeft, X } from "lucide-react";
+import { MapPin, Navigation, Search, ArrowLeft, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import LocationPermissionDialog from "@/components/LocationPermissionDialog";
 import { useGeolocation } from "@/hooks/use-geolocation";
 
@@ -23,11 +22,6 @@ interface MapData {
   route: any;
 }
 
-interface SelectedAddress {
-  coordinates: [number, number];
-  address: string;
-  description: string;
-}
 
 const DUSHANBE_CENTER = [38.5598, 68.7870]; // Яндекс Карты: [широта, долгота]
 const STORE_COORDINATES = [38.5598, 68.7870]; // Центр Душанбе
@@ -37,13 +31,10 @@ export default function Maps() {
   const mapDataRef = useRef<MapData | null>(null);
   const [searchAddress, setSearchAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
-  const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(true);
   const [isMapReady, setIsMapReady] = useState(false);
   const [pendingUserLocation, setPendingUserLocation] = useState<GeolocationPosition | null>(null);
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
   const { requestLocation, loading: locationLoading, error: locationError } = useGeolocation();
 
   // Helper function to apply user location to map
@@ -109,7 +100,7 @@ export default function Maps() {
     if (permission === "deny") {
       toast({
         title: "Геолокация отклонена",
-        description: "Вы можете выбрать адрес вручную на карте или воспользоваться поиском",
+        description: "Вы можете воспользоваться поиском для нахождения адреса",
       });
       return;
     }
@@ -134,7 +125,7 @@ export default function Maps() {
       console.error('Location request failed:', error);
       toast({
         title: "Не удалось получить местоположение",
-        description: locationError || "Попробуйте выбрать адрес вручную на карте",
+        description: locationError || "Попробуйте воспользоваться поиском для нахождения адреса",
         variant: "destructive"
       });
     }
@@ -229,12 +220,6 @@ export default function Maps() {
 
           map.geoObjects.add(storeMarker);
 
-          // Add click event listener for address selection
-          map.events.add('click', (e: any) => {
-            const coords = e.get('coords');
-            console.log('Clicked coordinates:', coords);
-            handleMapClick(coords);
-          });
 
           // Store map data for later use
           mapDataRef.current = {
@@ -275,134 +260,8 @@ export default function Maps() {
     };
   }, [config?.apiKey]);
 
-  // Handle map click for address selection
-  const handleMapClick = async (coordinates: [number, number]) => {
-    console.log('handleMapClick called with coordinates:', coordinates);
-    
-    if (!window.ymaps || !mapDataRef.current) {
-      console.error('ymaps or mapDataRef not available');
-      return;
-    }
 
-    setIsLoading(true);
 
-    try {
-      // Get address by coordinates (reverse geocoding)
-      const geocoder = window.ymaps.geocode(coordinates, { results: 1 });
-      
-      geocoder.then((result: any) => {
-        const firstResult = result.geoObjects.get(0);
-        
-        if (!firstResult) {
-          toast({
-            title: "Адрес не найден",
-            description: "Не удалось определить адрес по выбранной точке",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        const address = firstResult.getAddressLine();
-        const description = firstResult.properties.get('text');
-
-        // Remove existing customer marker
-        if (mapDataRef.current?.customerMarker) {
-          mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
-        }
-
-        // Add selected address marker
-        const selectedMarker = new window.ymaps.Placemark(coordinates, {
-          balloonContent: `Выбранный адрес: ${address}`,
-          hintContent: 'Выбранный адрес доставки'
-        }, {
-          preset: 'islands#greenDotIcon'
-        });
-
-        mapDataRef.current!.map.geoObjects.add(selectedMarker);
-        mapDataRef.current!.customerMarker = selectedMarker;
-
-        // Set selected address
-        setSelectedAddress({
-          coordinates,
-          address,
-          description
-        });
-        
-        // Show address confirmation dialog
-        setShowAddressDialog(true);
-
-        setIsLoading(false);
-        
-        toast({
-          title: "Адрес выбран",
-          description: `Выбран: ${address}`,
-        });
-
-      }).catch((error: any) => {
-        console.error('Reverse geocoding error:', error);
-        toast({
-          title: "Ошибка определения адреса",
-          description: "Не удалось определить адрес по выбранной точке",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-      });
-
-    } catch (error) {
-      console.error('Map click error:', error);
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при выборе адреса",
-        variant: "destructive"
-      });
-      setIsLoading(false);
-    }
-  };
-
-  // Confirm selected address
-  const confirmAddress = () => {
-    if (!selectedAddress) return;
-
-    // Save to localStorage for now (later can be integrated with backend)
-    const addressData = {
-      id: Date.now().toString(),
-      title: "Выбранный на карте",
-      address: selectedAddress.address,
-      coordinates: selectedAddress.coordinates,
-      type: "other" as const,
-      isDefault: false,
-      timestamp: new Date().toISOString()
-    };
-
-    // Get existing addresses from localStorage
-    const existingAddresses = localStorage.getItem('user-addresses');
-    const addresses = existingAddresses ? JSON.parse(existingAddresses) : [];
-    
-    // Add new address
-    addresses.push(addressData);
-    localStorage.setItem('user-addresses', JSON.stringify(addresses));
-
-    toast({
-      title: "Адрес сохранен",
-      description: "Адрес доставки успешно добавлен",
-    });
-
-    // Navigate back or to addresses page
-    setLocation('/addresses');
-  };
-
-  // Cancel address selection
-  const cancelSelection = () => {
-    setShowAddressDialog(false);
-    setSelectedAddress(null);
-    
-    // Remove customer marker if exists
-    if (mapDataRef.current?.customerMarker) {
-      mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
-      mapDataRef.current.customerMarker = null;
-    }
-  };
 
   // Search for address
   const searchForAddress = async () => {
@@ -657,19 +516,6 @@ export default function Maps() {
             {/* Action Buttons */}
             <div className="flex gap-2">
               <Button 
-                data-testid="button-select-address"
-                onClick={() => toast({
-                  title: "Кликните по карте",
-                  description: "Нажмите на любое место на карте, чтобы выбрать адрес доставки"
-                })}
-                variant="default"
-                size="sm"
-                className="flex-1"
-              >
-                <MapPin className="h-4 w-4 mr-2" />
-                Выбрать на карте
-              </Button>
-              <Button 
                 data-testid="button-build-route"
                 onClick={buildRoute}
                 variant="outline"
@@ -692,50 +538,6 @@ export default function Maps() {
         />
       </div>
 
-      {/* Address Selection Dialog */}
-      <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Подтвердить адрес</DialogTitle>
-            <DialogDescription>
-              Проверьте правильность выбранного адреса доставки
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedAddress && (
-            <div className="space-y-4">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 mb-1">
-                  📍 Выбранный адрес:
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {selectedAddress.address}
-                </p>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={cancelSelection}
-                  className="flex-1"
-                  data-testid="button-dialog-cancel"
-                >
-                  Отменить
-                </Button>
-                <Button 
-                  onClick={confirmAddress}
-                  disabled={isLoading}
-                  className="flex-1"
-                  data-testid="button-dialog-confirm"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Сохранить адрес
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
       
       {/* Location Permission Dialog */}
       <LocationPermissionDialog
