@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 
@@ -30,9 +30,11 @@ export default function LocationPermissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent 
-        className="sm:max-w-md mx-4 rounded-3xl p-0 gap-0 border-0 shadow-2xl [&>button]:hidden"
-      >
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-[2000] bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogContent 
+          className="fixed left-[50%] top-[50%] z-[2000] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg sm:max-w-md mx-4 rounded-3xl p-0 gap-0 border-0 shadow-2xl [&>button]:hidden"
+        >
         <div className="px-6 py-8 text-center">
           {/* Location Pin Icon */}
           <div className="mx-auto mb-6 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -141,7 +143,8 @@ export default function LocationPermissionDialog({
             </Button>
           </div>
         </div>
-      </DialogContent>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 }

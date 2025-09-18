@@ -545,39 +545,6 @@ export default function Maps() {
     );
   }
 
-  // Show loading screen while map is initializing
-  if (!isMapReady) {
-    return (
-      <>
-        <div className="flex flex-col h-screen bg-background">
-          {/* Map Container with Loading Overlay */}
-          <div className="flex-1 relative">
-            <div 
-              ref={mapRef} 
-              className="w-full h-full"
-              data-testid="map-container"
-            />
-            {/* Loading Overlay */}
-            <div className="absolute inset-0 bg-gray-100/80 dark:bg-gray-900/80 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mx-auto mb-3"></div>
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Загрузка карты...</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Подготавливаем карту</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Location Permission Dialog */}
-        <LocationPermissionDialog
-          open={showLocationDialog}
-          onPermissionResponse={handleLocationPermission}
-          isLoading={locationLoading}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="h-screen relative bg-background">
       {/* Full-screen Map Container */}
@@ -587,6 +554,17 @@ export default function Maps() {
           className="w-full h-full"
           data-testid="map-container"
         />
+        
+        {/* Loading Overlay - shown while map is initializing */}
+        {!isMapReady && (
+          <div className="absolute inset-0 bg-gray-100/80 dark:bg-gray-900/80 flex items-center justify-center z-[800]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mx-auto mb-3"></div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Загрузка карты...</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Подготавливаем карту</p>
+            </div>
+          </div>
+        )}
         
         {/* Floating Close Button - Top Left */}
         <div className="absolute top-4 left-4 z-[1000]">
@@ -757,8 +735,9 @@ export default function Maps() {
         )}
       </div>
 
-      
-      {/* Location Permission Dialog */}
+      </div>
+
+      {/* Location Permission Dialog - Always rendered at the bottom with highest z-index */}
       <LocationPermissionDialog
         open={showLocationDialog}
         onPermissionResponse={handleLocationPermission}
