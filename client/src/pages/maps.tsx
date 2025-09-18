@@ -735,8 +735,6 @@ export default function Maps() {
         )}
       </div>
 
-      </div>
-
       {/* Location Permission Dialog - Always rendered at the bottom with highest z-index */}
       <LocationPermissionDialog
         open={showLocationDialog}
