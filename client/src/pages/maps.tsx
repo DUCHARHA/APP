@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Navigation, Search, ArrowLeft, X, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Search, ArrowLeft, X, Loader2, Plus, Minus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import LocationPermissionDialog from "@/components/LocationPermissionDialog";
@@ -39,6 +39,7 @@ export default function Maps() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapDataRef = useRef<MapData | null>(null);
   const [searchAddress, setSearchAddress] = useState("");
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(true);
   const [isMapReady, setIsMapReady] = useState(false);
@@ -100,6 +101,23 @@ export default function Maps() {
       geocodeCoordinates(debouncedCoordinates);
     }
   }, [debouncedCoordinates, hoverData.visible, geocodeCoordinates]);
+
+  // Escape key handling for search modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showSearchModal) {
+        setShowSearchModal(false);
+      }
+    };
+
+    if (showSearchModal) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [showSearchModal]);
 
   // Helper function to apply user location to map
   const applyUserLocationToMap = (position: GeolocationPosition) => {
@@ -258,11 +276,11 @@ export default function Maps() {
 
         window.ymaps.ready(() => {
         try {
-          // Create map centered on Dushanbe
+          // Create map centered on Dushanbe without default controls
           const map = new window.ymaps.Map(mapRef.current, {
             center: DUSHANBE_CENTER,
             zoom: 12,
-            controls: ['zoomControl', 'fullscreenControl']
+            controls: [] // Remove default controls since we're using custom floating buttons
           });
           
           // Mark map as ready
@@ -433,6 +451,21 @@ export default function Maps() {
     }
   };
 
+  // Zoom functions
+  const zoomIn = () => {
+    if (mapDataRef.current?.map) {
+      const currentZoom = mapDataRef.current.map.getZoom();
+      mapDataRef.current.map.setZoom(currentZoom + 1, { duration: 300 });
+    }
+  };
+
+  const zoomOut = () => {
+    if (mapDataRef.current?.map) {
+      const currentZoom = mapDataRef.current.map.getZoom();
+      mapDataRef.current.map.setZoom(Math.max(currentZoom - 1, 1), { duration: 300 });
+    }
+  };
+
   // Build route from store to customer
   const buildRoute = () => {
     if (!mapDataRef.current?.customerMarker || !config?.apiKey) {
@@ -546,86 +579,71 @@ export default function Maps() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="p-4 border-b bg-white dark:bg-gray-900">
-        <div className="flex items-center justify-between mb-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" data-testid="button-back">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Назад
-            </Button>
-          </Link>
-          <h1 className="text-xl font-bold text-foreground flex-1 text-center">
-            🗺️ Карта доставки
-          </h1>
-          <Link href="/">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              data-testid="button-close"
-              className="border border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        {/* Search and Route Controls */}
-        <>
-            {/* Search Bar */}
-            <div className="flex gap-2 mb-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  data-testid="input-address-search"
-                  type="text"
-                  placeholder="Введите адрес доставки..."
-                  value={searchAddress}
-                  onChange={(e) => setSearchAddress(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="pl-10"
-                  disabled={isLoading}
-                />
-              </div>
-              <Button 
-                data-testid="button-search-address"
-                onClick={searchForAddress}
-                disabled={isLoading}
-                size="sm"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button 
-                data-testid="button-build-route"
-                onClick={buildRoute}
-                variant="outline"
-                size="sm"
-                className="flex-1"
-              >
-                <Navigation className="h-4 w-4 mr-2" />
-                Маршрут
-              </Button>
-            </div>
-        </>
-      </div>
-
-      {/* Map Container */}
-      <div className="flex-1 relative">
+    <div className="h-screen relative bg-background">
+      {/* Full-screen Map Container */}
+      <div className="w-full h-full relative">
         <div 
           ref={mapRef} 
           className="w-full h-full"
           data-testid="map-container"
         />
         
-        {/* Hover Address Display - positioned at top of map */}
+        {/* Floating Close Button - Top Left */}
+        <div className="absolute top-4 left-4 z-[1000]">
+          <Link href="/">
+            <Button 
+              size="icon"
+              data-testid="button-close-floating"
+              aria-label="Закрыть карту"
+              className="w-12 h-12 rounded-full bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 hover:bg-gray-50 dark:hover:bg-gray-100"
+            >
+              <X className="h-5 w-5 text-gray-700" />
+            </Button>
+          </Link>
+        </div>
+        
+        {/* Floating Search Button - Top Right */}
+        <div className="absolute top-4 right-4 z-[1000]">
+          <Button 
+            size="icon"
+            data-testid="button-search-floating"
+            aria-label="Открыть поиск"
+            onClick={() => setShowSearchModal(true)}
+            className="w-12 h-12 rounded-full bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 hover:bg-gray-50 dark:hover:bg-gray-100"
+          >
+            <Search className="h-5 w-5 text-gray-700" />
+          </Button>
+        </div>
+        
+        {/* Floating Zoom Controls - Bottom Right */}
+        <div className="absolute bottom-6 right-4 z-[1000] flex flex-col gap-2">
+          {/* Zoom In Button */}
+          <Button 
+            size="icon"
+            data-testid="button-zoom-in"
+            aria-label="Увеличить"
+            onClick={zoomIn}
+            className="w-12 h-12 rounded-full bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 hover:bg-gray-50 dark:hover:bg-gray-100"
+          >
+            <Plus className="h-5 w-5 text-gray-700" />
+          </Button>
+          
+          {/* Zoom Out Button */}
+          <Button 
+            size="icon"
+            data-testid="button-zoom-out"
+            aria-label="Уменьшить"
+            onClick={zoomOut}
+            className="w-12 h-12 rounded-full bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 hover:bg-gray-50 dark:hover:bg-gray-100"
+          >
+            <Minus className="h-5 w-5 text-gray-700" />
+          </Button>
+        </div>
+        
+        {/* Hover Address Display - positioned at top center of map */}
         {hoverData.visible && (
           <div 
-            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] 
+            className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[900] 
                        bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm 
                        border border-gray-200 dark:border-gray-700 
                        rounded-lg shadow-lg px-4 py-3 min-w-[280px] max-w-[90%]"
@@ -660,6 +678,81 @@ export default function Maps() {
             
             {/* Small arrow pointing down to map */}
             <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-700 rotate-45"></div>
+          </div>
+        )}
+        
+        {/* Search Modal - Expandable from search button */}
+        {showSearchModal && (
+          <div className="absolute inset-0 z-[1001] bg-black/20 backdrop-blur-sm" onClick={() => setShowSearchModal(false)}>
+            <div 
+              className="absolute top-4 right-4 left-4 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Поиск адреса</h3>
+                <Button 
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setShowSearchModal(false)}
+                  className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Search Input */}
+              <div className="flex gap-2 mb-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    data-testid="input-address-search-modal"
+                    type="text"
+                    placeholder="Введите адрес доставки..."
+                    value={searchAddress}
+                    onChange={(e) => setSearchAddress(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        searchForAddress();
+                        setShowSearchModal(false);
+                      }
+                    }}
+                    className="pl-10"
+                    disabled={isLoading}
+                    autoFocus
+                  />
+                </div>
+                <Button 
+                  data-testid="button-search-address-modal"
+                  onClick={() => {
+                    searchForAddress();
+                    setShowSearchModal(false);
+                  }}
+                  disabled={isLoading}
+                  size="sm"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button 
+                  data-testid="button-build-route-modal"
+                  onClick={() => {
+                    buildRoute();
+                    setShowSearchModal(false);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Построить маршрут
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
