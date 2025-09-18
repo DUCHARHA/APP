@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { MapPin, Navigation, Search, Check, ArrowLeft, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import LocationPermissionDialog from "@/components/LocationPermissionDialog";
+import { useGeolocation } from "@/hooks/use-geolocation";
 
 // Declare global ymaps type
 declare global {
@@ -37,8 +39,106 @@ export default function Maps() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [showAddressDialog, setShowAddressDialog] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(true);
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [pendingUserLocation, setPendingUserLocation] = useState<GeolocationPosition | null>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { requestLocation, loading: locationLoading, error: locationError } = useGeolocation();
+
+  // Helper function to apply user location to map
+  const applyUserLocationToMap = (position: GeolocationPosition) => {
+    if (!mapDataRef.current?.map || !window.ymaps) return;
+
+    const userCoordinates: [number, number] = [
+      position.coords.latitude,
+      position.coords.longitude
+    ];
+
+    // Center map on user location
+    mapDataRef.current.map.setCenter(userCoordinates, 15, { duration: 1000 });
+
+    // Add user location marker
+    if (mapDataRef.current.customerMarker) {
+      mapDataRef.current.map.geoObjects.remove(mapDataRef.current.customerMarker);
+    }
+
+    const userMarker = new window.ymaps.Placemark(userCoordinates, {
+      balloonContent: 'Ваше местоположение',
+      hintContent: 'Вы находитесь здесь'
+    }, {
+      preset: 'islands#greenDotIcon'
+    });
+
+    mapDataRef.current.map.geoObjects.add(userMarker);
+    mapDataRef.current.customerMarker = userMarker;
+
+    // Get address for the location
+    const geocoder = window.ymaps.geocode(userCoordinates, { results: 1 });
+    geocoder.then((result: any) => {
+      const firstResult = result.geoObjects.get(0);
+      if (firstResult) {
+        const address = firstResult.getAddressLine();
+        toast({
+          title: "Местоположение определено",
+          description: `Ваше местоположение: ${address}`,
+        });
+      }
+    }).catch((error: any) => {
+      console.warn('Could not get address for user location:', error);
+    });
+
+    toast({
+      title: "Местоположение найдено",
+      description: "Карта центрирована на вашем местоположении",
+    });
+  };
+
+  // Apply pending location when map becomes ready
+  useEffect(() => {
+    if (isMapReady && pendingUserLocation && mapDataRef.current?.map) {
+      applyUserLocationToMap(pendingUserLocation);
+      setPendingUserLocation(null); // Clear pending location
+    }
+  }, [isMapReady, pendingUserLocation]);
+
+  // Handle location permission response
+  const handleLocationPermission = async (permission: "while_using" | "once" | "deny") => {
+    setShowLocationDialog(false);
+
+    if (permission === "deny") {
+      toast({
+        title: "Геолокация отклонена",
+        description: "Вы можете выбрать адрес вручную на карте или воспользоваться поиском",
+      });
+      return;
+    }
+
+    try {
+      const position = await requestLocation(permission);
+      
+      if (position) {
+        if (mapDataRef.current?.map && isMapReady) {
+          // Map is ready, apply location immediately
+          applyUserLocationToMap(position);
+        } else {
+          // Map not ready yet, store for later application
+          setPendingUserLocation(position);
+          toast({
+            title: "Местоположение получено",
+            description: "Применим местоположение когда карта будет готова",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Location request failed:', error);
+      toast({
+        title: "Не удалось получить местоположение",
+        description: locationError || "Попробуйте выбрать адрес вручную на карте",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Get Yandex Maps API key
   const { data: config } = useQuery<{ apiKey: string }>({
@@ -109,6 +209,9 @@ export default function Maps() {
             zoom: 12,
             controls: ['zoomControl', 'fullscreenControl']
           });
+          
+          // Mark map as ready
+          setIsMapReady(true);
           
           // Explicitly verify and set center after initialization
           setTimeout(() => {
@@ -465,6 +568,39 @@ export default function Maps() {
     );
   }
 
+  // Show loading screen while map is initializing
+  if (!isMapReady) {
+    return (
+      <>
+        <div className="flex flex-col h-screen bg-background">
+          {/* Map Container with Loading Overlay */}
+          <div className="flex-1 relative">
+            <div 
+              ref={mapRef} 
+              className="w-full h-full"
+              data-testid="map-container"
+            />
+            {/* Loading Overlay */}
+            <div className="absolute inset-0 bg-gray-100/80 dark:bg-gray-900/80 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mx-auto mb-3"></div>
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Загрузка карты...</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Подготавливаем карту</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Location Permission Dialog */}
+        <LocationPermissionDialog
+          open={showLocationDialog}
+          onPermissionResponse={handleLocationPermission}
+          isLoading={locationLoading}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
@@ -600,6 +736,13 @@ export default function Maps() {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Location Permission Dialog */}
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onPermissionResponse={handleLocationPermission}
+        isLoading={locationLoading}
+      />
     </div>
   );
 }
