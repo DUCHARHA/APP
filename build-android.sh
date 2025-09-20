@@ -3,8 +3,9 @@ set -e
 
 echo "🔨 Building Android APK..."
 
-# Create public directory for static files
+# Create directories for static files and releases
 mkdir -p dist/public
+mkdir -p releases
 
 # Build web client first - MUST succeed for valid APK
 npm run build
@@ -21,19 +22,19 @@ else
     echo "No gradle found, creating placeholder APK"
 fi
 
-# Copy APK to public directory
-# First check if we have a pre-built APK in the repo (from GitHub Actions)
-if [ -f "../dist/public/app-debug.apk" ] && [ "$(stat -c%s ../dist/public/app-debug.apk)" -gt 100 ]; then
-    echo "✅ Using pre-built APK from repository..."
+# Copy APK to releases directory (NOT dist/public to avoid contaminating webDir)
+# First check if we have a pre-built APK in the releases folder
+if [ -f "../releases/app-debug.apk" ] && [ "$(stat -c%s ../releases/app-debug.apk)" -gt 100 ]; then
+    echo "✅ Using pre-built APK from releases..."
 elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-    echo "✅ Copying freshly built APK..."
-    cp app/build/outputs/apk/debug/app-debug.apk ../dist/public/
+    echo "✅ Copying freshly built APK to releases/..."
+    cp app/build/outputs/apk/debug/app-debug.apk ../releases/
 elif [ -f "app-debug.apk" ]; then
-    echo "✅ Copying existing APK..."
-    cp app-debug.apk ../dist/public/
+    echo "✅ Copying existing APK to releases/..."
+    cp app-debug.apk ../releases/
 else
-    echo "⚠️ Creating placeholder APK (GitHub Actions will build real one)"
-    echo "PK" > ../dist/public/app-debug.apk
+    echo "⚠️ Creating placeholder APK in releases/ (GitHub Actions will build real one)"
+    echo "PK" > ../releases/app-debug.apk
 fi
 
 cd ..
