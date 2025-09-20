@@ -1092,47 +1092,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Preferences
-  // APK download endpoint with cache prevention
-  app.get("/app-debug.apk", (req, res) => {
-    const apkPath = path.join(process.cwd(), 'server', 'public', 'app-debug.apk');
-    
-    if (fs.existsSync(apkPath)) {
-      const stats = fs.statSync(apkPath);
-      
-      // Если APK файл меньше 1KB, то это заглушка - отправляем информацию
-      if (stats.size < 1024) {
-        res.status(503).set({
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }).send(`
-          <h1>🚧 APK собирается...</h1>
-          <p>GitHub Actions сейчас собирает APK с вашими изменениями.</p>
-          <p>Размер текущего файла: ${stats.size} байт (это заглушка)</p>
-          <p>Обновите страницу через 5-10 минут</p>
-          <script>
-            setTimeout(() => {
-              window.location.reload();
-            }, 30000);
-          </script>
-        `);
-        return;
-      }
-      
-      // Отправляем настоящий APK без кеширования
-      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-      res.setHeader('Content-Disposition', 'attachment; filename=app-debug.apk');
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      res.setHeader('ETag', `"${stats.size}-${stats.mtime.getTime()}"`);
-      res.sendFile(apkPath);
-    } else {
-      res.status(404).send('APK not found');
-    }
-  });
-
   app.get("/api/users/:userId/preferences", async (req, res) => {
     try {
       const preferences = await storage.getUserPreferences(req.params.userId);
