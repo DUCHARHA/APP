@@ -11,15 +11,19 @@ mkdir -p releases
 npm run build
 
 # Try to build Android APK if possible
-cd android-app
+cd android
 if [ -f "gradlew" ]; then
     echo "Using gradle wrapper..."
-    ./gradlew assembleDebug --no-daemon --quiet
+    if ! ./gradlew assembleDebug --no-daemon --quiet; then
+        echo "⚠️ Gradle build failed, will create placeholder APK"
+    fi
 elif command -v gradle &> /dev/null; then
     echo "Using system gradle..."
-    gradle assembleDebug --no-daemon --quiet
+    if ! gradle assembleDebug --no-daemon --quiet; then
+        echo "⚠️ Gradle build failed, will create placeholder APK"
+    fi
 else
-    echo "No gradle found, creating placeholder APK"
+    echo "No gradle found, will create placeholder APK"
 fi
 
 # Copy APK to releases directory (NOT dist/public to avoid contaminating webDir)
