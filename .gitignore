@@ -5,3 +5,11 @@ server/public/*
 !server/public/*.apk
 vite.config.ts.*
 *.tar.gz
+
+# Android security files - NEVER commit private keys
+*.keystore
+*.jks
+android-app/*.keystore
+android-app/*.jks
+android/*.keystore
+android/*.jks
