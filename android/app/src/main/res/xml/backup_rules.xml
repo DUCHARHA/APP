@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Описывает правила автоматического резервного копирования для приложения доставки.
+   Исключает чувствительные данные из резервных копий.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="user_session.xml"/>
+    <exclude domain="sharedpref" path="auth_tokens.xml"/>
+    <exclude domain="database" path="user_data.db"/>
+    <exclude domain="file" path="cache/"/>
+    <exclude domain="file" path="temp/"/>
+</full-backup-content>

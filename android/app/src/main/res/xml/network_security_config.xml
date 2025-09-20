@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Конфигурация сетевой безопасности для приложения доставки еды
+   Обеспечивает безопасность сетевых соединений
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.ducharkha.com</domain>
+        <domain includeSubdomains="true">ducharkha.com</domain>
+        <!-- Allow replit.dev domains for development -->
+        <domain includeSubdomains="true" cleartextTrafficPermitted="true">replit.dev</domain>
+        <domain includeSubdomains="true" cleartextTrafficPermitted="true">replit.co</domain>
+    </domain-config>
+    
+    <!-- Base configuration for all other domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Debug overrides (only for debug builds) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

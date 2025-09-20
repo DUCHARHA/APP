@@ -13,6 +13,28 @@ const config: CapacitorConfig = {
       backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP'
+    },
+    Geolocation: {
+      requestPermissions: true,
+      androidPermissions: {
+        location: 'whenInUse'
+      }
+    },
+    PushNotifications: {
+      presentationOptions: ['alert', 'badge', 'sound']
+    },
+    Haptics: {
+      enabled: true
+    },
+    StatusBar: {
+      style: 'default',
+      backgroundColor: '#ffffff',
+      overlaysWebView: false
+    },
+    App: {
+      androidDeepLinkDomains: [],
+      androidCustomScheme: 'ducharkha',
+      androidPackageName: 'com.ducharkha.delivery'
     }
   }
 };

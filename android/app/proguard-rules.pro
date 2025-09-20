@@ -5,17 +5,48 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Capacitor и Cordova правила
+-keep class com.getcapacitor.** { *; }
+-keep class com.ionicframework.capacitor.** { *; }
+-keep class org.apache.cordova.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# WebView с JavaScript интерфейсом
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Сохранение атрибутов для отладки
+-keepattributes SourceFile,LineNumberTable
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+
+# Общие правила для Android
+-keep class androidx.** { *; }
+-keep class android.support.** { *; }
+
+# Геолокация и уведомления
+-keep class com.google.android.gms.location.** { *; }
+-keep class androidx.core.app.NotificationCompat { *; }
+
+# JSON и сериализация
+-keepattributes *Annotation*,Signature
+-keep class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+# Capacitor плагины
+-keep class com.ducharkha.delivery.** { *; }
+
+# Сетевые библиотеки
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn retrofit2.**
+
+# Multidex поддержка
+-keep class androidx.multidex.** { *; }
