@@ -103,6 +103,25 @@ jobs:
           exit 1
         fi
 
+    - name: Copy AAB to public directory
+      run: |
+        mkdir -p server/public
+        cp android-app/app/build/outputs/bundle/release/app-release.aab server/public/app-release.aab
+        echo "✅ AAB copied to server/public/app-release.aab"
+        
+    - name: Commit and push AAB to repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add server/public/app-release.aab
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🤖 Auto-update AAB release build [skip ci]"
+          git push
+          echo "✅ AAB pushed to repository - triggering Render redeploy"
+        fi
+
     - name: Clean up keystore
       working-directory: android-app
       if: always()
