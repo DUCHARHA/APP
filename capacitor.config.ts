@@ -4,9 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.ducharkha.delivery',
   appName: 'DUCHARKHA',
   webDir: 'dist/public',
-  server: {
-    androidScheme: 'https'
-  },
+  // Убрана настройка server для локального WebView
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
