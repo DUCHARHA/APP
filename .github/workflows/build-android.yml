@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'android-app/**'
+      - 'android/**'
       - 'client/**'
       - '.github/workflows/build-android.yml'
   workflow_dispatch:
@@ -53,10 +53,10 @@ jobs:
       run: npm run build
       
     - name: Make gradlew executable
-      run: chmod +x android-app/gradlew
+      run: chmod +x android/gradlew
       
     - name: Build Android APK
-      working-directory: android-app
+      working-directory: android
       run: |
         echo "Building Android APK..."
         ./gradlew clean --no-daemon --no-build-cache
@@ -64,12 +64,12 @@ jobs:
         
     - name: Verify APK was created
       run: |
-        if [ -f "android-app/app/build/outputs/apk/debug/app-debug.apk" ]; then
+        if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
           echo "✅ APK created successfully"
-          ls -la android-app/app/build/outputs/apk/debug/
+          ls -la android/app/build/outputs/apk/debug/
         else
           echo "❌ APK not found"
-          ls -la android-app/app/build/outputs/ || echo "Build outputs directory not found"
+          ls -la android/app/build/outputs/ || echo "Build outputs directory not found"
           exit 1
         fi
         
@@ -77,12 +77,12 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        path: android-app/app/build/outputs/apk/debug/app-debug.apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
         
     - name: Copy APK to public directory with correct name
       run: |
         mkdir -p server/public
-        cp android-app/app/build/outputs/apk/debug/app-debug.apk server/public/app-debug.apk
+        cp android/app/build/outputs/apk/debug/app-debug.apk server/public/app-debug.apk
         echo "✅ APK copied to server/public/app-debug.apk"
         
     - name: Commit and push APK to repository

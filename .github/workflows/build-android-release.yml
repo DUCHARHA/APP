@@ -5,13 +5,13 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'android-app/**'
+      - 'android/**'
       - 'client/**'
       - '.github/workflows/build-android-release.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'android-app/**'
+      - 'android/**'
       - 'client/**'
       - '.github/workflows/build-android-release.yml'
 
@@ -50,7 +50,7 @@ jobs:
         sdkmanager "build-tools;34.0.0"
 
     - name: Create keystore from secrets
-      working-directory: android-app
+      working-directory: android
       run: |
         echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ducharkha-release-key.keystore
         ls -la ducharkha-release-key.keystore
@@ -61,21 +61,21 @@ jobs:
         npm run build
 
     - name: Setup Android local.properties
-      working-directory: android-app
+      working-directory: android
       run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
     - name: Make gradlew executable
-      working-directory: android-app
+      working-directory: android
       run: chmod +x gradlew
 
     - name: Clean and build release AAB
-      working-directory: android-app
+      working-directory: android
       run: |
         ./gradlew clean
         ./gradlew bundleRelease --no-daemon --stacktrace
 
     - name: List build outputs
-      working-directory: android-app
+      working-directory: android
       run: |
         echo "Build outputs:"
         find app/build/outputs -name "*.aab" -type f
@@ -85,11 +85,11 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-aab
-        path: android-app/app/build/outputs/bundle/release/app-release.aab
+        path: android/app/build/outputs/bundle/release/app-release.aab
         retention-days: 30
 
     - name: Verify AAB signature
-      working-directory: android-app
+      working-directory: android
       run: |
         if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
           echo "AAB file created successfully:"
@@ -110,7 +110,7 @@ jobs:
     - name: Copy AAB to public directory
       run: |
         mkdir -p server/public
-        cp android-app/app/build/outputs/bundle/release/app-release.aab server/public/app-release.aab
+        cp android/app/build/outputs/bundle/release/app-release.aab server/public/app-release.aab
         echo "✅ AAB copied to server/public/app-release.aab"
         
     - name: Commit and push AAB to repository
@@ -127,7 +127,7 @@ jobs:
         fi
 
     - name: Clean up keystore
-      working-directory: android-app
+      working-directory: android
       if: always()
       run: |
         rm -f ducharkha-release-key.keystore
