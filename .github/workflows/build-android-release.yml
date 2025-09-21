@@ -71,8 +71,11 @@ jobs:
     - name: Clean and build release AAB
       working-directory: android
       run: |
-        ./gradlew clean
-        ./gradlew bundleRelease --no-daemon --stacktrace
+        echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" >> gradle.properties
+        echo "org.gradle.parallel=false" >> gradle.properties
+        echo "org.gradle.daemon=false" >> gradle.properties
+        ./gradlew clean --stacktrace --info
+        ./gradlew bundleRelease --no-daemon --stacktrace --info --no-parallel
 
     - name: List build outputs
       working-directory: android

@@ -35,6 +35,8 @@ jobs:
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34"
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.22.1"
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;26.1.10909125"
         
     - name: Accept Android licenses
       run: |
@@ -52,15 +54,21 @@ jobs:
     - name: Build web client
       run: npm run build
       
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
+    - name: Setup Gradle wrapper
+      working-directory: android
+      run: |
+        chmod +x gradlew
+        echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" >> gradle.properties
+        echo "org.gradle.parallel=false" >> gradle.properties
+        echo "org.gradle.daemon=false" >> gradle.properties
       
     - name: Build Android APK
       working-directory: android
       run: |
         echo "Building Android APK..."
-        ./gradlew clean --no-daemon --no-build-cache
-        ./gradlew assembleDebug --no-daemon --no-build-cache --info
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+        ./gradlew clean --no-daemon --stacktrace --info
+        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel
         
     - name: Verify APK was created
       run: |
