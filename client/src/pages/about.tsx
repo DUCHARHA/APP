@@ -50,7 +50,7 @@ export default function About() {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-bold text-agent-purple" data-testid="text-app-version">1.0.0</div>
+              <div className="font-bold text-agent-purple" data-testid="text-app-version">1.5</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Стабильная</div>
             </div>
           </div>
