@@ -32,6 +32,17 @@ android {
         // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
+    signingConfigs {
+        release {
+            if (System.getenv('ANDROID_KEYSTORE_PASSWORD') != null) {
+                storeFile file('ducharkha-release-key.keystore')
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled true
@@ -41,6 +52,9 @@ android {
             jniDebuggable false
             renderscriptDebuggable false
             zipAlignEnabled true
+            if (System.getenv('ANDROID_KEYSTORE_PASSWORD') != null) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             minifyEnabled false

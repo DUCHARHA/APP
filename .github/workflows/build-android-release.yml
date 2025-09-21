@@ -44,7 +44,7 @@ jobs:
         
     - name: Accept Android SDK licenses first
       run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
         
     - name: Install Android SDK components
       run: |
@@ -52,8 +52,6 @@ jobs:
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.22.1"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;26.1.10909125"
         
     - name: Verify Android SDK installation
       run: |
@@ -77,20 +75,12 @@ jobs:
       working-directory: android
       run: |
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
-        echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" >> local.properties
         cat local.properties
 
-    - name: Setup Gradle wrapper and properties
+    - name: Setup Gradle wrapper
       working-directory: android
       run: |
         chmod +x gradlew
-        echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=768m -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
-        echo "org.gradle.parallel=false" >> gradle.properties
-        echo "org.gradle.daemon=false" >> gradle.properties
-        echo "org.gradle.caching=false" >> gradle.properties
-        echo "android.useAndroidX=true" >> gradle.properties
-        echo "android.enableJetifier=true" >> gradle.properties
 
     - name: Clean and build release AAB
       working-directory: android
