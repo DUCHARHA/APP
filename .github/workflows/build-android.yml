@@ -30,17 +30,25 @@ jobs:
       with:
         cmdline-tools-version: '11076708' # Specific version for stability
         
-    - name: Install Android SDK components  
+    - name: Accept Android licenses first
       run: |
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34"
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.22.1"
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;26.1.10909125"
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
         
-    - name: Accept Android licenses
+    - name: Install Android SDK components
       run: |
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        echo "Installing Android SDK components..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.22.1"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;26.1.10909125"
+        
+    - name: Verify Android SDK installation
+      run: |
+        echo "Verifying Android SDK installation..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        ls -la $ANDROID_HOME/ || true
       
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -54,21 +62,35 @@ jobs:
     - name: Build web client
       run: npm run build
       
-    - name: Setup Gradle wrapper
+    - name: Setup Android local.properties
+      working-directory: android
+      run: |
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+        echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
+        echo "cmake.dir=$ANDROID_HOME/cmake/3.22.1" >> local.properties
+        cat local.properties
+        
+    - name: Setup Gradle wrapper and properties
       working-directory: android
       run: |
         chmod +x gradlew
-        echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" >> gradle.properties
+        echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=768m -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
         echo "org.gradle.parallel=false" >> gradle.properties
         echo "org.gradle.daemon=false" >> gradle.properties
-      
-    - name: Build Android APK
+        echo "org.gradle.caching=false" >> gradle.properties
+        echo "android.useAndroidX=true" >> gradle.properties
+        echo "android.enableJetifier=true" >> gradle.properties
+        
+    - name: Clean and build Android APK
       working-directory: android
       run: |
         echo "Building Android APK..."
-        echo "sdk.dir=$ANDROID_HOME" > local.properties
+        echo "Gradle version:"
+        ./gradlew --version
+        echo "Starting clean build..."
         ./gradlew clean --no-daemon --stacktrace --info
-        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel
+        echo "Building debug APK..."
+        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel --refresh-dependencies
         
     - name: Verify APK was created
       run: |
