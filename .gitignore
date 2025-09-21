@@ -3,6 +3,7 @@ dist
 .DS_Store
 server/public/*
 !server/public/*.apk
+!server/public/*.aab
 vite.config.ts.*
 *.tar.gz
 
