@@ -91,6 +91,14 @@ The application implements comprehensive PWA capabilities:
 - **Install prompt** component for encouraging app installation
 - **Offline-first approach** with cached resources and API responses
 
+## Mobile App Configuration (Updated September 2025)
+The application supports native mobile app deployment through Capacitor:
+- **Native WebView**: Configured to run as a native Capacitor app with local WebView instead of TWA
+- **Android Configuration**: Proper AndroidManifest.xml setup for native app behavior
+- **Local Asset Loading**: Web files stored in Android assets directory for offline operation
+- **No Browser UI**: Removed TWA configuration to eliminate browser address bar in mobile apps
+- **Capacitor Config**: Optimized for local WebView with proper webDir setup and native plugins
+
 ## Security and Privacy (Added August 2025)
 The application implements comprehensive security measures to protect user data:
 - **Console Log Protection**: All console.log, console.info, and console.debug are disabled in production to prevent data leaks
