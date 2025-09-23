@@ -75,9 +75,11 @@ jobs:
         chmod +x gradlew
         echo "Gradle wrapper properties:"
         cat gradle/wrapper/gradle-wrapper.properties
-        echo "Clearing Gradle cache to force version update..."
+        echo "Clearing Gradle cache and configuration cache..."
         rm -rf ~/.gradle/caches/
         rm -rf ~/.gradle/wrapper/
+        rm -rf .gradle/
+        ./gradlew --stop
         
     - name: Clean and build Android APK
       working-directory: android
