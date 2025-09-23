@@ -19,10 +19,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         
     - name: Setup Android SDK Command Line Tools
@@ -75,8 +75,12 @@ jobs:
       working-directory: android
       run: |
         echo "Building Android APK..."
+        echo "Java version in use:"
+        java -version
         echo "Gradle version:"
         ./gradlew --version
+        echo "Gradle JVM args:"
+        ./gradlew -q javaToolchains
         echo "Starting clean build..."
         ./gradlew clean --no-daemon --stacktrace --info
         echo "Building debug APK..."

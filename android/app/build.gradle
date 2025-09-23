@@ -89,13 +89,7 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-// Override Capacitor's Java 21 settings with Java 17
-android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-}
+// Use Capacitor's default Java 21 settings for compatibility
 
 try {
     def servicesJSON = file('google-services.json')
