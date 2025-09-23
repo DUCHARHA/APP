@@ -10,17 +10,22 @@ mkdir -p releases
 # Build web client first - MUST succeed for valid APK
 npm run build
 
+# Sync Capacitor before building
+echo "📱 Syncing Capacitor..."
+npx cap sync || echo "⚠️ Capacitor sync failed, continuing..."
+
 # Try to build Android APK if possible
 cd android
 if [ -f "gradlew" ]; then
     echo "Using gradle wrapper..."
-    if ! ./gradlew assembleDebug --no-daemon --quiet; then
-        echo "⚠️ Gradle build failed, will create placeholder APK"
+    # Use timeout to prevent hanging
+    if ! timeout 300s ./gradlew assembleDebug --no-daemon --warning-mode none; then
+        echo "⚠️ Gradle build failed or timed out, will create placeholder APK"
     fi
 elif command -v gradle &> /dev/null; then
     echo "Using system gradle..."
-    if ! gradle assembleDebug --no-daemon --quiet; then
-        echo "⚠️ Gradle build failed, will create placeholder APK"
+    if ! timeout 300s gradle assembleDebug --no-daemon --warning-mode none; then
+        echo "⚠️ Gradle build failed or timed out, will create placeholder APK"
     fi
 else
     echo "No gradle found, will create placeholder APK"
