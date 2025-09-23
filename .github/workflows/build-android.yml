@@ -61,7 +61,7 @@ jobs:
       run: npm run build
       
     - name: Sync Capacitor with Android
-      run: npx cap sync android --copy
+      run: npx cap sync android
       
     - name: Setup Android local.properties
       working-directory: android
