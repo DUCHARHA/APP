@@ -14,3 +14,17 @@ android-app/*.keystore
 android-app/*.jks
 android/*.keystore
 android/*.jks
+
+# Screenshots and images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.webp
+attached_assets/
+Opera*Снимок*.png
+Снимок*экрана*.png
+screenshot*.png
+WhatsApp*Image*.jpeg
