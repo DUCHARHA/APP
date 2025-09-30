@@ -136,9 +136,9 @@ jobs:
         echo "Gradle version:"
         ./gradlew --version
         echo "Starting clean build..."
-        ./gradlew clean --no-daemon --stacktrace --info --no-configuration-cache
+        ./gradlew clean --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel
         echo "Building release AAB..."
-        ./gradlew bundleRelease --no-daemon --stacktrace --info --no-parallel --no-configuration-cache --refresh-dependencies
+        ./gradlew bundleRelease --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel --refresh-dependencies
 
     - name: List build outputs
       working-directory: android

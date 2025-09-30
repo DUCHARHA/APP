@@ -131,9 +131,9 @@ jobs:
         echo "Gradle JVM args:"
         ./gradlew -q javaToolchains
         echo "Starting clean build..."
-        ./gradlew clean --no-daemon --stacktrace --info --no-configuration-cache
+        ./gradlew clean --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel
         echo "Building debug APK..."
-        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel --no-configuration-cache --refresh-dependencies
+        ./gradlew assembleDebug --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel --refresh-dependencies
         
     - name: Verify APK was created
       run: |
