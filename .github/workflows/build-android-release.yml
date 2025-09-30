@@ -107,6 +107,7 @@ jobs:
         org.gradle.parallel=false
         org.gradle.caching=false
         org.gradle.configuration-cache=false
+        org.gradle.workers.max=2
         android.useAndroidX=true
         android.enableJetifier=true
         android.suppressUnsupportedCompileSdk=true
