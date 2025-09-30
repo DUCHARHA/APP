@@ -85,6 +85,28 @@ jobs:
         echo "sdk.dir=$ANDROID_HOME" > local.properties
         cat local.properties
         
+    - name: Create CI-optimized gradle.properties
+      working-directory: android
+      run: |
+        echo "Creating CI-optimized gradle.properties..."
+        cat > gradle.properties.ci << 'EOF'
+        # CI/CD optimized Gradle settings
+        org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError
+        org.gradle.daemon=false
+        org.gradle.parallel=false
+        org.gradle.caching=false
+        org.gradle.configuration-cache=false
+        android.useAndroidX=true
+        android.enableJetifier=true
+        android.suppressUnsupportedCompileSdk=true
+        android.suppressUnsupportedOptionWarnings=true
+        org.gradle.warning.mode=none
+        EOF
+        mv gradle.properties gradle.properties.bak
+        mv gradle.properties.ci gradle.properties
+        echo "New gradle.properties for CI:"
+        cat gradle.properties
+        
     - name: Setup Gradle wrapper
       working-directory: android
       run: |
@@ -108,9 +130,9 @@ jobs:
         echo "Gradle JVM args:"
         ./gradlew -q javaToolchains
         echo "Starting clean build..."
-        ./gradlew clean --no-daemon --stacktrace --info
+        ./gradlew clean --no-daemon --stacktrace --info --no-configuration-cache
         echo "Building debug APK..."
-        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel --refresh-dependencies
+        ./gradlew assembleDebug --no-daemon --stacktrace --info --no-parallel --no-configuration-cache --refresh-dependencies
         
     - name: Verify APK was created
       run: |
