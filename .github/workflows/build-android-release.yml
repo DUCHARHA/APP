@@ -125,9 +125,11 @@ jobs:
         chmod +x gradlew
         echo "Gradle wrapper properties:"
         cat gradle/wrapper/gradle-wrapper.properties
-        echo "Clearing Gradle cache to force version update..."
-        rm -rf ~/.gradle/caches/
-        rm -rf ~/.gradle/wrapper/
+        echo "Clearing ALL Gradle caches to force version update..."
+        rm -rf ~/.gradle/
+        rm -rf .gradle/
+        echo "Verifying Gradle version will be downloaded fresh..."
+        ./gradlew --version || echo "Will download on first build"
 
     - name: Clean and build release AAB
       working-directory: android
