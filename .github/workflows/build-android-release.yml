@@ -50,7 +50,7 @@ jobs:
       run: |
         echo "Installing Android SDK components..."
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;35.0.0"
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
         
     - name: Verify Android SDK installation
