@@ -71,18 +71,25 @@ jobs:
         npm ci
         npm run build
 
-    - name: Sync Capacitor with Android
+    - name: Remove old Capacitor config and regenerate
       run: |
+        echo "Removing old Capacitor auto-generated files..."
+        rm -f android/capacitor.settings.gradle
+        rm -f android/app/capacitor.build.gradle
         echo "Syncing Capacitor with Android..."
-        npx cap sync android --deployment
-        npx cap copy android
+        npx cap sync android
         echo "Verifying Capacitor files were generated..."
-        ls -la android/capacitor.settings.gradle || echo "ERROR: capacitor.settings.gradle not generated!"
-        ls -la android/app/capacitor.build.gradle || echo "ERROR: capacitor.build.gradle not generated!"
-        echo "Checking Capacitor plugin directories..."
-        ls -la node_modules/@capacitor/android/capacitor/ || true
-        ls -la node_modules/@capacitor/app/android/ || true
-        ls -la node_modules/@capacitor/geolocation/android/ || true
+        if [ ! -f "android/capacitor.settings.gradle" ]; then
+          echo "ERROR: capacitor.settings.gradle not generated!"
+          exit 1
+        fi
+        if [ ! -f "android/app/capacitor.build.gradle" ]; then
+          echo "ERROR: capacitor.build.gradle not generated!"
+          exit 1
+        fi
+        echo "✅ Capacitor files generated successfully"
+        cat android/capacitor.settings.gradle
+        cat android/app/capacitor.build.gradle
 
     - name: Setup Android local.properties
       working-directory: android
