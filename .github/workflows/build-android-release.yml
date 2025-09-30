@@ -113,7 +113,6 @@ jobs:
         android.enableJetifier=true
         android.suppressUnsupportedCompileSdk=true
         android.suppressUnsupportedOptionWarnings=true
-        org.gradle.warning.mode=none
         EOF
         mv gradle.properties gradle.properties.bak
         mv gradle.properties.ci gradle.properties
@@ -137,9 +136,9 @@ jobs:
         echo "Gradle version:"
         ./gradlew --version
         echo "Starting clean build..."
-        ./gradlew clean --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel
+        ./gradlew clean --no-daemon --stacktrace --info --no-configuration-cache --no-build-cache --no-parallel
         echo "Building release AAB..."
-        ./gradlew bundleRelease --no-daemon --stacktrace --no-configuration-cache --no-build-cache --no-parallel --refresh-dependencies
+        ./gradlew bundleRelease --no-daemon --stacktrace --info --no-configuration-cache --no-build-cache --no-parallel --refresh-dependencies
 
     - name: List build outputs
       working-directory: android
