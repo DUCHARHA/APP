@@ -1,4 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Updated: Android Gradle Plugin 8.4.2 compatible with Gradle 8.6
 
 buildscript {
     
