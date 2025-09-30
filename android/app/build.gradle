@@ -41,6 +41,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -86,8 +91,6 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
-
-// Use Capacitor's default Java 21 settings for compatibility
 
 try {
     def servicesJSON = file('google-services.json')
