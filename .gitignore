@@ -15,6 +15,10 @@ android-app/*.jks
 android/*.keystore
 android/*.jks
 
+# Capacitor auto-generated files - regenerated during build
+android/capacitor.settings.gradle
+android/app/capacitor.build.gradle
+
 # Screenshots and images
 *.png
 *.jpg
