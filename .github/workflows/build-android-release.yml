@@ -97,26 +97,21 @@ jobs:
         echo "sdk.dir=$ANDROID_HOME" > local.properties
         cat local.properties
 
-    - name: Create CI-optimized gradle.properties
+    - name: Update gradle.properties with CI settings
       working-directory: android
       run: |
-        echo "Creating CI-optimized gradle.properties..."
-        cat > gradle.properties.ci << 'EOF'
-        # CI/CD optimized Gradle settings
-        org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError
-        org.gradle.daemon=false
-        org.gradle.parallel=false
-        org.gradle.caching=false
-        org.gradle.configuration-cache=false
-        org.gradle.workers.max=2
-        android.useAndroidX=true
-        android.enableJetifier=true
-        android.suppressUnsupportedCompileSdk=true
-        android.suppressUnsupportedOptionWarnings=true
-        EOF
-        mv gradle.properties gradle.properties.bak
-        mv gradle.properties.ci gradle.properties
-        echo "New gradle.properties for CI:"
+        echo "Updating gradle.properties with CI-optimized settings..."
+        cat >> gradle.properties << 'EOF'
+
+# CI/CD optimized Gradle settings
+org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError
+org.gradle.daemon=false
+org.gradle.parallel=false
+org.gradle.caching=false
+org.gradle.configuration-cache=false
+org.gradle.workers.max=2
+EOF
+        echo "Updated gradle.properties:"
         cat gradle.properties
 
     - name: Setup Gradle wrapper
