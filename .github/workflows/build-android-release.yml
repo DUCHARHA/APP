@@ -3,17 +3,9 @@ name: Build Android Release AAB
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
-    paths:
-      - 'android/**'
-      - 'client/**'
-      - '.github/workflows/build-android-release.yml'
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'android/**'
-      - 'client/**'
-      - '.github/workflows/build-android-release.yml'
+    branches: [ main, master ]
 
 jobs:
   build:
