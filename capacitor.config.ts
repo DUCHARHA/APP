@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.ducharkha.delivery',
-  appName: 'DUCHARKHA',
+  appId: 'com.ducharha.delivery',
+  appName: 'DUCHARHA',
   webDir: 'dist/public',
   // Убрана настройка server для локального WebView
   plugins: {
@@ -31,8 +31,8 @@ const config: CapacitorConfig = {
     },
     App: {
       androidDeepLinkDomains: [],
-      androidCustomScheme: 'ducharkha',
-      androidPackageName: 'com.ducharkha.delivery'
+      androidCustomScheme: 'ducharha',
+      androidPackageName: 'com.ducharha.delivery'
     }
   }
 };

@@ -55,8 +55,8 @@ jobs:
     - name: Create keystore from secrets
       working-directory: android
       run: |
-        echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ducharkha-release-key.keystore
-        ls -la ducharkha-release-key.keystore
+        echo "$ANDROID_KEYSTORE_B64" | base64 --decode > ducharha-release-key.keystore
+        ls -la ducharha-release-key.keystore
 
     - name: Build client assets
       run: |
@@ -153,7 +153,7 @@ EOF
           echo " - alias: ${ANDROID_KEY_ALIAS}"
           # Actual verification
           keytool -list -v \
-            -keystore ducharkha-release-key.keystore \
+            -keystore ducharha-release-key.keystore \
             -alias "$ANDROID_KEY_ALIAS" \
             -storepass "$ANDROID_KEYSTORE_PASSWORD" \
             -keypass "$ANDROID_KEY_PASSWORD"
@@ -185,5 +185,5 @@ EOF
       working-directory: android
       if: always()
       run: |
-        rm -f ducharkha-release-key.keystore
+        rm -f ducharha-release-key.keystore
         echo "Keystore cleaned up"

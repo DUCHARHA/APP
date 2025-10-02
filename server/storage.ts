@@ -645,7 +645,7 @@ export class MemStorage implements IStorage {
       {
         id: "demo-user",
         username: "demo",
-        email: "demo@ducharkha.com",
+        email: "demo@ducharha.com",
         phone: "+992123456789",
         address: "г. Душанбе, ул. Рудаки 1",
         role: "user",
@@ -655,7 +655,7 @@ export class MemStorage implements IStorage {
       {
         id: "admin-user",
         username: "admin",
-        email: "admin@ducharkha.com",
+        email: "admin@ducharha.com",
         phone: "+992987654321",
         address: "г. Душанбе, офис",
         role: "admin",
@@ -665,7 +665,7 @@ export class MemStorage implements IStorage {
       {
         id: "test-user-1",
         username: "testuser1",
-        email: "test1@ducharkha.com",
+        email: "test1@ducharha.com",
         phone: "+992555123456",
         address: "г. Худжанд, ул. Ленина 15",
         role: "user",
@@ -675,7 +675,7 @@ export class MemStorage implements IStorage {
       {
         id: "test-user-2",
         username: "testuser2",
-        email: "test2@ducharkha.com",
+        email: "test2@ducharha.com",
         phone: "+992555654321",
         address: "г. Курган-Тюбе, ул. Айни 8",
         role: "user",
