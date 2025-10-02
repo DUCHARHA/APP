@@ -825,6 +825,8 @@ export class MemStorage implements IStorage {
       email: "demo@example.com",
       phone: "+992 12 345 6789",
       address: "ул. Рудаки, 25, кв. 10, Душанбе",
+      role: "user",
+      status: "active",
       createdAt: new Date().toISOString()
     };
     this.users.set(demoUser.id, demoUser);
@@ -860,8 +862,8 @@ export class MemStorage implements IStorage {
       createdAt: new Date().toISOString(),
       phone: insertUser.phone || null,
       address: insertUser.address || null,
-      role: insertUser.role || "user",
-      status: insertUser.status || "active"
+      role: "user",
+      status: "active"
     };
     this.users.set(id, user);
     return user;
@@ -1213,8 +1215,16 @@ export class MemStorage implements IStorage {
     const order = this.orders.get(orderId);
     if (!order) return undefined;
 
-    // Get order items from the order's items array (assuming it exists)
-    const items = order.items || [];
+    // Get order items - since we don't store them, return empty array
+    // TODO: Add order_items table to properly store order items
+    const items: Array<{
+      id: string;
+      productId: string;
+      productName: string;
+      productPrice: string;
+      quantity: number;
+      totalPrice: string;
+    }> = [];
     
     // Get user details
     let user = undefined;
@@ -1572,6 +1582,13 @@ export class MemStorage implements IStorage {
 
     return {
       users: paginatedUsers,
+      stats: {
+        totalUsers: this.users.size,
+        activeUsers: Array.from(this.users.values()).filter(u => u.status === 'active').length,
+        blockedUsers: Array.from(this.users.values()).filter(u => u.status === 'blocked').length,
+        adminUsers: Array.from(this.users.values()).filter(u => u.role === 'admin').length,
+        regularUsers: Array.from(this.users.values()).filter(u => u.role === 'user').length
+      },
       meta: {
         total,
         page,
@@ -1704,10 +1721,10 @@ export class MemStorage implements IStorage {
     }) : orders;
 
     const totalProducts = products.length;
-    const outOfStockProducts = products.filter(p => p.stock === 0).length;
+    const outOfStockProducts = products.filter(p => !p.inStock).length;
     const popularProducts = products.filter(p => p.isPopular).length;
     const averagePrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0) / totalProducts;
-    const totalInventoryValue = products.reduce((sum, p) => sum + (parseFloat(p.price) * p.stock), 0);
+    const totalInventoryValue = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
 
     // Products by category
     const productsByCategory = categories.map(category => {
@@ -1725,22 +1742,8 @@ export class MemStorage implements IStorage {
     });
 
     // Calculate product sales from orders
+    // TODO: Implement proper order items tracking
     const productSales = new Map<string, { quantity: number; revenue: number }>();
-    filteredOrders.forEach(order => {
-      try {
-        const items = JSON.parse(order.items);
-        items.forEach((item: any) => {
-          const existing = productSales.get(item.productId) || { quantity: 0, revenue: 0 };
-          productSales.set(item.productId, {
-            quantity: existing.quantity + item.quantity,
-            revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
-          });
-        });
-      } catch (e) {
-        // Handle malformed order items
-        console.warn('Failed to parse order items for order:', order.id);
-      }
-    });
 
     // Top selling products
     const topSellingProducts = Array.from(productSales.entries())
@@ -1791,15 +1794,8 @@ export class MemStorage implements IStorage {
       let revenue = 0;
       
       dayOrders.forEach(order => {
-        try {
-          const items = JSON.parse(order.items);
-          items.forEach((item: any) => {
-            productsSold += item.quantity;
-            revenue += parseFloat(item.price) * item.quantity;
-          });
-        } catch (e) {
-          // Handle malformed order items
-        }
+        // TODO: Calculate products sold from order items when implemented
+        revenue += parseFloat(order.totalAmount);
       });
       
       salesByDay.push({
@@ -1844,24 +1840,8 @@ export class MemStorage implements IStorage {
       : 0;
 
     // Calculate category sales
+    // TODO: Implement proper category sales tracking when order items are added
     const categorySales = new Map<string, { sales: number; revenue: number }>();
-    filteredOrders.forEach(order => {
-      try {
-        const items = JSON.parse(order.items);
-        items.forEach((item: any) => {
-          const product = products.find(p => p.id === item.productId);
-          if (product?.categoryId) {
-            const existing = categorySales.get(product.categoryId) || { sales: 0, revenue: 0 };
-            categorySales.set(product.categoryId, {
-              sales: existing.sales + item.quantity,
-              revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
-            });
-          }
-        });
-      } catch (e) {
-        // Handle malformed order items
-      }
-    });
 
     // Category performance
     const categoryPerformance = categories.map(category => {
@@ -1904,18 +1884,8 @@ export class MemStorage implements IStorage {
         let revenue = 0;
         
         dayOrders.forEach(order => {
-          try {
-            const items = JSON.parse(order.items);
-            items.forEach((item: any) => {
-              const product = products.find(p => p.id === item.productId);
-              if (product?.categoryId === category.id) {
-                sales += item.quantity;
-                revenue += parseFloat(item.price) * item.quantity;
-              }
-            });
-          } catch (e) {
-            // Handle malformed order items
-          }
+          // TODO: Calculate sales by category from order items when implemented
+          revenue += parseFloat(order.totalAmount);
         });
         
         salesByDay.push({
