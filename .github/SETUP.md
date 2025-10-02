@@ -40,12 +40,12 @@
 Если у вас уже есть keystore файл, переходите к Шагу 2.
 
 ```bash
-keytool -genkey -v -keystore release.keystore -alias ducharkha -keyalg RSA -keysize 2048 -validity 10000
+keytool -genkey -v -keystore release.keystore -alias ducharha -keyalg RSA -keysize 2048 -validity 10000
 ```
 
 Запомните:
 - Пароль keystore (KEYSTORE_PASSWORD)
-- Alias ключа (обычно "ducharkha")
+- Alias ключа (обычно "duchakha")
 - Пароль ключа (KEY_PASSWORD)
 
 ### Шаг 2: Конвертация Keystore в Base64
@@ -69,7 +69,7 @@ base64 -i release.keystore > keystore-base64.txt
 |-------------|----------|----------|
 | `ANDROID_KEYSTORE_B64` | Содержимое файла `keystore-base64.txt` | Base64 keystore |
 | `ANDROID_KEYSTORE_PASSWORD` | Ваш пароль keystore | Пароль от keystore |
-| `ANDROID_KEY_ALIAS` | Обычно "ducharkha" | Alias ключа |
+| `ANDROID_KEY_ALIAS` | Обычно "ducharha" | Alias ключа |
 | `ANDROID_KEY_PASSWORD` | Ваш пароль ключа | Пароль от ключа |
 
 ### Шаг 4: Проверка
@@ -90,7 +90,7 @@ base64 -i release.keystore > keystore-base64.txt
 2. Выберите последний успешный workflow run
 3. Прокрутите вниз до раздела "Artifacts"
 4. Скачайте:
-   - `ducharkha-debug-apk` - для тестирования
+   - `ducharha-debug-apk` - для тестирования
    - `app-release-aab` - для публикации в Google Play
 
 ## Создание Release
