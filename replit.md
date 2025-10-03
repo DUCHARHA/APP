@@ -98,10 +98,6 @@ The application supports native mobile app deployment through Capacitor:
 - **Local Asset Loading**: Web files stored in Android assets directory for offline operation
 - **No Browser UI**: Removed TWA configuration to eliminate browser address bar in mobile apps
 - **Capacitor Config**: Optimized for local WebView with proper webDir setup and native plugins
-- **Build Configuration**: Uses Android Gradle Plugin 8.4.2 with Gradle 8.6 and Build Tools 34.0.0
-- **Compatibility**: Aligned with cordova-android 10.1.1 for stable CI/CD builds
-- **Automated Builds**: GitHub Actions workflows preserve Capacitor settings in gradle.properties
-- **CI/CD Optimization**: Workflows append CI settings instead of overwriting configuration files
 
 ## Security and Privacy (Added August 2025)
 The application implements comprehensive security measures to protect user data:

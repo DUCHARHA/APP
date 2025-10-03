@@ -278,7 +278,7 @@ function App() {
   return (
     <ErrorBoundary>
       <DOMProtectionWrapper onDOMError={(error) => console.warn('DOM Error защищен:', error.message)}>
-        <ThemeProvider defaultTheme="light" storageKey="ducharha-ui-theme">
+        <ThemeProvider defaultTheme="light" storageKey="ducharkha-ui-theme">
           <QueryClientProvider client={queryClient}>
             <PWAProvider>
               <TooltipProvider>

@@ -1,6 +1,6 @@
 // Стабильный Service Worker для PWA
 const APP_VERSION = '1.0.0';
-const CACHE_NAME = `ducharha-app-${APP_VERSION}`;
+const CACHE_NAME = `ducharkha-app-${APP_VERSION}`;
 const STATIC_CACHE = `static-${APP_VERSION}`;
 
 // Файлы для кэширования

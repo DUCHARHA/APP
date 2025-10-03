@@ -27,7 +27,7 @@ if (typeof window !== 'undefined') {
 async function cleanupOldCaches() {
   try {
     const APP_CACHE_VERSION = 'v2';
-    const APP_CACHE_PREFIX = 'ducharha-';
+    const APP_CACHE_PREFIX = 'ducharkha-';
     
     // 1. Очистка только старых версий наших кэшей
     if ('caches' in window) {

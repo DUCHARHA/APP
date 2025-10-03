@@ -29,7 +29,7 @@ interface OnboardingProviderProps {
 
 export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children }) => {
   const userId = getCurrentUserId();
-  const storageKey = `ducharha_onboarding_${userId}`;
+  const storageKey = `ducharkha_onboarding_${userId}`;
 
   // Check if user has completed onboarding
   const hasCompletedOnboarding = localStorage.getItem(storageKey) === 'completed';

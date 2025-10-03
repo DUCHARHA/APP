@@ -41,7 +41,7 @@
 }
 
 # Capacitor плагины
--keep class com.ducharha.delivery.** { *; }
+-keep class com.ducharkha.delivery.** { *; }
 
 # Сетевые библиотеки
 -dontwarn okhttp3.**

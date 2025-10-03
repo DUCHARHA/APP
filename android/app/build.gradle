@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace "com.ducharha.delivery"
+    namespace "com.ducharkha.delivery"
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ducharha.delivery"
+        applicationId "com.ducharkha.delivery"
         minSdkVersion 24
         targetSdkVersion 34
         versionCode 2
@@ -27,14 +27,15 @@ android {
         }
     }
 
-    androidResources {
+    aaptOptions {
+        // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+        // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
-    
     signingConfigs {
         release {
             if (System.getenv('ANDROID_KEYSTORE_PASSWORD') != null) {
-                storeFile file('ducharha-release-key.keystore')
+                storeFile file('ducharkha-release-key.keystore')
                 storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
                 keyAlias System.getenv('ANDROID_KEY_ALIAS')
                 keyPassword System.getenv('ANDROID_KEY_PASSWORD')
@@ -87,6 +88,8 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Use Capacitor's default Java 21 settings for compatibility
 
 try {
     def servicesJSON = file('google-services.json')

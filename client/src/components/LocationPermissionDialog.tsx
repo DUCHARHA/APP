@@ -44,7 +44,7 @@ export default function LocationPermissionDialog({
           {/* Title */}
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
             Разрешить приложению<br />
-            DUCHARHA доступ к<br />
+            DUCHARKHA доступ к<br />
             данным о местоположении<br />
             устройства?
           </h2>

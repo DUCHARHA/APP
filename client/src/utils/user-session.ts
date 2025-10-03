@@ -1,5 +1,5 @@
 // Utility for managing unique user sessions
-const USER_SESSION_KEY = 'ducharha_user_session';
+const USER_SESSION_KEY = 'ducharkha_user_session';
 
 export interface UserSession {
   userId: string;

@@ -24,7 +24,7 @@ export const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [hasBeenShown, setHasBeenShown] = useState(false);
 
-  const storageKey = `ducharha_tooltip_${id}`;
+  const storageKey = `ducharkha_tooltip_${id}`;
 
   useEffect(() => {
     // Check if this tooltip has been shown before

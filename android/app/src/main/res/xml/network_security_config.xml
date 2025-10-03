@@ -5,8 +5,8 @@
 -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">api.ducharha.com</domain>
-        <domain includeSubdomains="true">ducharha.com</domain>
+        <domain includeSubdomains="true">api.ducharkha.com</domain>
+        <domain includeSubdomains="true">ducharkha.com</domain>
         <!-- Allow replit.dev domains for development -->
         <domain includeSubdomains="true" cleartextTrafficPermitted="true">replit.dev</domain>
         <domain includeSubdomains="true" cleartextTrafficPermitted="true">replit.co</domain>

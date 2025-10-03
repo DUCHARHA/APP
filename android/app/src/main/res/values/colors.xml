@@ -72,6 +72,9 @@
     <color name="md_theme_dark_outlineVariant">#49454E</color>
     <color name="md_theme_dark_scrim">#000000</color>
     
+    <!-- App Launcher Icon -->
+    <color name="ic_launcher_background">#5B21B6</color>
+    
     <!-- Window and System Bar Colors -->
     <color name="window_background_light">#FEFBFF</color>
     <color name="window_background_dark">#141218</color>
