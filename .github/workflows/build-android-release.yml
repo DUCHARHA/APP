@@ -1,4 +1,5 @@
 name: Build Android Release AAB
+# Build signed AAB for Google Play Store
 
 on:
   workflow_dispatch:

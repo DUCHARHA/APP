@@ -1,4 +1,5 @@
 name: Build Android APK
+# Auto-build APK on push to main/master or manual trigger
 
 on:
   push:
