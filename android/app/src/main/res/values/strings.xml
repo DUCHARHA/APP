@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">ДУЧАРХА</string>
     <string name="title_activity_main">ДУЧАРХА</string>
-    <string name="package_name">com.ducharkha.delivery</string>
-    <string name="custom_url_scheme">com.ducharkha.delivery</string>
+    <string name="package_name">com.ducharha.delivery</string>
+    <string name="custom_url_scheme">com.ducharha.delivery</string>
     <string name="app_description">Экспресс-доставка продуктов за 10-15 минут</string>
     <string name="twa_error_title">Ошибка подключения</string>
     <string name="twa_error_message">Не удалось подключиться к сервису доставки. Проверьте интернет-соединение.</string>

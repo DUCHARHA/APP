@@ -1,4 +1,4 @@
-package com.ducharkha.delivery;
+package com.ducharha.delivery;
 
 import com.getcapacitor.BridgeActivity;
 

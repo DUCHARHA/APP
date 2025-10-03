@@ -32,7 +32,7 @@ export function forceRefreshApp(): void {
 export function debugUserSession(): void {
   if (typeof window === 'undefined') return;
 
-  const sessionData = localStorage.getItem('ducharkha_user_session');
+  const sessionData = localStorage.getItem('ducharha_user_session');
   console.log('Session data exists:', !!sessionData);
   
   const localStorageKeys = Object.keys(localStorage);
@@ -48,10 +48,10 @@ export function autoFixDemoUser(): void {
     
     // Check localStorage for demo-user references with additional safety
     try {
-      const sessionData = localStorage.getItem('ducharkha_user_session');
+      const sessionData = localStorage.getItem('ducharha_user_session');
       if (sessionData && sessionData.includes('demo-user')) {
         console.warn('Demo-user session detected in localStorage, clearing...');
-        localStorage.removeItem('ducharkha_user_session');
+        localStorage.removeItem('ducharha_user_session');
         shouldRefresh = true;
       }
     } catch (error) {
