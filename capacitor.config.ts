@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.ducharha.delivery',
-  appName: 'DUCHAKHA',
+  appName: 'DUCHARHA',
   webDir: 'dist/public',
   // Убрана настройка server для локального WebView
   plugins: {
