@@ -142,6 +142,6 @@ jobs:
           echo "No changes to commit"
         else
           git commit -m "🤖 Auto-update AAB release build [skip ci]"
-          git push
+          git push --force-with-lease
           echo "✅ AAB pushed to repository - triggering Render redeploy"
         fi
