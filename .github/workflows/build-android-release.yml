@@ -21,11 +21,12 @@ jobs:
     permissions:
       contents: write
 
-    env:
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    # УБРАНО: env переменные для подписи, так как подпись теперь делается через r0adkll/sign-android-release action
+    # env:
+    #   ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+    #   ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+    #   ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+    #   ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
     - name: Checkout code
@@ -60,11 +61,12 @@ jobs:
         echo "ANDROID_HOME: $ANDROID_HOME"
         ls -la $ANDROID_HOME/ || true
 
-    - name: Create keystore from secrets
-      working-directory: android
-      run: |
-        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/ducharha-release-keystore
-        ls -la app/ducharha-release-keystore
+    # ЗАКОММЕНТИРОВАНО: Старый метод создания keystore вручную
+    # - name: Create keystore from secrets
+    #   working-directory: android
+    #   run: |
+    #     echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/ducharha-release-keystore
+    #     ls -la app/ducharha-release-keystore
 
     - name: Build client assets
       run: |
@@ -101,6 +103,16 @@ jobs:
         echo "Building release AAB..."
         ./gradlew bundleRelease --no-daemon --stacktrace --info --no-parallel --refresh-dependencies
 
+    - name: Sign Android Release
+      uses: r0adkll/sign-android-release@v1
+      id: sign_app
+      with:
+        releaseDirectory: android/app/build/outputs/bundle/release
+        signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
     - name: List build outputs
       working-directory: android
       run: |
@@ -114,25 +126,6 @@ jobs:
         name: app-release-aab
         path: android/app/build/outputs/bundle/release/app-release.aab
         retention-days: 30
-
-    - name: Verify AAB signature
-      working-directory: android
-      run: |
-        if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
-          echo "AAB file created successfully:"
-          ls -la app/build/outputs/bundle/release/app-release.aab
-          echo "Verifying keystore signature (using variables):"
-          echo " - alias: ${ANDROID_KEY_ALIAS}"
-          # Actual verification
-          keytool -list -v \
-            -keystore app/ducharha-release-keystore \
-            -alias "$ANDROID_KEY_ALIAS" \
-            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -keypass "$ANDROID_KEY_PASSWORD"
-        else
-          echo "AAB file not found!"
-          exit 1
-        fi
 
     - name: Copy AAB to public directory
       run: |
@@ -152,10 +145,3 @@ jobs:
           git push
           echo "✅ AAB pushed to repository - triggering Render redeploy"
         fi
-
-    - name: Clean up keystore
-      working-directory: android
-      if: always()
-      run: |
-        rm -f app/ducharha-release-keystore
-        echo "Keystore cleaned up"
