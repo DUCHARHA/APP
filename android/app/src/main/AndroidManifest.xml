@@ -14,8 +14,7 @@
         android:requestLegacyExternalStorage="false"
         android:hardwareAccelerated="true"
         android:largeHeap="false"
-        android:extractNativeLibs="false"
-        android:debuggable="false">
+        android:extractNativeLibs="false">
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
