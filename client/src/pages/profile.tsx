@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles, Settings } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, CreditCard, Bell, HelpCircle, LogOut, ChevronRight, Edit, RefreshCw, RotateCcw, Sparkles, Settings, Info, Shield, FileText, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import PWAInstallBannerProfile from "@/components/pwa-install-banner-profile";
 import AppHeader from "@/components/app-header";
 import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { UserStatistics as UserStatsComponent } from "@/components/profile/user-statistics";
+import { ExternalLink } from "@/components/external-link";
 
 export default function Profile() {
   const userId = getCurrentUserId();
@@ -115,7 +116,7 @@ export default function Profile() {
       ? orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || '0'), 0) / orders.length 
       : 0,
     favoriteCategories: ["Овощи и фрукты", "Молочные продукты", "Хлебобулочные"], // Заглушка
-    lastOrderDate: orders.length > 0 ? orders[0].createdAt : undefined,
+    lastOrderDate: orders.length > 0 && orders[0].createdAt ? orders[0].createdAt : undefined,
     loyaltyLevel: orders.length >= 50 ? 'platinum' : orders.length >= 25 ? 'gold' : orders.length >= 10 ? 'silver' : 'bronze',
     deliveryAddresses: 2, // Заглушка
     completedOrders: orders.filter(order => order.status === 'delivered').length,
@@ -172,6 +173,29 @@ export default function Profile() {
       label: "Обновить сессию",
       description: "Очистить кэш",
       action: handleRefreshSession,
+    },
+  ];
+
+  const aboutMenuItems = [
+    {
+      icon: Shield,
+      label: "Политика конфиденциальности",
+      description: "Защита данных",
+      href: "https://yourdomain.com/privacy",
+      external: true,
+    },
+    {
+      icon: FileText,
+      label: "Условия использования",
+      description: "Правила сервиса",
+      href: "https://yourdomain.com/terms",
+      external: true,
+    },
+    {
+      icon: Package,
+      label: "Версия приложения",
+      description: "1.0.0",
+      displayOnly: true,
     },
   ];
 
@@ -346,6 +370,61 @@ export default function Profile() {
                   </div>
                 </button>
               </FeatureTooltip>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* About App / Legal Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center space-x-2">
+              <Info className="w-5 h-5" />
+              <span>О приложении</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {aboutMenuItems.map((item, index) => (
+              <div key={index}>
+                {item.external ? (
+                  <ExternalLink 
+                    href={item.href!}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                          <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-medium" data-testid={`text-about-${item.label.toLowerCase().replace(/ /g, '-')}`}>
+                            {item.label}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </ExternalLink>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                        <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      </div>
+                      <div>
+                        <p className="font-medium" data-testid="text-app-version">
+                          {item.label}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </CardContent>
         </Card>
