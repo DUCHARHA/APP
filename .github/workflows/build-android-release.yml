@@ -104,7 +104,7 @@ jobs:
         ./gradlew bundleRelease --no-daemon --stacktrace --info --no-parallel --refresh-dependencies
 
     - name: Sign Android Release
-      uses: r0adkll/sign-android-release@v1.0.3
+      uses: r0adkll/sign-android-release@v1
       id: sign_app
       with:
         releaseDirectory: android/app/build/outputs/bundle/release
