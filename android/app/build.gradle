@@ -52,12 +52,6 @@ android {
             jniDebuggable false
             renderscriptDebuggable false
             zipAlignEnabled true
-            if (System.getenv('ANDROID_KEYSTORE_PASSWORD') != null) {
-                signingConfig signingConfigs.release
-            } else {
-                // Fallback to debug signing if production keystore is not available
-                signingConfig signingConfigs.debug
-            }
         }
         debug {
             minifyEnabled false

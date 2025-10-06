@@ -128,6 +128,6 @@ jobs:
           echo "No changes to commit"
         else
           git commit -m "🤖 Auto-update APK build [skip ci]"
-          git push
+          git push --force-with-lease
           echo "✅ APK pushed to repository - triggering Render redeploy"
         fi
