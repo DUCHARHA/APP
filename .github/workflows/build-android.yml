@@ -113,21 +113,21 @@ jobs:
         name: android-apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
         
-    - name: Copy APK to public directory with correct name
-      run: |
-        mkdir -p server/public
-        cp android/app/build/outputs/apk/debug/app-debug.apk server/public/app-debug.apk
-        echo "✅ APK copied to server/public/app-debug.apk"
+    # - name: Copy APK to public directory with correct name
+    #   run: |
+    #     mkdir -p server/public
+    #     cp android/app/build/outputs/apk/debug/app-debug.apk server/public/app-debug.apk
+    #     echo "✅ APK copied to server/public/app-debug.apk"
         
-    - name: Commit and push APK to repository
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add server/public/app-debug.apk
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "🤖 Auto-update APK build [skip ci]"
-          git push --force-with-lease
-          echo "✅ APK pushed to repository - triggering Render redeploy"
-        fi
+    # - name: Commit and push APK to repository
+    #   run: |
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git add server/public/app-debug.apk
+    #     if git diff --staged --quiet; then
+    #       echo "No changes to commit"
+    #     else
+    #       git commit -m "🤖 Auto-update APK build [skip ci]"
+    #       git push --force-with-lease
+    #       echo "✅ APK pushed to repository - triggering Render redeploy"
+    #     fi

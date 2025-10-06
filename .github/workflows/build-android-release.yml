@@ -127,21 +127,21 @@ jobs:
         path: android/app/build/outputs/bundle/release/app-release.aab
         retention-days: 30
 
-    - name: Copy AAB to public directory
-      run: |
-        mkdir -p server/public
-        cp android/app/build/outputs/bundle/release/app-release.aab server/public/app-release.aab
-        echo "✅ AAB copied to server/public/app-release.aab"
+    # - name: Copy AAB to public directory
+    #   run: |
+    #     mkdir -p server/public
+    #     cp android/app/build/outputs/bundle/release/app-release.aab server/public/app-release.aab
+    #     echo "✅ AAB copied to server/public/app-release.aab"
         
-    - name: Commit and push AAB to repository
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add server/public/app-release.aab
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "🤖 Auto-update AAB release build [skip ci]"
-          git push --force-with-lease
-          echo "✅ AAB pushed to repository - triggering Render redeploy"
-        fi
+    # - name: Commit and push AAB to repository
+    #   run: |
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git add server/public/app-release.aab
+    #     if git diff --staged --quiet; then
+    #       echo "No changes to commit"
+    #     else
+    #       git commit -m "🤖 Auto-update AAB release build [skip ci]"
+    #       git push --force-with-lease
+    #       echo "✅ AAB pushed to repository - triggering Render redeploy"
+    #     fi
