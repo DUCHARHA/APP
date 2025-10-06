@@ -48,6 +48,7 @@ export interface IStorage {
   getAllOrdersWithFiltering(filters: OrderFilterOptions): Promise<PaginatedOrdersResponse>;
   getOrderById(orderId: string): Promise<Order | undefined>;
   getOrderDetails(orderId: string): Promise<OrderWithDetails | undefined>;
+  getOrderItems(orderId: string): Promise<Array<{ id: string; orderId: string; productId: string; productName: string; productPrice: string; quantity: number; totalPrice: string }>>;
   updateOrderStatus(orderId: string, status: string): Promise<Order | undefined>;
   updateOrdersStatus(orderIds: string[], status: string): Promise<Order[]>;
   deleteOrder(orderId: string): Promise<boolean>;
@@ -84,12 +85,23 @@ export interface IStorage {
   getErrorStats(): Promise<{ total: number; unresolved: number; byType: Record<string, number>; byLevel: Record<string, number> }>;
 }
 
+interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  productName: string;
+  productPrice: string;
+  quantity: number;
+  totalPrice: string;
+}
+
 export class MemStorage implements IStorage {
   private users: Map<string, User> = new Map();
   private categories: Map<string, Category> = new Map();
   private products: Map<string, Product> = new Map();
   private cartItems: Map<string, CartItem> = new Map();
   private orders: Map<string, Order> = new Map();
+  private orderItems: Map<string, OrderItem[]> = new Map();
   private notifications: Map<string, Notification> = new Map();
   private banners: Map<string, Banner> = new Map();
   private userPreferences: Map<string, UserPreferences> = new Map();
@@ -825,6 +837,8 @@ export class MemStorage implements IStorage {
       email: "demo@example.com",
       phone: "+992 12 345 6789",
       address: "ул. Рудаки, 25, кв. 10, Душанбе",
+      role: "user",
+      status: "active",
       createdAt: new Date().toISOString()
     };
     this.users.set(demoUser.id, demoUser);
@@ -860,8 +874,8 @@ export class MemStorage implements IStorage {
       createdAt: new Date().toISOString(),
       phone: insertUser.phone || null,
       address: insertUser.address || null,
-      role: insertUser.role || "user",
-      status: insertUser.status || "active"
+      role: "user",
+      status: "active"
     };
     this.users.set(id, user);
     return user;
@@ -1113,6 +1127,30 @@ export class MemStorage implements IStorage {
     };
     this.orders.set(id, order);
     
+    // Store order items with product details
+    const orderItemsArray: OrderItem[] = [];
+    for (const cartItem of userCartItems) {
+      if (!cartItem.productId) continue;
+      const product = this.products.get(cartItem.productId);
+      if (product) {
+        const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+        const totalPrice = price * cartItem.quantity;
+        orderItemsArray.push({
+          id: randomUUID(),
+          orderId: id,
+          productId: product.id,
+          productName: product.name,
+          productPrice: price.toFixed(2),
+          quantity: cartItem.quantity,
+          totalPrice: totalPrice.toFixed(2)
+        });
+      }
+    }
+    this.orderItems.set(id, orderItemsArray);
+    
+    // Clear user's cart after creating order
+    await this.clearCart(userId);
+    
     // Запускаем автоматическое обновление статуса заказа
     this.scheduleOrderStatusUpdates(id);
     
@@ -1213,8 +1251,7 @@ export class MemStorage implements IStorage {
     const order = this.orders.get(orderId);
     if (!order) return undefined;
 
-    // Get order items from the order's items array (assuming it exists)
-    const items = order.items || [];
+    const items = this.orderItems.get(orderId) || [];
     
     // Get user details
     let user = undefined;
@@ -1235,6 +1272,10 @@ export class MemStorage implements IStorage {
       items,
       user
     };
+  }
+
+  async getOrderItems(orderId: string): Promise<Array<{ id: string; orderId: string; productId: string; productName: string; productPrice: string; quantity: number; totalPrice: string }>> {
+    return this.orderItems.get(orderId) || [];
   }
 
   async updateOrdersStatus(orderIds: string[], status: string): Promise<Order[]> {
@@ -1570,6 +1611,13 @@ export class MemStorage implements IStorage {
     
     const paginatedUsers = users.slice(startIndex, endIndex);
 
+    // Calculate stats for the response
+    const totalUsers = users.length;
+    const activeUsers = users.filter(user => user.status === 'active').length;
+    const blockedUsers = users.filter(user => user.status === 'blocked').length;
+    const adminUsers = users.filter(user => user.role === 'admin').length;
+    const regularUsers = users.filter(user => user.role === 'user').length;
+
     return {
       users: paginatedUsers,
       meta: {
@@ -1579,6 +1627,13 @@ export class MemStorage implements IStorage {
         totalPages,
         hasNext: page < totalPages,
         hasPrev: page > 1
+      },
+      stats: {
+        totalUsers,
+        activeUsers,
+        blockedUsers,
+        adminUsers,
+        regularUsers
       }
     };
   }
@@ -1704,10 +1759,10 @@ export class MemStorage implements IStorage {
     }) : orders;
 
     const totalProducts = products.length;
-    const outOfStockProducts = products.filter(p => p.stock === 0).length;
+    const outOfStockProducts = products.filter(p => !p.inStock).length;
     const popularProducts = products.filter(p => p.isPopular).length;
     const averagePrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0) / totalProducts;
-    const totalInventoryValue = products.reduce((sum, p) => sum + (parseFloat(p.price) * p.stock), 0);
+    const totalInventoryValue = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
 
     // Products by category
     const productsByCategory = categories.map(category => {
@@ -1724,22 +1779,16 @@ export class MemStorage implements IStorage {
       };
     });
 
-    // Calculate product sales from orders
     const productSales = new Map<string, { quantity: number; revenue: number }>();
     filteredOrders.forEach(order => {
-      try {
-        const items = JSON.parse(order.items);
-        items.forEach((item: any) => {
-          const existing = productSales.get(item.productId) || { quantity: 0, revenue: 0 };
-          productSales.set(item.productId, {
-            quantity: existing.quantity + item.quantity,
-            revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
-          });
+      const items = this.orderItems.get(order.id) || [];
+      items.forEach((item: any) => {
+        const existing = productSales.get(item.productId) || { quantity: 0, revenue: 0 };
+        productSales.set(item.productId, {
+          quantity: existing.quantity + item.quantity,
+          revenue: existing.revenue + (parseFloat(item.productPrice) * item.quantity)
         });
-      } catch (e) {
-        // Handle malformed order items
-        console.warn('Failed to parse order items for order:', order.id);
-      }
+      });
     });
 
     // Top selling products
@@ -1791,15 +1840,11 @@ export class MemStorage implements IStorage {
       let revenue = 0;
       
       dayOrders.forEach(order => {
-        try {
-          const items = JSON.parse(order.items);
-          items.forEach((item: any) => {
-            productsSold += item.quantity;
-            revenue += parseFloat(item.price) * item.quantity;
-          });
-        } catch (e) {
-          // Handle malformed order items
-        }
+        const items = this.orderItems.get(order.id) || [];
+        items.forEach((item: any) => {
+          productsSold += item.quantity;
+          revenue += parseFloat(item.productPrice) * item.quantity;
+        });
       });
       
       salesByDay.push({
@@ -1843,24 +1888,19 @@ export class MemStorage implements IStorage {
       ? products.length / totalCategories 
       : 0;
 
-    // Calculate category sales
     const categorySales = new Map<string, { sales: number; revenue: number }>();
     filteredOrders.forEach(order => {
-      try {
-        const items = JSON.parse(order.items);
-        items.forEach((item: any) => {
-          const product = products.find(p => p.id === item.productId);
-          if (product?.categoryId) {
-            const existing = categorySales.get(product.categoryId) || { sales: 0, revenue: 0 };
-            categorySales.set(product.categoryId, {
-              sales: existing.sales + item.quantity,
-              revenue: existing.revenue + (parseFloat(item.price) * item.quantity)
-            });
-          }
-        });
-      } catch (e) {
-        // Handle malformed order items
-      }
+      const items = this.orderItems.get(order.id) || [];
+      items.forEach((item: any) => {
+        const product = products.find(p => p.id === item.productId);
+        if (product?.categoryId) {
+          const existing = categorySales.get(product.categoryId) || { sales: 0, revenue: 0 };
+          categorySales.set(product.categoryId, {
+            sales: existing.sales + item.quantity,
+            revenue: existing.revenue + (parseFloat(item.productPrice) * item.quantity)
+          });
+        }
+      });
     });
 
     // Category performance
@@ -1904,18 +1944,14 @@ export class MemStorage implements IStorage {
         let revenue = 0;
         
         dayOrders.forEach(order => {
-          try {
-            const items = JSON.parse(order.items);
-            items.forEach((item: any) => {
-              const product = products.find(p => p.id === item.productId);
-              if (product?.categoryId === category.id) {
-                sales += item.quantity;
-                revenue += parseFloat(item.price) * item.quantity;
-              }
-            });
-          } catch (e) {
-            // Handle malformed order items
-          }
+          const items = this.orderItems.get(order.id) || [];
+          items.forEach((item: any) => {
+            const product = products.find(p => p.id === item.productId);
+            if (product?.categoryId === category.id) {
+              sales += item.quantity;
+              revenue += parseFloat(item.productPrice) * item.quantity;
+            }
+          });
         });
         
         salesByDay.push({

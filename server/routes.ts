@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema, insertErrorSchema, updateUserRoleSchema, updateUserStatusSchema, adminUpdateUserSchema } from "@shared/schema";
+import { insertUserSchema, insertCartItemSchema, insertOrderSchema, insertNotificationSchema, insertBannerSchema, insertUserPreferencesSchema, insertErrorSchema, updateUserRoleSchema, updateUserStatusSchema, adminUpdateUserSchema, insertProductSchema } from "@shared/schema";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -23,7 +23,7 @@ function isCacheValid(cacheKey: string, maxAge: number = 300000): boolean { // 5
 // Helper function to invalidate all product cache keys
 function invalidateProductCache(): void {
   // Clear all cache keys that start with 'products_' to handle all variants
-  for (const [key] of dataCache) {
+  for (const [key] of Array.from(dataCache)) {
     if (key.startsWith('products_')) {
       dataCache.delete(key);
     }
