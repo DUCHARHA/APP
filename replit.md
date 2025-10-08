@@ -91,13 +91,18 @@ The application implements comprehensive PWA capabilities:
 - **Install prompt** component for encouraging app installation
 - **Offline-first approach** with cached resources and API responses
 
-## Mobile App Configuration (Updated September 2025)
+## Mobile App Configuration (Updated October 2025)
 The application supports native mobile app deployment through Capacitor:
 - **Native WebView**: Configured to run as a native Capacitor app with local WebView instead of TWA
 - **Android Configuration**: Proper AndroidManifest.xml setup for native app behavior
 - **Local Asset Loading**: Web files stored in Android assets directory for offline operation
 - **No Browser UI**: Removed TWA configuration to eliminate browser address bar in mobile apps
 - **Capacitor Config**: Optimized for local WebView with proper webDir setup and native plugins
+- **CORS Support**: Backend configured to accept requests from Capacitor origins (capacitor://localhost, ionic://localhost, http://localhost with any port)
+- **Content Security Policy**: CSP configured to allow Yandex Maps resources and Capacitor WebView origins
+  - Allowed script sources: api-maps.yandex.ru
+  - Allowed image/connection sources: *.yandex.net, *.yandex.ru
+  - Full localhost support with wildcard ports for development
 
 ## Security and Privacy (Added August 2025)
 The application implements comprehensive security measures to protect user data:
