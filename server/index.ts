@@ -1,10 +1,55 @@
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Configure CORS to support Capacitor mobile app
+const allowedOrigins = [
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost',
+  'https://ducharha.onrender.com',
+  'http://ducharha.onrender.com'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // Parse origin to check host properly
+    try {
+      const originUrl = new URL(origin);
+      
+      // Check exact match with allowed origins
+      const isExactMatch = allowedOrigins.includes(origin);
+      
+      // Allow localhost with any port for development
+      const isLocalhost = originUrl.hostname === 'localhost';
+      
+      // Allow capacitor and ionic schemes
+      const isCapacitorScheme = originUrl.protocol === 'capacitor:' || originUrl.protocol === 'ionic:';
+      
+      if (isExactMatch || isLocalhost || isCapacitorScheme) {
+        callback(null, true);
+      } else {
+        log(`CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    } catch (e) {
+      log(`CORS invalid origin: ${origin}`);
+      callback(new Error('Invalid origin'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

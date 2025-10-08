@@ -23,6 +23,19 @@
     <!-- Предотвращение предложений перевода -->
     <meta name="google" content="notranslate" />
     <meta http-equiv="Content-Language" content="ru" />
+    
+    <!-- Content Security Policy для поддержки Яндекс Карт в мобильном приложении -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* https://ducharha.onrender.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* https://ducharha.onrender.com api-maps.yandex.ru https://api-maps.yandex.ru;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+      img-src 'self' data: blob: https: *.yandex.net *.yandex.ru https://ducharha.onrender.com capacitor://localhost;
+      connect-src 'self' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* ws://localhost:* wss://localhost:* https://ducharha.onrender.com *.yandex.net *.yandex.ru api-maps.yandex.ru https://api-maps.yandex.ru wss://ducharha.onrender.com;
+      frame-src 'self' *.yandex.ru *.yandex.net;
+      worker-src 'self' blob:;
+      manifest-src 'self';
+    "/>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.webmanifest">
