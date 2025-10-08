@@ -34,7 +34,10 @@ app.use(cors({
       // Allow capacitor and ionic schemes
       const isCapacitorScheme = originUrl.protocol === 'capacitor:' || originUrl.protocol === 'ionic:';
       
-      if (isExactMatch || isLocalhost || isCapacitorScheme) {
+      // Allow Replit preview domains
+      const isReplitDomain = originUrl.hostname.endsWith('.replit.dev');
+      
+      if (isExactMatch || isLocalhost || isCapacitorScheme || isReplitDomain) {
         callback(null, true);
       } else {
         log(`CORS blocked origin: ${origin}`);
