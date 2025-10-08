@@ -26,16 +26,13 @@
     
     <!-- Content Security Policy для поддержки Яндекс Карт в мобильном приложении -->
     <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* https://ducharha.onrender.com;
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* https://ducharha.onrender.com api-maps.yandex.ru https://api-maps.yandex.ru;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-      img-src 'self' data: blob: https: *.yandex.net *.yandex.ru https://ducharha.onrender.com capacitor://localhost;
-      connect-src 'self' capacitor://localhost ionic://localhost http://localhost:* https://localhost:* ws://localhost:* wss://localhost:* https://ducharha.onrender.com *.yandex.net *.yandex.ru api-maps.yandex.ru https://api-maps.yandex.ru wss://ducharha.onrender.com;
-      frame-src 'self' *.yandex.ru *.yandex.net;
-      worker-src 'self' blob:;
-      manifest-src 'self';
-    "/>
+    default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; 
+    style-src 'self' 'unsafe-inline' fonts.googleapis.com; 
+    font-src 'self' fonts.gstatic.com;
+    media-src *; 
+    script-src 'self' api-maps.yandex.ru yandex.ru 'unsafe-inline' 'unsafe-eval' ionic://localhost http://localhost:* https://localhost:*; 
+    img-src 'self' data: content: *.yandex.net *.yandex.ru;
+    connect-src 'self' https://ducharha.onrender.com *.yandex.net *.yandex.ru ws://localhost:* wss://localhost:* capacitor://* ionic://*;"/>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.webmanifest">
