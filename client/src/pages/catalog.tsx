@@ -4,17 +4,18 @@ import { ArrowLeft, Search } from "lucide-react";
 import { type Category, type Product } from "@shared/schema";
 import ProductCard from "@/components/product-card";
 import CategoryButton from "@/components/category-button";
+import { ProductGridSkeleton, CategoryGridSkeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 
 export default function Catalog() {
   const { categoryId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: categories = [] } = useQuery<Category[]>({
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
-  const { data: products = [] } = useQuery<Product[]>({
+  const { data: products = [], isLoading: isProductsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products", categoryId || "all"],
     queryFn: () => {
       const url = categoryId ? `/api/products?category=${categoryId}` : "/api/products";
@@ -67,11 +68,17 @@ export default function Catalog() {
       {!categoryId && !searchQuery && (
         <section className="p-4">
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Категории</h3>
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {categories.slice(0, 8).map((category) => (
-              <CategoryButton key={category.id} category={category} />
-            ))}
-          </div>
+          {isCategoriesLoading ? (
+            <div className="skeleton-fade-out">
+              <CategoryGridSkeleton count={6} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3 mb-6 content-loaded">
+              {categories.slice(0, 8).map((category) => (
+                <CategoryButton key={category.id} category={category} />
+              ))}
+            </div>
+          )}
         </section>
       )}
       {/* Products */}
@@ -84,8 +91,12 @@ export default function Catalog() {
           </div>
         )}
 
-        {displayProducts.length === 0 ? (
-          <div className="text-center py-12">
+        {isProductsLoading ? (
+          <div className="skeleton-fade-out">
+            <ProductGridSkeleton count={6} />
+          </div>
+        ) : displayProducts.length === 0 ? (
+          <div className="text-center py-12 content-loaded">
             <div className="text-gray-400 mb-4">
               <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
                 <Search className="w-8 h-8" />
@@ -102,7 +113,7 @@ export default function Catalog() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 content-loaded">
             {displayProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
