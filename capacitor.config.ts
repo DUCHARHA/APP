@@ -7,10 +7,12 @@ const config: CapacitorConfig = {
   // Убрана настройка server для локального WebView
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
-      backgroundColor: '#ffffff',
+      launchShowDuration: 3000,
+      launchAutoHide: true,
+      backgroundColor: '#5B21B6',
       androidSplashResourceName: 'splash',
-      androidScaleType: 'CENTER_CROP'
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false
     },
     Geolocation: {
       requestPermissions: true,
@@ -25,8 +27,8 @@ const config: CapacitorConfig = {
       enabled: true
     },
     StatusBar: {
-      style: 'default',
-      backgroundColor: '#ffffff',
+      style: 'dark',
+      backgroundColor: '#5B21B6',
       overlaysWebView: false
     },
     App: {
