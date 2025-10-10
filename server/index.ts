@@ -28,8 +28,8 @@ app.use(cors({
       // Check exact match with allowed origins
       const isExactMatch = allowedOrigins.includes(origin);
       
-      // Allow localhost with any port for development
-      const isLocalhost = originUrl.hostname === 'localhost';
+      // Allow localhost with any port for development (including 127.0.0.1)
+      const isLocalhost = originUrl.hostname === 'localhost' || originUrl.hostname === '127.0.0.1';
       
       // Allow capacitor and ionic schemes
       const isCapacitorScheme = originUrl.protocol === 'capacitor:' || originUrl.protocol === 'ionic:';
