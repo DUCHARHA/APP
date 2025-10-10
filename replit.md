@@ -98,7 +98,13 @@ The application supports native mobile app deployment through Capacitor:
 - **Local Asset Loading**: Web files stored in Android assets directory for offline operation
 - **No Browser UI**: Removed TWA configuration to eliminate browser address bar in mobile apps
 - **Capacitor Config**: Optimized for local WebView with proper webDir setup and native plugins
-- **CORS Support**: Backend configured to accept requests from Capacitor origins (capacitor://localhost, ionic://localhost, http://localhost with any port)
+- **Splash Screen Configuration** (Updated October 2025):
+  - White background (#FFFFFF) for clean, modern appearance
+  - Centered logo with proper scaling (androidScaleType: CENTER)
+  - Full-screen display with splashFullScreen enabled
+  - Auto-hide after 3 seconds (launchShowDuration: 3000)
+  - Logo assets generated using cordova-res for all Android screen densities
+- **CORS Support**: Backend configured to accept requests from Capacitor origins (capacitor://localhost, ionic://localhost, http://localhost with any port, 127.0.0.1)
 - **Content Security Policy**: CSP configured to allow Yandex Maps resources and Capacitor WebView origins
   - Allowed script sources: api-maps.yandex.ru
   - Allowed image/connection sources: *.yandex.net, *.yandex.ru
