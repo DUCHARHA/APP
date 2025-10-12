@@ -99,11 +99,13 @@ The application supports native mobile app deployment through Capacitor:
 - **No Browser UI**: Removed TWA configuration to eliminate browser address bar in mobile apps
 - **Capacitor Config**: Optimized for local WebView with proper webDir setup and native plugins
 - **Splash Screen Configuration** (Updated October 2025):
-  - White background (#FFFFFF) for clean, modern appearance
-  - Centered logo with proper scaling (androidScaleType: CENTER)
-  - Full-screen display with splashFullScreen enabled
+  - Full-screen purple background (#5B21B6) matching brand colors
+  - White logo centered on full-screen background (androidScaleType: CENTER_CROP)
+  - Full-screen display with splashFullScreen enabled for immersive experience
   - Auto-hide after 3 seconds (launchShowDuration: 3000)
+  - High-resolution source image (2732×2732px) for optimal quality across all devices
   - Logo assets generated using cordova-res for all Android screen densities
+  - Modern design similar to popular apps (Alfa Bank, Sberbank, etc.)
 - **CORS Support**: Backend configured to accept requests from Capacitor origins (capacitor://localhost, ionic://localhost, http://localhost with any port, 127.0.0.1)
 - **Content Security Policy**: CSP configured to allow Yandex Maps resources and Capacitor WebView origins
   - Allowed script sources: api-maps.yandex.ru
