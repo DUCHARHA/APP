@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Zap } from "lucide-react";
+import { DucharhaLogo } from "@/components/ducharha-logo";
 
 interface SplashScreenProps {
   onAnimationComplete?: () => void;
@@ -58,10 +58,10 @@ export function SplashScreen({
 
       {/* Main Content */}
       <div className="relative z-10 text-center px-8">
-        {/* Logo Container */}
+        {/* Logo */}
         <div className="mb-8">
-          <div className="w-24 h-24 mx-auto mb-6 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm animate-logo-pulse">
-            <Zap className="w-12 h-12 text-white" />
+          <div className="mx-auto mb-6 animate-logo-pulse">
+            <DucharhaLogo className="text-white mx-auto" size={140} />
           </div>
           
           {/* App Name */}
