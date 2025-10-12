@@ -1,55 +1,63 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-def create_maskable_icon(size, filename):
-    # Create image with purple background (HSL: 262.1 83.3% 57.8%)
-    # RGB conversion of hsl(262.1 83.3% 57.8%): rgb(91, 33, 182)
+def create_professional_icon(size, filename):
     img = Image.new('RGBA', (size, size), color=(91, 33, 182, 255))
     draw = ImageDraw.Draw(img)
     
-    # For maskable icons, content should be in safe zone (80% of icon)
     safe_zone = int(size * 0.8)
     margin = (size - safe_zone) // 2
     
-    # Add white circle in safe zone
-    circle_radius = safe_zone // 3
-    circle_center = size // 2
-    circle_coords = [
-        circle_center - circle_radius,
-        circle_center - circle_radius,
-        circle_center + circle_radius,
-        circle_center + circle_radius
-    ]
-    draw.ellipse(circle_coords, fill=(255, 255, 255, 230))
+    center = size // 2
+    outer_radius = int(safe_zone * 0.45)
     
-    # Add text 'Д' in center
-    font_size = safe_zone // 4
+    circle_width = max(8, int(size * 0.04))
+    draw.ellipse(
+        [center - outer_radius, center - outer_radius, 
+         center + outer_radius, center + outer_radius],
+        outline=(255, 255, 255, 230),
+        width=circle_width
+    )
     
-    # Use default font since system fonts might not be available
-    font = ImageFont.load_default()
+    letter_width = int(size * 0.3)
+    letter_height = int(size * 0.35)
+    letter_thickness = max(10, int(size * 0.1))
     
-    text = 'Д'
-    # Get text size and center it
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-    text_x = (size - text_width) // 2
-    text_y = (size - text_height) // 2
+    left_x = center - int(letter_width * 0.5)
+    top_y = center - int(letter_height * 0.5)
     
-    # Make text larger by drawing multiple times with offset
-    # Using same primary color as background for text
-    for i in range(5):
-        for j in range(5):
-            draw.text((text_x + i - 2, text_y + j - 2), text, fill=(91, 33, 182, 255), font=font)
+    draw.rectangle(
+        [left_x, top_y, left_x + letter_thickness, top_y + letter_height],
+        fill=(255, 255, 255, 240)
+    )
     
-    # Save as PNG
+    arc_right = left_x + letter_width
+    arc_center_y = center
+    arc_radius = int(letter_width * 0.5)
+    
+    for i in range(letter_thickness):
+        draw.arc(
+            [left_x + letter_thickness, top_y, arc_right, top_y + letter_height],
+            start=270, end=90,
+            fill=(255, 255, 255, 240),
+            width=1
+        )
+    
+    draw.chord(
+        [left_x + letter_thickness, top_y, arc_right, top_y + letter_height],
+        start=270, end=90,
+        fill=None,
+        outline=(255, 255, 255, 240),
+        width=letter_thickness
+    )
+    
     img.save(filename, 'PNG', optimize=True)
-    print(f'Created maskable {filename} ({size}x{size})')
+    print(f'Created professional icon {filename} ({size}x{size})')
 
-# Create maskable icons
 try:
-    create_maskable_icon(192, '192.png')
-    create_maskable_icon(512, '512.png')
+    create_professional_icon(192, '192.png')
+    create_professional_icon(512, '512.png')
+    create_professional_icon(512, 'logo.png')
     print("Successfully created PWA icons!")
 except Exception as e:
     print(f"Error creating icons: {e}")
