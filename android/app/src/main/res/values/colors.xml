@@ -85,7 +85,7 @@
     
     <!-- Splash Screen Colors -->
     <color name="splash_background">#5B21B6</color>
-    <color name="splash_icon_background">#5B21B6</color>
+    <color name="splash_icon_background">@android:color/transparent</color>
     
     <!-- Standard Material Colors -->
     <color name="black">#FF000000</color>

@@ -43,6 +43,10 @@
     <color name="status_bar_light">@color/status_bar_dark</color>
     <color name="navigation_bar_light">@color/navigation_bar_dark</color>
     
+    <!-- Splash Screen Colors for Dark Theme -->
+    <color name="splash_background">#4F378A</color>
+    <color name="splash_icon_background">@android:color/transparent</color>
+    
     <!-- Legacy support colors for dark theme -->
     <color name="colorPrimary">#D0BCFF</color>
     <color name="colorPrimaryDark">#4F378A</color>
