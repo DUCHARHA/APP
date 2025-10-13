@@ -7,8 +7,8 @@ const config: CapacitorConfig = {
   // Убрана настройка server для локального WebView
   plugins: {
     SplashScreen: {
-      launchShowDuration: 3000,
-      launchAutoHide: true,
+      launchShowDuration: 0,
+      launchAutoHide: false,
       backgroundColor: '#5B21B6',
       androidScaleType: 'CENTER_CROP',
       splashFullScreen: true,

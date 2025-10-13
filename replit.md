@@ -103,11 +103,12 @@ The application supports native mobile app deployment through Capacitor:
   - White logo with heart ❤️ + infinity ∞ symbol (brand identity)
   - High-quality rendering with anti-aliasing (androidScaleType: CENTER_CROP)
   - Full-screen display with splashFullScreen enabled for immersive experience
-  - Auto-hide after 3 seconds (launchShowDuration: 3000)
+  - Manual control (launchAutoHide: false) - native splash stays visible until web app is ready
   - Multi-resolution splash screens (512px - 2560px) for all Android screen densities
   - 2x supersampling technique for crisp, non-pixelated logo display
   - Professional quality matching modern delivery apps
   - Seamless transition: purple background throughout (html, body, root) eliminates white flash between native and web splash screens
+  - Programmatic hiding: native splash screen hides instantly when React app loads, immediately showing web splash screen
 - **CORS Support**: Backend configured to accept requests from Capacitor origins (capacitor://localhost, ionic://localhost, http://localhost with any port, 127.0.0.1)
 - **Content Security Policy**: CSP configured to allow Yandex Maps resources and Capacitor WebView origins
   - Allowed script sources: api-maps.yandex.ru

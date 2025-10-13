@@ -1,6 +1,12 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { SplashScreen } from "./splash-screen";
 
+// Type definition for Capacitor SplashScreen plugin
+interface CapacitorSplashScreenPlugin {
+  hide: (options?: { fadeOutDuration?: number }) => Promise<void>;
+  show: (options?: { showDuration?: number; fadeInDuration?: number; fadeOutDuration?: number; autoHide?: boolean }) => Promise<void>;
+}
+
 interface SplashScreenContextType {
   isLoading: boolean;
   hideSplash: () => void;
@@ -31,6 +37,23 @@ export function SplashScreenProvider({
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    // Hide native Capacitor splash screen as soon as web app is ready
+    // This prevents the white/purple flash between native and web splash screens
+    const hideNativeSplash = async () => {
+      try {
+        // Access Capacitor SplashScreen plugin via window
+        const { Capacitor } = window as any;
+        if (Capacitor?.Plugins?.SplashScreen) {
+          const splashScreen = Capacitor.Plugins.SplashScreen as CapacitorSplashScreenPlugin;
+          await splashScreen.hide({ fadeOutDuration: 0 });
+        }
+      } catch (error) {
+        // Silently fail if not running in Capacitor
+      }
+    };
+    
+    hideNativeSplash();
+
     // Skip splash screen in development mode if requested
     if (skipInDevelopment && import.meta.env.DEV) {
       setIsLoading(false);
