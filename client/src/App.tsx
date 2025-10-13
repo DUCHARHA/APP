@@ -57,18 +57,18 @@ import { SplashScreenProvider } from "@/components/splash-screen-provider";
 
 // Enhanced loading component for lazy routes
 const PageLoader = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-background page-transition">
+  <div className="flex flex-col items-center justify-center min-h-screen bg-[#5B21B6] page-transition">
     <div className="relative">
       {/* Spinning border */}
-      <div className="animate-spin rounded-full h-12 w-12 border-2 border-muted"></div>
-      <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent absolute top-0 left-0"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/30"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent absolute top-0 left-0"></div>
       
       {/* Pulsing center */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full animate-pulse"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full animate-pulse"></div>
     </div>
     
     {/* Loading text */}
-    <p className="text-muted-foreground text-sm mt-4 animate-fade-in">
+    <p className="text-white text-sm mt-4 animate-fade-in">
       Загрузка...
     </p>
   </div>

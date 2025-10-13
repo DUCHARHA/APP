@@ -102,6 +102,10 @@
                 box-shadow 200ms ease-in-out;
   }
 
+  html {
+    background-color: #5B21B6;
+  }
+
   body {
     @apply bg-background text-foreground font-inter antialiased;
     /* Smooth theme transition for body */
