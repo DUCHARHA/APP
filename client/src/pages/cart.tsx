@@ -137,7 +137,7 @@ export default function Cart() {
   if (isLoading) {
     return (
       <div className="bg-background min-h-screen">
-        <div className="bg-white dark:bg-card shadow-sm border-b">
+        <div className="bg-white dark:bg-card shadow-sm border-b pt-[env(safe-area-inset-top,0)]">
           <div className="max-w-md mx-auto px-4 py-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Корзина</h1>
           </div>
@@ -152,7 +152,7 @@ export default function Cart() {
   if (!cartItems || cartItems.length === 0) {
     return (
       <div className="bg-background min-h-screen">
-        <div className="bg-white dark:bg-card shadow-sm border-b">
+        <div className="bg-white dark:bg-card shadow-sm border-b pt-[env(safe-area-inset-top,0)]">
           <div className="max-w-md mx-auto px-4 py-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Корзина</h1>
           </div>
@@ -180,7 +180,7 @@ export default function Cart() {
   return (
     <div className="bg-background min-h-screen pb-20" data-testid="page-cart">
       {/* Header */}
-      <div className="bg-white dark:bg-card shadow-sm border-b">
+      <div className="bg-white dark:bg-card shadow-sm border-b pt-[env(safe-area-inset-top,0)]">
         <div className="max-w-md mx-auto px-4 py-4">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             Корзина ({totalItems})
