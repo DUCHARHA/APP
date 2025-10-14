@@ -6,7 +6,7 @@ export default function About() {
   return (
     <main className="pb-20">
       {/* Header */}
-      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40 pt-[env(safe-area-inset-top,0)]">
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-40">
         <div className="flex items-center p-4">
           <Link href="/profile">
             <button className="mr-3 p-2 -ml-2" data-testid="button-back">
